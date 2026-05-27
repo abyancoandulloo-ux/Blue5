@@ -71,7 +71,6 @@
         <div id="errorMsg" style="color:red; text-align:center; margin-top:15px;"></div>
     </div>
 
-    <!-- Payment Modal -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -93,19 +92,17 @@
         </div>
     </div>
 
-    <footer class="footer"><div class="copyright">© 2025 Blue5 Football Academy — Secure Payments</div></footer>
+    <footer class="footer"><div class="copyright">© 2026 Blue5 Football Academy — Secure Payments</div></footer>
 
     <script type="module">
-        // Import Supabase (if supabase-config.js exists, otherwise it will fail gracefully)
-        // Import Supabase statically at the top
-        import { supabase } from './supabase-config.js';
-
-        // --- DOM elements ---
+        // --- State variables ---
         const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
         const amount = 49;
         let currentUser = null;
         let paidMonths = [];
-        let supabase;
+        let supabase = null;
+
+        // Dynamic asynchronous import of Supabase to gracefully handle cases where the file doesn't exist
         try {
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
@@ -116,11 +113,6 @@
         }
 
         // --- DOM elements ---
-        /*const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-        const amount = 49;
-        let currentUser = null;
-        let paidMonths = [];*/
-
         const tbody = document.getElementById('monthTableBody');
         const authStatusDiv = document.getElementById('authStatus');
         const errorMsgDiv = document.getElementById('errorMsg');
@@ -145,6 +137,7 @@
                 `;
                 tbody.appendChild(row);
             });
+            
             // Attach click handlers to "Pay Now" buttons on the table
             document.querySelectorAll('.pay-btn-small').forEach(btn => {
                 btn.onclick = (e) => {
@@ -204,7 +197,6 @@
                     }
                 } catch (err) {
                     console.error("Supabase save failed, falling back to localStorage:", err);
-                    // fall through to localStorage
                 }
             }
             // Always update localStorage as backup
@@ -243,13 +235,13 @@
             };
         });
 
-       // --- 🔥 CRITICAL: Attach the modal "Pay Now" button handler early ---
+        // --- Attach the modal "Pay Now" button handler ---
         const confirmBtn = document.getElementById('confirmPaymentBtn');
         if (confirmBtn) {
             confirmBtn.addEventListener('click', async (e) => {
-                e.preventDefault(); // Prevent accidental page reloads
+                e.preventDefault(); 
                 
-                console.log("✅ Modal Pay Now button clicked");
+                console.log("Modal Pay Now button clicked");
                 
                 if (!selectedMonth || !currentUser) {
                     alert('Please log in first.');
@@ -257,7 +249,7 @@
                     return;
                 }
                 
-                // Get values and sanitize them (removes both spaces and hyphens)
+                // Get values and sanitize them
                 const cardName = document.getElementById('cardName').value.trim();
                 const cardNumber = document.getElementById('cardNumber').value.replace(/[\s-]/g, '');
                 const expiry = document.getElementById('expiry').value.trim();
@@ -272,7 +264,6 @@
                     alert('Invalid card number. Please enter 13-19 digits without spaces.');
                     return;
                 }
-                // Allow both MM/YY and MM/YYYY
                 if (!/^\d{2}\/\d{2,4}$/.test(expiry)) {
                     alert('Expiry must be MM/YY (e.g., 12/28) or MM/YYYY.');
                     return;
@@ -309,11 +300,12 @@
         } else {
             console.error("confirmPaymentBtn not found – check the HTML ID");
         }
+
         // --- Modal close events ---
         closeSpan.onclick = closeModal;
         window.onclick = (event) => { if (event.target === modal) closeModal(); };
 
-        // --- Supabase Auth listener (only if supabase is available) ---
+        // --- Supabase Auth listener / Demo Mode Toggle ---
         if (supabase) {
             supabase.auth.onAuthStateChange(async (event, session) => {
                 if (session) {
@@ -328,14 +320,13 @@
                 }
             });
         } else {
-            // No Supabase – fallback to localStorage demo mode
+            // No Supabase file found – fallback to localStorage demo mode safely
             authStatusDiv.innerHTML = '<span style="color:orange;">⚠️ Demo mode (no Supabase). Payments are stored only in your browser.</span>';
-            // Allow any user (simulate logged in)
             currentUser = { id: 'demo-user' };
             loadPaidMonths('demo-user');
         }
 
-        // Initial table render (all unpaid)
+        // Initial fallback execution
         renderTable();
 
         // Mobile menu toggle
