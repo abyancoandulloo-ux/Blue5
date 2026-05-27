@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue5 Academy | Sign In & Register</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    <div class="site-wrapper">
+        <!-- Top Navigation with Logo only -->
+        <div class="top-nav login-nav">
+            <a href="Home.html" class="logo-link">
+                <div class="logo-area">
+                    <i class="fas fa-futbol logo-icon"></i>
+                    <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
+                </div>
+            </a>
+            <div class="nav-placeholder"></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="login.html">Log in</a></li>
+                    <li><a href="Payment.html">Payment</a></li>
+                    <li><a href="sessions.html">Sessions</a></li>
+                    <li><a href="Coach.html">Coach</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-icon" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+
+        <!-- Centered Login / Register Container -->
+        <div class="form-card login-register-card">
+            <h2><i class="fas fa-user-astronaut"></i> Welcome to Blue5</h2>
+            <div class="form-toggle">
+                <span id="loginTab" class="active-toggle" onclick="login()">Login</span>
+                <span id="registerTab" onclick="register()">Register</span>
+            </div>
+
+            <!-- Login Form (Name, Email, Password) -->
+            <form id="LoginForm" action="#" method="post" style="display: block;">
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" placeholder="Full Name" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" placeholder="Email Address" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-block" id="loginSubmit">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <div class="forgot-password">
+                    <a href="#">Forgot password?</a>
+                </div>
+            </form>
+
+            <!-- Register Form (Full Name, Email, Password, Confirm) -->
+            <form id="RegForm" action="#" method="post" style="display: none;">
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" placeholder="Full Name" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" placeholder="Email Address" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" placeholder="Create Password" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-check-circle input-icon"></i>
+                    <input type="password" placeholder="Confirm Password" required>
+                </div>
+                <button type="submit" class="btn-block" id="regSubmit">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+
+            <!-- Social Login Divider & Buttons -->
+            <div class="social-divider">
+                <span>or continue with</span>
+            </div>
+            <div class="social-login-group">
+                <button class="social-btn google-btn" id="googleLogin">
+                    <i class="fab fa-google"></i> Google
+                </button>
+                <button class="social-btn yahoo-btn" id="yahooLogin">
+                    <i class="fab fa-yahoo"></i> Yahoo
+                </button>
+                <button class="social-btn hotmail-btn" id="hotmailLogin">
+                    <i class="fas fa-envelope"></i> Hotmail
+                </button>
+            </div>
+            <p class="terms-note">By continuing you agree to Blue5’s Terms & Privacy.</p>
+        </div>
+
+        <footer class="footer login-footer">
+            <div class="copyright">© 2025 Blue5 Football Academy — Rise Above.</div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

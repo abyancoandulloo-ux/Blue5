@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue5 Academy | Payments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* (Same CSS as before – keep it) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f8fafc; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { font-size: 28px; color: #0a4da4; }
+        .logo-text { font-size: 1.3rem; font-weight: 700; color: #0a4da4; }
+        .logo-text .accent { font-weight: 800; color: #1e6fdf; }
+        .logo-link { text-decoration: none; }
+        .main-nav ul { display: flex; gap: 28px; list-style: none; }
+        .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
+        .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
+        .mobile-menu-icon { display: none; font-size: 24px; cursor: pointer; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .section-title { font-size: 2rem; color: #0a4da4; text-align: center; }
+        .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 10px auto 30px; border-radius: 3px; }
+        .table-responsive { overflow-x: auto; }
+        .month-table { width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; }
+        .month-table th { background: #0a4da4; color: white; padding: 15px; text-align: left; }
+        .month-table td { padding: 12px 15px; border-bottom: 1px solid #eef2ff; }
+        .paid-row { background-color: #d1fae5; border-left: 4px solid #10b981; }
+        .unpaid-row { background-color: #fff9ef; border-left: 4px solid #f59e0b; }
+        .pay-btn-small { background: #0a4da4; color: white; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; font-weight: 600; }
+        .status-paid { background: #10b98120; color: #0a6e44; }
+        .status-unpaid { background: #f59e0b20; color: #b45309; }
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+        .modal-content { background: white; max-width: 480px; width: 90%; padding: 30px; border-radius: 36px; position: relative; }
+        .close-modal { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; }
+        .input-group { position: relative; margin-bottom: 18px; }
+        .input-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #0a4da4; }
+        .input-group input { width: 100%; padding: 12px 15px 12px 45px; border-radius: 60px; border: 1px solid #ddd; }
+        .row-flex { display: flex; gap: 15px; }
+        .half { flex: 1; }
+        .payment-methods-icons { display: flex; flex-wrap: wrap; gap: 12px; margin: 15px 0; }
+        .payment-option { background: #f1f5fd; padding: 8px 18px; border-radius: 50px; cursor: pointer; border: 1px solid transparent; }
+        .payment-option.active-method { border-color: #0a4da4; background: #e6edfc; }
+        .btn-block { width: 100%; background: #0a4da4; color: white; border: none; padding: 12px; border-radius: 60px; font-weight: 600; cursor: pointer; }
+        .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
+        @media (max-width: 700px) { .top-nav { padding: 15px 20px; } .main-nav ul { display: none; } .mobile-menu-icon { display: block; } }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <a href="Home.html" class="logo-link"><div class="logo-area"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">Blue5<span class="accent">Football</span> Academy</span></div></a>
+        <nav class="main-nav"><ul><li><a href="Home.html">Home</a></li><li><a href="login.html">Log in</a></li><li><a href="Payment.html" class="active-nav">Payment</a></li><li><a href="sessions.html">Sessions</a></li><li><a href="Coach.html">Coach</a></li></ul></nav>
+        <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">Membership & Monthly Fees</h2>
+        <div class="title-underline"></div>
+        <div id="authStatus" style="text-align:center; margin-bottom:20px;"></div>
+        <div class="table-responsive">
+            <table class="month-table"><thead><tr><th>Month</th><th>Status</th><th>Amount</th><th>Action</th></tr></thead><tbody id="monthTableBody"></tbody>瞻</table>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3><i class="fas fa-credit-card"></i> Complete Payment</h3>
+            <p id="modalMonthName" style="margin:10px 0; color:#0a4da4;"></p>
+            <div class="input-group"><i class="fas fa-user input-icon"></i><input type="text" id="cardName" placeholder="Cardholder Name" required></div>
+            <div class="input-group"><i class="fas fa-credit-card input-icon"></i><input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" required></div>
+            <div class="row-flex"><div class="input-group half"><i class="fas fa-calendar-alt input-icon"></i><input type="text" id="expiry" placeholder="MM/YY" required></div>
+            <div class="input-group half"><i class="fas fa-lock input-icon"></i><input type="text" id="cvv" placeholder="CVV" maxlength="4" required></div></div>
+            <label>Payment Method:</label>
+            <div class="payment-methods-icons">
+                <div class="payment-option active-method" data-method="visa"><i class="fab fa-cc-visa"></i> Visa</div>
+                <div class="payment-option" data-method="mastercard"><i class="fab fa-cc-mastercard"></i> Mastercard</div>
+                <div class="payment-option" data-method="paypal"><i class="fab fa-paypal"></i> PayPal</div>
+                <div class="payment-option" data-method="applepay"><i class="fab fa-apple-pay"></i> Apple Pay</div>
+            </div>
+            <input type="hidden" id="selectedMethod" value="visa">
+            <button class="btn-block" id="confirmPaymentBtn">Pay Now</button>
+        </div>
+    </div>
+
+    <footer class="footer"><div class="copyright">© 2025 Blue5 Football Academy — Secure Payments</div></footer>
+
+    <!-- Supabase JS -->
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const amount = 49;
+        let currentUser = null;
+        let paidMonths = [];
+
+        // DOM elements
+        const tbody = document.getElementById('monthTableBody');
+        const authStatusDiv = document.getElementById('authStatus');
+        const modal = document.getElementById('paymentModal');
+        const modalMonthName = document.getElementById('modalMonthName');
+        const closeModalSpan = document.querySelector('.close-modal');
+        const confirmBtn = document.getElementById('confirmPaymentBtn');
+        let selectedMonth = null;
+
+        // Load user's paid months from Supabase
+        async function loadPaidMonths(userId) {
+            const { data, error } = await supabase
+                .from('user_payments')
+                .select('month')
+                .eq('user_id', userId)
+                .eq('paid', true);
+            
+            if (error) {
+                console.error('Error loading payments:', error);
+                paidMonths = [];
+            } else {
+                paidMonths = data.map(row => row.month);
+            }
+            renderTable();
+        }
+
+        // Mark a month as paid in Supabase
+        async function savePaidMonth(userId, month) {
+            // First check if a record exists for this user+month
+            const { data: existing } = await supabase
+                .from('user_payments')
+                .select('id')
+                .eq('user_id', userId)
+                .eq('month', month)
+                .maybeSingle();
+            
+            if (existing) {
+                // Update existing record
+                const { error } = await supabase
+                    .from('user_payments')
+                    .update({ paid: true, payment_date: new Date().toISOString() })
+                    .eq('id', existing.id);
+                if (error) throw error;
+            } else {
+                // Insert new record
+                const { error } = await supabase
+                    .from('user_payments')
+                    .insert({ user_id: userId, month: month, paid: true, amount: amount, payment_date: new Date().toISOString() });
+                if (error) throw error;
+            }
+            paidMonths.push(month);
+            renderTable();
+        }
+
+        // Render table
+        function renderTable() {
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            months.forEach(month => {
+                const isPaid = paidMonths.includes(month);
+                const row = document.createElement('tr');
+                row.className = isPaid ? 'paid-row' : 'unpaid-row';
+                row.innerHTML = `
+                    <td>${month}</td>
+                    <td>${isPaid ? '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Paid</span>' : '<span class="status-badge status-unpaid"><i class="fas fa-hourglass-half"></i> Pending</span>'}</td>
+                    <td>$${amount}</td>
+                    <td>${isPaid ? '<i class="fas fa-check" style="color:#10b981;"></i> Completed' : `<button class="pay-btn-small" data-month="${month}">Pay Now</button>`}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            document.querySelectorAll('.pay-btn-small').forEach(btn => {
+                btn.removeEventListener('click', payHandler);
+                btn.addEventListener('click', payHandler);
+            });
+        }
+
+        function payHandler(e) {
+            const month = e.currentTarget.getAttribute('data-month');
+            if (month && currentUser) {
+                openModal(month);
+            } else if (!currentUser) {
+                authStatusDiv.innerHTML = '<span style="color:red;">Please <a href="login.html">log in</a> to make a payment.</span>';
+            }
+        }
+
+        function openModal(month) {
+            selectedMonth = month;
+            modalMonthName.innerText = `Month: ${month} - $${amount}`;
+            // Reset form
+            document.getElementById('cardName').value = '';
+            document.getElementById('cardNumber').value = '';
+            document.getElementById('expiry').value = '';
+            document.getElementById('cvv').value = '';
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            selectedMonth = null;
+        }
+
+        // Payment method selection
+        const methodOptions = document.querySelectorAll('.payment-option');
+        const methodInput = document.getElementById('selectedMethod');
+        methodOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                methodOptions.forEach(o => o.classList.remove('active-method'));
+                opt.classList.add('active-method');
+                methodInput.value = opt.getAttribute('data-method');
+            });
+        });
+
+        confirmBtn.addEventListener('click', async () => {
+            if (!selectedMonth || !currentUser) {
+                alert('Please log in first.');
+                closeModal();
+                return;
+            }
+            // Basic validation
+            const cardName = document.getElementById('cardName').value.trim();
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const expiry = document.getElementById('expiry').value.trim();
+            const cvv = document.getElementById('cvv').value.trim();
+            if (!cardName || !cardNumber || !expiry || !cvv) {
+                alert('Please fill all payment details.');
+                return;
+            }
+            if (!/^\d{13,19}$/.test(cardNumber)) {
+                alert('Invalid card number (13-19 digits).');
+                return;
+            }
+            if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+                alert('Expiry must be MM/YY (e.g., 12/28).');
+                return;
+            }
+            if (!/^\d{3,4}$/.test(cvv)) {
+                alert('CVV must be 3 or 4 digits.');
+                return;
+            }
+            if (paidMonths.includes(selectedMonth)) {
+                alert('This month is already paid!');
+                closeModal();
+                return;
+            }
+            try {
+                await savePaidMonth(currentUser.id, selectedMonth);
+                alert(`✅ Payment successful for ${selectedMonth} via ${methodInput.value.toUpperCase()}. Thank you!`);
+                closeModal();
+            } catch (error) {
+                console.error(error);
+                alert('Payment failed. Please try again.');
+            }
+        });
+
+        closeModalSpan.addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        // Auth state listener (Supabase)
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session) {
+                currentUser = session.user;
+                authStatusDiv.innerHTML = `<span style="color:green;">✅ Logged in as ${currentUser.email}</span>`;
+                await loadPaidMonths(currentUser.id);
+            } else {
+                currentUser = null;
+                authStatusDiv.innerHTML = `<span style="color:red;">⚠️ You are not logged in. <a href="login.html">Log in</a> to view and make payments.</span>`;
+                paidMonths = [];
+                renderTable();
+            }
+        });
+
+        window.toggleMobileMenu = function() {
+            const menu = document.querySelector('.main-nav ul');
+            if (menu) menu.classList.toggle('show-mobile');
+        };
+    </script>
+</body>
+</html>
