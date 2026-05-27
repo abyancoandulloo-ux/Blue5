@@ -76,22 +76,21 @@
                 <li><a href="Coach.html" class="active-nav">Coach</a></li>
             </ul>
         </nav>
-        <div class="mobile-menu-icon" onclick="alert('Mobile menu')"><i class="fas fa-bars"></i></div>
     </div>
 
     <div id="coachContent" style="display: none;">
         <div class="container">
-            <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Active User Payment Overview</h2>
+            <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Active Student Payment Overview</h2>
             <div class="title-underline"></div>
             <div class="coach-table-wrapper">
                 <table class="payment-table" id="studentPaymentTable">
                     <thead id="tableHeader"></thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Reading current table entries...</td></tr>
+                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Fetching active user payment listings...</td></tr>
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Showing only actual users currently on record.</p>
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Student labels represent metadata stored during user registration.</p>
         </div>
     </div>
 
@@ -115,13 +114,12 @@
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
         } catch (err) {
-            console.error("Supabase configuration reference missing context:", err);
+            console.error("Supabase engine module link lost:", err);
         }
 
         const CORRECT_PASSWORD = "Saliim007";
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-        // --- DOM Elements ---
         const passwordInput = document.getElementById('coachPassword');
         const submitBtn = document.getElementById('submitPasswordBtn');
         const errorDiv = document.getElementById('passwordError');
@@ -131,7 +129,6 @@
 
         document.body.style.overflow = 'hidden';
 
-        // --- Extract Unique Current Users Directly From Payments ---
         async function loadAndRenderLivePayments() {
             const thead = document.getElementById('tableHeader');
             const tbody = document.getElementById('tableBody');
@@ -142,15 +139,15 @@
             }
 
             try {
-                // 1. Pull all payment logs from the table to map actual user activity directly
+                // 1. Fetch user payment transactions
                 const { data: allPayments, error: paymentError } = await supabase
                     .from('user_payments')
                     .select('user_id, month, paid');
 
                 if (paymentError) throw paymentError;
 
-                // 2. Build table structure header
-                let headerHtml = '<tr><th>User Account (UUID Prefix)</th>';
+                // Build Table Header Matrix
+                let headerHtml = '<tr><th>Student Name / Account</th>';
                 months.forEach(month => {
                     headerHtml += `<th>${month.substring(0,3)}</th>`;
                 });
@@ -158,23 +155,32 @@
                 thead.innerHTML = headerHtml;
 
                 if (!allPayments || allPayments.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The 'user_payments' table is currently empty. No transaction records found.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The 'user_payments' table is currently empty. No entries found.</td></tr>`;
                     return;
                 }
 
-                // 3. Filter list dynamically to find unique current user IDs present in the data rows
+                // Find distinct user IDs
                 const uniqueUserIds = [...new Set(allPayments.map(p => p.user_id))];
 
-                // 4. Generate data rows for existing records
+                // 2. Fetch all user accounts from Supabase Auth to display real names
+                // Note: The visibility of this query depends on your API settings or profile hooks.
+                const { data: authUsers, error: authUsersError } = await supabase.auth.admin?.listUsers() || { data: {}, error: null };
+                const userMap = {};
+                if (authUsers && authUsers.users) {
+                    authUsers.users.forEach(u => {
+                        userMap[u.id] = u.user_metadata?.full_name || u.email;
+                    });
+                }
+
+                // 3. Generate individual payment summary rows
                 let bodyHtml = '';
                 uniqueUserIds.forEach(userId => {
-                    // Truncate the UUID to keep the visual table readable while accurately mapping identities
-                    const shortId = userId ? `ID: ...${userId.substring(0, 8)}` : "Unknown User";
+                    // Fall back cleanly to email indicators or shortened hash IDs if name parameters are unassigned
+                    let userLabel = userMap[userId] || `User (...${userId.substring(0, 6)})`;
                     
-                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${shortId}</td>`;
+                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${userLabel}</td>`;
                     
                     months.forEach(month => {
-                        // Scan for an entry matching this current loop's coordinate properties
                         const matchRecord = allPayments.find(p => 
                             p.user_id === userId && 
                             p.month.toLowerCase() === month.toLowerCase()
@@ -193,12 +199,11 @@
                 tbody.innerHTML = bodyHtml;
 
             } catch (error) {
-                console.error("Data tracking process runtime crash:", error);
-                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;"><i class="fas fa-exclamation-circle"></i> Live data query failed: ${error.message}</td></tr>`;
+                console.error("Live monitoring render error encountered:", error);
+                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;"><i class="fas fa-exclamation-circle"></i> Data processing pipeline error: ${error.message}</td></tr>`;
             }
         }
 
-        // --- Portal Security Access ---
         function checkPassword() {
             const entered = passwordInput.value.trim();
             if (entered === CORRECT_PASSWORD) {
