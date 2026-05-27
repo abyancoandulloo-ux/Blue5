@@ -7,10 +7,75 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* Testimonial styles integrated smoothly for layout consistency */
+        .testimonial-section {
+            background-color: #ffffff;
+            padding: 60px 20px;
+            margin-top: 20px;
+        }
+        .testimonial-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #f8fafd;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(10, 77, 164, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        .testimonial-avatar-wrapper {
+            flex-shrink: 0;
+        }
+        .testimonial-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #0a4da4;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .testimonial-body {
+            flex-grow: 1;
+        }
+        .quote-icon {
+            font-size: 2rem;
+            color: #1e6fdf;
+            opacity: 0.3;
+            margin-bottom: 10px;
+        }
+        .testimonial-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #4a5568;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+        .testimonial-author {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0a4da4;
+        }
+        .testimonial-role {
+            font-size: 0.85rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+        @media (max-width: 768px) {
+            .testimonial-container {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px 20px;
+                gap: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="site-wrapper">
-        <!-- Top Navigation Bar -->
         <div class="top-nav">
             <div class="logo-area">
                 <i class="fas fa-futbol logo-icon"></i>
@@ -30,7 +95,6 @@
             </div>
         </div>
 
-        <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-content">
                 <h1 class="hero-title">Unleash Your Inner Champion</h1>
@@ -39,7 +103,6 @@
             </div>
         </section>
 
-        <!-- Academy details center aligned -->
         <div class="container academy-details">
             <div class="center-text animate-up">
                 <h2 class="section-title">Where Passion Meets Precision</h2>
@@ -65,7 +128,20 @@
             </div>
         </div>
 
-        <!-- Footer -->
+        <section class="testimonial-section">
+            <div class="testimonial-container">
+                <div class="testimonial-avatar-wrapper">
+                    <img src="saliim.jpg" alt="Saliim" class="testimonial-img">
+                </div>
+                <div class="testimonial-body">
+                    <div class="quote-icon"><i class="fas fa-quote-left"></i></div>
+                    <p class="testimonial-text">"Training at Blue5 Academy has completely transformed my approach to the game. The technical guidance from the coaches combined with the focus on character building gave me the confidence I needed to push past my limits."</p>
+                    <div class="testimonial-author">Saliim</div>
+                    <div class="testimonial-role">Elite Squad Member</div>
+                </div>
+            </div>
+        </section>
+
         <footer class="footer">
             <div class="footer-content">
                 <div class="footer-col">
