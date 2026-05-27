@@ -28,7 +28,8 @@
         .month-table td { padding: 12px 15px; border-bottom: 1px solid #eef2ff; }
         .paid-row { background-color: #d1fae5; border-left: 4px solid #10b981; }
         .unpaid-row { background-color: #fff9ef; border-left: 4px solid #f59e0b; }
-        .pay-btn-small { background: #0a4da4; color: white; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer; font-weight: 500; }
+        .pay-btn-small { background: #0a4da4; color: white; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .pay-btn-small:hover { background: #1e6fdf; transform: scale(1.02); }
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; font-weight: 600; }
         .status-paid { background: #10b98120; color: #0a6e44; }
         .status-unpaid { background: #f59e0b20; color: #b45309; }
@@ -43,7 +44,7 @@
         .row-flex { display: flex; gap: 15px; }
         .half { flex: 1; }
         .payment-methods-icons { display: flex; flex-wrap: wrap; gap: 12px; margin: 15px 0; }
-        .payment-option { background: #f1f5fd; padding: 8px 18px; border-radius: 50px; display: flex; align-items: center; gap: 8px; cursor: pointer; border: 1px solid transparent; }
+        .payment-option { background: #f1f5fd; padding: 8px 18px; border-radius: 50px; display: flex; align-items: center; gap: 8px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
         .payment-option.active-method { border-color: #0a4da4; background: #e6edfc; }
         .btn-block { width: 100%; background: #0a4da4; color: white; border: none; padding: 12px; border-radius: 60px; font-weight: 600; cursor: pointer; }
         .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
@@ -99,18 +100,15 @@
 
         console.log("Supabase module loaded");
 
-        // Months data
         const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
         const amount = 49;
         let currentUser = null;
         let paidMonths = [];
 
-        // DOM elements
         const tbody = document.getElementById('monthTableBody');
         const authStatusDiv = document.getElementById('authStatus');
         const errorMsgDiv = document.getElementById('errorMsg');
 
-        // Render table
         function renderTable() {
             if (!tbody) return;
             tbody.innerHTML = '';
@@ -126,7 +124,6 @@
                 `;
                 tbody.appendChild(row);
             });
-            // Attach click handlers to Pay Now buttons
             document.querySelectorAll('.pay-btn-small').forEach(btn => {
                 btn.onclick = (e) => {
                     e.preventDefault();
@@ -137,7 +134,6 @@
             });
         }
 
-        // Load paid months from Supabase
         async function loadPaidMonths(userId) {
             try {
                 const { data, error } = await supabase
@@ -151,14 +147,12 @@
             } catch (err) {
                 console.error("Supabase load error:", err);
                 errorMsgDiv.innerText = 'Using local storage (Supabase connection failed)';
-                // Fallback to localStorage
                 const local = localStorage.getItem(`blue5_payments_${userId}`);
                 paidMonths = local ? JSON.parse(local) : [];
                 renderTable();
             }
         }
 
-        // Save paid month to Supabase (with localStorage fallback)
         async function savePaidMonth(userId, month) {
             try {
                 const { data: existing } = await supabase
@@ -179,7 +173,6 @@
                         .insert({ user_id: userId, month: month, paid: true, amount: amount, payment_date: new Date().toISOString() });
                     if (error) throw error;
                 }
-                // Also save to localStorage as backup
                 const local = JSON.parse(localStorage.getItem(`blue5_payments_${userId}`) || '[]');
                 if (!local.includes(month)) {
                     local.push(month);
@@ -187,18 +180,16 @@
                 }
             } catch (err) {
                 console.error("Supabase save failed, using localStorage fallback:", err);
-                // Fallback to localStorage only
                 const local = JSON.parse(localStorage.getItem(`blue5_payments_${userId}`) || '[]');
                 if (!local.includes(month)) {
                     local.push(month);
                     localStorage.setItem(`blue5_payments_${userId}`, JSON.stringify(local));
                 }
-                // Re-throw so the UI knows it failed (but we already saved locally)
                 throw new Error("Saved only locally (cloud unavailable)");
             }
         }
 
-        // ---------- Modal logic ----------
+        // Modal logic – using the same pattern as the test version that works
         const modal = document.getElementById('paymentModal');
         const modalMonthName = document.getElementById('modalMonthName');
         const closeSpan = document.querySelector('.close-modal');
@@ -207,7 +198,6 @@
         function openModal(month) {
             selectedMonth = month;
             modalMonthName.innerText = `Month: ${month} - $${amount}`;
-            // Clear form fields
             document.getElementById('cardName').value = '';
             document.getElementById('cardNumber').value = '';
             document.getElementById('expiry').value = '';
@@ -232,7 +222,7 @@
             };
         });
 
-        // ----- The critical Pay Now button inside modal -----
+        // Get the confirm button and attach the event handler (critical part)
         const confirmBtn = document.getElementById('confirmPaymentBtn');
         if (confirmBtn) {
             confirmBtn.onclick = async () => {
@@ -242,6 +232,7 @@
                     closeModal();
                     return;
                 }
+                // Basic validation (dummy – replace with real payment later)
                 const cardName = document.getElementById('cardName').value.trim();
                 const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
                 const expiry = document.getElementById('expiry').value.trim();
@@ -269,7 +260,6 @@
                 }
                 try {
                     await savePaidMonth(currentUser.id, selectedMonth);
-                    // Update local paidMonths array and re-render
                     if (!paidMonths.includes(selectedMonth)) {
                         paidMonths.push(selectedMonth);
                         renderTable();
@@ -290,9 +280,9 @@
         }
 
         closeSpan.onclick = closeModal;
-        window.onclick = (e) => { if (e.target === modal) closeModal(); };
+        window.onclick = (event) => { if (event.target === modal) closeModal(); };
 
-        // ---------- Supabase auth listener ----------
+        // Supabase auth listener
         supabase.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 currentUser = session.user;
@@ -306,10 +296,8 @@
             }
         });
 
-        // Initial table render (all unpaid)
         renderTable();
 
-        // Mobile menu toggle
         window.toggleMobileMenu = function() {
             const menu = document.querySelector('.main-nav ul');
             if (menu) menu.classList.toggle('show-mobile');
