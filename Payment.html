@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        /* (Same CSS as before – keep it) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f8fafc; }
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
@@ -24,25 +23,27 @@
         .section-title { font-size: 2rem; color: #0a4da4; text-align: center; }
         .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 10px auto 30px; border-radius: 3px; }
         .table-responsive { overflow-x: auto; }
-        .month-table { width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; }
+        .month-table { width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .month-table th { background: #0a4da4; color: white; padding: 15px; text-align: left; }
         .month-table td { padding: 12px 15px; border-bottom: 1px solid #eef2ff; }
         .paid-row { background-color: #d1fae5; border-left: 4px solid #10b981; }
         .unpaid-row { background-color: #fff9ef; border-left: 4px solid #f59e0b; }
-        .pay-btn-small { background: #0a4da4; color: white; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer; }
+        .pay-btn-small { background: #0a4da4; color: white; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer; font-weight: 500; }
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; font-weight: 600; }
         .status-paid { background: #10b98120; color: #0a6e44; }
         .status-unpaid { background: #f59e0b20; color: #b45309; }
-        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-        .modal-content { background: white; max-width: 480px; width: 90%; padding: 30px; border-radius: 36px; position: relative; }
-        .close-modal { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; }
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); justify-content: center; align-items: center; }
+        .modal-content { background: white; max-width: 480px; width: 90%; padding: 30px; border-radius: 36px; position: relative; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .close-modal { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #888; }
+        .close-modal:hover { color: #0a4da4; }
         .input-group { position: relative; margin-bottom: 18px; }
         .input-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #0a4da4; }
-        .input-group input { width: 100%; padding: 12px 15px 12px 45px; border-radius: 60px; border: 1px solid #ddd; }
+        .input-group input { width: 100%; padding: 12px 15px 12px 45px; border-radius: 60px; border: 1px solid #ddd; font-size: 1rem; }
         .row-flex { display: flex; gap: 15px; }
         .half { flex: 1; }
         .payment-methods-icons { display: flex; flex-wrap: wrap; gap: 12px; margin: 15px 0; }
-        .payment-option { background: #f1f5fd; padding: 8px 18px; border-radius: 50px; cursor: pointer; border: 1px solid transparent; }
+        .payment-option { background: #f1f5fd; padding: 8px 18px; border-radius: 50px; display: flex; align-items: center; gap: 8px; cursor: pointer; border: 1px solid transparent; }
         .payment-option.active-method { border-color: #0a4da4; background: #e6edfc; }
         .btn-block { width: 100%; background: #0a4da4; color: white; border: none; padding: 12px; border-radius: 60px; font-weight: 600; cursor: pointer; }
         .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
@@ -51,18 +52,24 @@
 </head>
 <body>
     <div class="top-nav">
-        <a href="index.html" class="logo-link"><div class="logo-area"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">Blue5<span class="accent">Football</span> Academy</span></div></a>
-        <nav class="main-nav"><ul><li><a href="index.html">Home</a></li><li><a href="login.html">Log in</a></li><li><a href="Payment.html" class="active-nav">Payment</a></li><li><a href="sessions.html">Sessions</a></li><li><a href="Coach.html">Coach</a></li></ul></nav>
+        <a href="Home.html" class="logo-link"><div class="logo-area"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">Blue5<span class="accent">Football</span> Academy</span></div></a>
+        <nav class="main-nav"><ul><li><a href="Home.html">Home</a></li><li><a href="login.html">Log in</a></li><li><a href="Payment.html" class="active-nav">Payment</a></li><li><a href="sessions.html">Sessions</a></li><li><a href="Coach.html">Coach</a></li></ul></nav>
         <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
     </div>
 
     <div class="container">
         <h2 class="section-title">Membership & Monthly Fees</h2>
         <div class="title-underline"></div>
-        <div id="authStatus" style="text-align:center; margin-bottom:20px;"></div>
+        <div id="authStatus" style="text-align:center; margin-bottom:20px; font-weight:500;"></div>
         <div class="table-responsive">
-            <table class="month-table"><thead><tr><th>Month</th><th>Status</th><th>Amount</th><th>Action</th></tr></thead><tbody id="monthTableBody"></tbody>瞻</table>
+            <table class="month-table" id="monthsTable">
+                <thead><tr><th>Month</th><th>Status</th><th>Amount</th><th>Action</th></tr></thead>
+                <tbody id="monthTableBody">
+                    <!-- Months will be injected here by JavaScript -->
+                </tbody>
+            </table>
         </div>
+        <div id="errorMsg" style="color:red; text-align:center; margin-top:20px;"></div>
     </div>
 
     <!-- Payment Modal -->
@@ -89,10 +96,10 @@
 
     <footer class="footer"><div class="copyright">© 2025 Blue5 Football Academy — Secure Payments</div></footer>
 
-    <!-- Supabase JS -->
     <script type="module">
         import { supabase } from './supabase-config.js';
 
+        // ---------- Data ----------
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const amount = 49;
         let currentUser = null;
@@ -101,73 +108,95 @@
         // DOM elements
         const tbody = document.getElementById('monthTableBody');
         const authStatusDiv = document.getElementById('authStatus');
+        const errorMsgDiv = document.getElementById('errorMsg');
         const modal = document.getElementById('paymentModal');
         const modalMonthName = document.getElementById('modalMonthName');
         const closeModalSpan = document.querySelector('.close-modal');
         const confirmBtn = document.getElementById('confirmPaymentBtn');
         let selectedMonth = null;
 
+        // Helper: Clear error
+        function setError(msg) {
+            errorMsgDiv.innerText = msg;
+        }
+
         // Load user's paid months from Supabase
         async function loadPaidMonths(userId) {
-            const { data, error } = await supabase
-                .from('user_payments')
-                .select('month')
-                .eq('user_id', userId)
-                .eq('paid', true);
-            
-            if (error) {
-                console.error('Error loading payments:', error);
+            try {
+                const { data, error } = await supabase
+                    .from('user_payments')
+                    .select('month')
+                    .eq('user_id', userId)
+                    .eq('paid', true);
+                
+                if (error) {
+                    console.error('Supabase load error:', error);
+                    setError('Could not load payment data. Please try again later.');
+                    paidMonths = [];
+                } else {
+                    paidMonths = data.map(row => row.month);
+                    setError('');
+                }
+                renderTable(); // Always render even if error
+            } catch (err) {
+                console.error('Unexpected error loading payments:', err);
+                setError('Network error. Check your connection.');
                 paidMonths = [];
-            } else {
-                paidMonths = data.map(row => row.month);
+                renderTable();
             }
-            renderTable();
         }
 
-        // Mark a month as paid in Supabase
+        // Save a month as paid
         async function savePaidMonth(userId, month) {
-            // First check if a record exists for this user+month
-            const { data: existing } = await supabase
-                .from('user_payments')
-                .select('id')
-                .eq('user_id', userId)
-                .eq('month', month)
-                .maybeSingle();
-            
-            if (existing) {
-                // Update existing record
-                const { error } = await supabase
+            try {
+                // Check if record exists
+                const { data: existing } = await supabase
                     .from('user_payments')
-                    .update({ paid: true, payment_date: new Date().toISOString() })
-                    .eq('id', existing.id);
-                if (error) throw error;
-            } else {
-                // Insert new record
-                const { error } = await supabase
-                    .from('user_payments')
-                    .insert({ user_id: userId, month: month, paid: true, amount: amount, payment_date: new Date().toISOString() });
-                if (error) throw error;
+                    .select('id')
+                    .eq('user_id', userId)
+                    .eq('month', month)
+                    .maybeSingle();
+                
+                if (existing) {
+                    const { error } = await supabase
+                        .from('user_payments')
+                        .update({ paid: true, payment_date: new Date().toISOString() })
+                        .eq('id', existing.id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase
+                        .from('user_payments')
+                        .insert({ user_id: userId, month: month, paid: true, amount: amount, payment_date: new Date().toISOString() });
+                    if (error) throw error;
+                }
+                paidMonths.push(month);
+                renderTable();
+            } catch (err) {
+                console.error('Save payment error:', err);
+                throw new Error('Payment could not be saved.');
             }
-            paidMonths.push(month);
-            renderTable();
         }
 
-        // Render table
+        // Render the 12-month table
         function renderTable() {
-            if (!tbody) return;
-            tbody.innerHTML = '';
+            if (!tbody) {
+                console.error('Table body not found');
+                return;
+            }
+            tbody.innerHTML = ''; // Clear existing
             months.forEach(month => {
                 const isPaid = paidMonths.includes(month);
                 const row = document.createElement('tr');
                 row.className = isPaid ? 'paid-row' : 'unpaid-row';
                 row.innerHTML = `
-                    <td>${month}</td>
+                    <td><strong>${month}</strong></td>
                     <td>${isPaid ? '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Paid</span>' : '<span class="status-badge status-unpaid"><i class="fas fa-hourglass-half"></i> Pending</span>'}</td>
                     <td>$${amount}</td>
                     <td>${isPaid ? '<i class="fas fa-check" style="color:#10b981;"></i> Completed' : `<button class="pay-btn-small" data-month="${month}">Pay Now</button>`}</td>
                 `;
                 tbody.appendChild(row);
             });
+            // Attach event listeners to Pay Now buttons
             document.querySelectorAll('.pay-btn-small').forEach(btn => {
                 btn.removeEventListener('click', payHandler);
                 btn.addEventListener('click', payHandler);
@@ -186,7 +215,7 @@
         function openModal(month) {
             selectedMonth = month;
             modalMonthName.innerText = `Month: ${month} - $${amount}`;
-            // Reset form
+            // Reset form fields
             document.getElementById('cardName').value = '';
             document.getElementById('cardNumber').value = '';
             document.getElementById('expiry').value = '';
@@ -210,13 +239,14 @@
             });
         });
 
+        // Confirm payment button
         confirmBtn.addEventListener('click', async () => {
             if (!selectedMonth || !currentUser) {
                 alert('Please log in first.');
                 closeModal();
                 return;
             }
-            // Basic validation
+            // Simple validation
             const cardName = document.getElementById('cardName').value.trim();
             const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
             const expiry = document.getElementById('expiry').value.trim();
@@ -247,7 +277,6 @@
                 alert(`✅ Payment successful for ${selectedMonth} via ${methodInput.value.toUpperCase()}. Thank you!`);
                 closeModal();
             } catch (error) {
-                console.error(error);
                 alert('Payment failed. Please try again.');
             }
         });
@@ -255,7 +284,7 @@
         closeModalSpan.addEventListener('click', closeModal);
         window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-        // Auth state listener (Supabase)
+        // Auth state listener
         supabase.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 currentUser = session.user;
@@ -265,10 +294,11 @@
                 currentUser = null;
                 authStatusDiv.innerHTML = `<span style="color:red;">⚠️ You are not logged in. <a href="login.html">Log in</a> to view and make payments.</span>`;
                 paidMonths = [];
-                renderTable();
+                renderTable(); // Show empty table with Pay Now buttons disabled
             }
         });
 
+        // Mobile menu toggle
         window.toggleMobileMenu = function() {
             const menu = document.querySelector('.main-nav ul');
             if (menu) menu.classList.toggle('show-mobile');
