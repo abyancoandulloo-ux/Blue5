@@ -35,7 +35,7 @@
         .payment-table tr:first-child th:first-child { border-top-left-radius: 20px; }
         .payment-table tr:first-child th:last-child { border-top-right-radius: 20px; }
         
-        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; }
+        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; }
         .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; }
         .unpaid-cell { background-color: #fff9ef; color: #b45309; }
         .paid-icon { color: #10b981; margin-right: 5px; }
@@ -81,17 +81,17 @@
 
     <div id="coachContent" style="display: none;">
         <div class="container">
-            <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Live Student Payment Overview</h2>
+            <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Active User Payment Overview</h2>
             <div class="title-underline"></div>
             <div class="coach-table-wrapper">
                 <table class="payment-table" id="studentPaymentTable">
                     <thead id="tableHeader"></thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading live database records...</td></tr>
+                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Reading current table entries...</td></tr>
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Updates are synchronized directly with live student transactions.</p>
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Showing only actual users currently on record.</p>
         </div>
     </div>
 
@@ -110,13 +110,12 @@
     </div>
 
     <script type="module">
-        // Import your standard database configuration module
         let supabase = null;
         try {
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
         } catch (err) {
-            console.error("Supabase config failed to map within the coach runtime layout:", err);
+            console.error("Supabase configuration reference missing context:", err);
         }
 
         const CORRECT_PASSWORD = "Saliim007";
@@ -130,10 +129,9 @@
         const footer = document.getElementById('footer');
         const modal = document.getElementById('passwordModal');
 
-        // Lock window scrolling while the auth challenge is visible
         document.body.style.overflow = 'hidden';
 
-        // --- Fetch and Render Live Supabase Data ---
+        // --- Extract Unique Current Users Directly From Payments ---
         async function loadAndRenderLivePayments() {
             const thead = document.getElementById('tableHeader');
             const tbody = document.getElementById('tableBody');
@@ -144,52 +142,48 @@
             }
 
             try {
-                // 1. Fetch live user records from your lookup profiles table
-                const { data: users, error: userError } = await supabase
-                    .from('profiles')
-                    .select('id, full_name')
-                    .order('full_name', { ascending: true });
-
-                if (userError) throw userError;
-
-                // 2. Fetch all verified settlement records
-                const { data: payments, error: paymentError } = await supabase
+                // 1. Pull all payment logs from the table to map actual user activity directly
+                const { data: allPayments, error: paymentError } = await supabase
                     .from('user_payments')
-                    .select('user_id, month, paid')
-                    .eq('paid', true);
+                    .select('user_id, month, paid');
 
                 if (paymentError) throw paymentError;
 
-                // 3. Render Table Header Structure
-                let headerHtml = '<tr><th>Student Name</th>';
+                // 2. Build table structure header
+                let headerHtml = '<tr><th>User Account (UUID Prefix)</th>';
                 months.forEach(month => {
                     headerHtml += `<th>${month.substring(0,3)}</th>`;
                 });
                 headerHtml += '</tr>';
                 thead.innerHTML = headerHtml;
 
-                // Evaluate if database tables returned query nodes
-                if (!users || users.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No student profile structures found in database.</td></tr>`;
+                if (!allPayments || allPayments.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The 'user_payments' table is currently empty. No transaction records found.</td></tr>`;
                     return;
                 }
 
-                // 4. Map cross-references into presentation tables
+                // 3. Filter list dynamically to find unique current user IDs present in the data rows
+                const uniqueUserIds = [...new Set(allPayments.map(p => p.user_id))];
+
+                // 4. Generate data rows for existing records
                 let bodyHtml = '';
-                users.forEach(user => {
-                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-graduate"></i> ${user.full_name}</td>`;
+                uniqueUserIds.forEach(userId => {
+                    // Truncate the UUID to keep the visual table readable while accurately mapping identities
+                    const shortId = userId ? `ID: ...${userId.substring(0, 8)}` : "Unknown User";
+                    
+                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${shortId}</td>`;
                     
                     months.forEach(month => {
-                        // Check if a row instance matches current user mapping coordinates
-                        const matchPaid = payments.some(p => 
-                            p.user_id === user.id && 
-                            p.month.toLowerCase() === month.toLowerCase() && 
-                            p.paid === true
+                        // Scan for an entry matching this current loop's coordinate properties
+                        const matchRecord = allPayments.find(p => 
+                            p.user_id === userId && 
+                            p.month.toLowerCase() === month.toLowerCase()
                         );
                         
-                        const cellClass = matchPaid ? 'paid-cell' : 'unpaid-cell';
-                        const icon = matchPaid ? '<i class="fas fa-check-circle paid-icon"></i>' : '<i class="fas fa-times-circle unpaid-icon"></i>';
-                        const statusLabel = matchPaid ? 'Paid' : 'Pending';
+                        const isPaid = matchRecord ? matchRecord.paid : false;
+                        const cellClass = isPaid ? 'paid-cell' : 'unpaid-cell';
+                        const icon = isPaid ? '<i class="fas fa-check-circle paid-icon"></i>' : '<i class="fas fa-times-circle unpaid-icon"></i>';
+                        const statusLabel = isPaid ? 'Paid' : 'Pending';
 
                         bodyHtml += `<td class="${cellClass}">${icon} ${statusLabel}</td>`;
                     });
@@ -199,22 +193,20 @@
                 tbody.innerHTML = bodyHtml;
 
             } catch (error) {
-                console.error("Data pipeline processing mapping failure:", error);
+                console.error("Data tracking process runtime crash:", error);
                 tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;"><i class="fas fa-exclamation-circle"></i> Live data query failed: ${error.message}</td></tr>`;
             }
         }
 
-        // --- Security Password Flow ---
+        // --- Portal Security Access ---
         function checkPassword() {
             const entered = passwordInput.value.trim();
             if (entered === CORRECT_PASSWORD) {
-                // Restore regular document scroll operations
                 document.body.style.overflow = '';
                 if (modal) modal.remove();
                 coachContent.style.display = 'block';
                 footer.style.display = 'block';
                 
-                // Initialize cloud database payload extraction loops
                 loadAndRenderLivePayments();
             } else {
                 errorDiv.textContent = 'Incorrect password. Access denied.';
@@ -223,7 +215,6 @@
             }
         }
 
-        // --- Action Listeners ---
         submitBtn.addEventListener('click', checkPassword);
         passwordInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') checkPassword();
