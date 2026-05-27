@@ -96,10 +96,18 @@
     <footer class="footer"><div class="copyright">© 2025 Blue5 Football Academy — Secure Payments</div></footer>
 
     <script type="module">
-        import { supabase } from './supabase-config.js';
+        // Import Supabase (if supabase-config.js exists, otherwise it will fail gracefully)
+        let supabase;
+        try {
+            const module = await import('./supabase-config.js');
+            supabase = module.supabase;
+            console.log("Supabase loaded successfully");
+        } catch (err) {
+            console.warn("Supabase not available, using localStorage only:", err);
+            supabase = null;
+        }
 
-        console.log("Supabase module loaded");
-
+        // --- DOM elements ---
         const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
         const amount = 49;
         let currentUser = null;
@@ -108,7 +116,12 @@
         const tbody = document.getElementById('monthTableBody');
         const authStatusDiv = document.getElementById('authStatus');
         const errorMsgDiv = document.getElementById('errorMsg');
+        const modal = document.getElementById('paymentModal');
+        const modalMonthName = document.getElementById('modalMonthName');
+        const closeSpan = document.querySelector('.close-modal');
+        let selectedMonth = null;
 
+        // --- Helper: render the 12-month table ---
         function renderTable() {
             if (!tbody) return;
             tbody.innerHTML = '';
@@ -124,6 +137,7 @@
                 `;
                 tbody.appendChild(row);
             });
+            // Attach click handlers to "Pay Now" buttons on the table
             document.querySelectorAll('.pay-btn-small').forEach(btn => {
                 btn.onclick = (e) => {
                     e.preventDefault();
@@ -134,67 +148,66 @@
             });
         }
 
+        // --- Load paid months (Supabase or localStorage) ---
         async function loadPaidMonths(userId) {
-            try {
-                const { data, error } = await supabase
-                    .from('user_payments')
-                    .select('month')
-                    .eq('user_id', userId)
-                    .eq('paid', true);
-                if (error) throw error;
-                paidMonths = data.map(row => row.month);
-                renderTable();
-            } catch (err) {
-                console.error("Supabase load error:", err);
-                errorMsgDiv.innerText = 'Using local storage (Supabase connection failed)';
-                const local = localStorage.getItem(`blue5_payments_${userId}`);
-                paidMonths = local ? JSON.parse(local) : [];
-                renderTable();
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('user_payments')
+                        .select('month')
+                        .eq('user_id', userId)
+                        .eq('paid', true);
+                    if (error) throw error;
+                    paidMonths = data.map(row => row.month);
+                    renderTable();
+                    return;
+                } catch (err) {
+                    console.error("Supabase load error:", err);
+                    errorMsgDiv.innerText = 'Supabase unavailable – using local storage.';
+                }
             }
+            // Fallback to localStorage
+            const local = localStorage.getItem(`blue5_payments_${userId}`);
+            paidMonths = local ? JSON.parse(local) : [];
+            renderTable();
         }
 
+        // --- Save a paid month (Supabase or localStorage) ---
         async function savePaidMonth(userId, month) {
-            try {
-                const { data: existing } = await supabase
-                    .from('user_payments')
-                    .select('id')
-                    .eq('user_id', userId)
-                    .eq('month', month)
-                    .maybeSingle();
-                if (existing) {
-                    const { error } = await supabase
+            if (supabase) {
+                try {
+                    const { data: existing } = await supabase
                         .from('user_payments')
-                        .update({ paid: true, payment_date: new Date().toISOString() })
-                        .eq('id', existing.id);
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabase
-                        .from('user_payments')
-                        .insert({ user_id: userId, month: month, paid: true, amount: amount, payment_date: new Date().toISOString() });
-                    if (error) throw error;
+                        .select('id')
+                        .eq('user_id', userId)
+                        .eq('month', month)
+                        .maybeSingle();
+                    if (existing) {
+                        const { error } = await supabase
+                            .from('user_payments')
+                            .update({ paid: true, payment_date: new Date().toISOString() })
+                            .eq('id', existing.id);
+                        if (error) throw error;
+                    } else {
+                        const { error } = await supabase
+                            .from('user_payments')
+                            .insert({ user_id: userId, month: month, paid: true, amount: amount, payment_date: new Date().toISOString() });
+                        if (error) throw error;
+                    }
+                } catch (err) {
+                    console.error("Supabase save failed, falling back to localStorage:", err);
+                    // fall through to localStorage
                 }
-                const local = JSON.parse(localStorage.getItem(`blue5_payments_${userId}`) || '[]');
-                if (!local.includes(month)) {
-                    local.push(month);
-                    localStorage.setItem(`blue5_payments_${userId}`, JSON.stringify(local));
-                }
-            } catch (err) {
-                console.error("Supabase save failed, using localStorage fallback:", err);
-                const local = JSON.parse(localStorage.getItem(`blue5_payments_${userId}`) || '[]');
-                if (!local.includes(month)) {
-                    local.push(month);
-                    localStorage.setItem(`blue5_payments_${userId}`, JSON.stringify(local));
-                }
-                throw new Error("Saved only locally (cloud unavailable)");
+            }
+            // Always update localStorage as backup
+            const local = JSON.parse(localStorage.getItem(`blue5_payments_${userId}`) || '[]');
+            if (!local.includes(month)) {
+                local.push(month);
+                localStorage.setItem(`blue5_payments_${userId}`, JSON.stringify(local));
             }
         }
 
-        // Modal logic – using the same pattern as the test version that works
-        const modal = document.getElementById('paymentModal');
-        const modalMonthName = document.getElementById('modalMonthName');
-        const closeSpan = document.querySelector('.close-modal');
-        let selectedMonth = null;
-
+        // --- Modal control ---
         function openModal(month) {
             selectedMonth = month;
             modalMonthName.innerText = `Month: ${month} - $${amount}`;
@@ -211,7 +224,7 @@
             selectedMonth = null;
         }
 
-        // Payment method selection
+        // --- Payment method selection UI ---
         const methodOptions = document.querySelectorAll('.payment-option');
         const methodInput = document.getElementById('selectedMethod');
         methodOptions.forEach(opt => {
@@ -222,17 +235,18 @@
             };
         });
 
-        // Get the confirm button and attach the event handler (critical part)
+        // --- 🔥 CRITICAL: Attach the modal "Pay Now" button handler early ---
         const confirmBtn = document.getElementById('confirmPaymentBtn');
         if (confirmBtn) {
-            confirmBtn.onclick = async () => {
-                console.log("Pay Now button clicked inside modal");
+            // Use addEventListener to avoid being overwritten
+            confirmBtn.addEventListener('click', async () => {
+                console.log("✅ Modal Pay Now button clicked");
                 if (!selectedMonth || !currentUser) {
                     alert('Please log in first.');
                     closeModal();
                     return;
                 }
-                // Basic validation (dummy – replace with real payment later)
+                // Basic validation (replace with real payment gateway later)
                 const cardName = document.getElementById('cardName').value.trim();
                 const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
                 const expiry = document.getElementById('expiry').value.trim();
@@ -258,6 +272,7 @@
                     closeModal();
                     return;
                 }
+                // Process payment
                 try {
                     await savePaidMonth(currentUser.id, selectedMonth);
                     if (!paidMonths.includes(selectedMonth)) {
@@ -274,30 +289,41 @@
                     }
                     closeModal();
                 }
-            };
+            });
         } else {
-            console.error("confirmPaymentBtn not found!");
+            console.error("confirmPaymentBtn not found – check the HTML ID");
         }
 
+        // --- Modal close events ---
         closeSpan.onclick = closeModal;
         window.onclick = (event) => { if (event.target === modal) closeModal(); };
 
-        // Supabase auth listener
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session) {
-                currentUser = session.user;
-                authStatusDiv.innerHTML = `<span style="color:green;">✅ Logged in as ${currentUser.email}</span>`;
-                await loadPaidMonths(currentUser.id);
-            } else {
-                currentUser = null;
-                authStatusDiv.innerHTML = `<span style="color:red;">⚠️ You are not logged in. <a href="login.html">Log in</a> to view and make payments.</span>`;
-                paidMonths = [];
-                renderTable();
-            }
-        });
+        // --- Supabase Auth listener (only if supabase is available) ---
+        if (supabase) {
+            supabase.auth.onAuthStateChange(async (event, session) => {
+                if (session) {
+                    currentUser = session.user;
+                    authStatusDiv.innerHTML = `<span style="color:green;">✅ Logged in as ${currentUser.email}</span>`;
+                    await loadPaidMonths(currentUser.id);
+                } else {
+                    currentUser = null;
+                    authStatusDiv.innerHTML = `<span style="color:red;">⚠️ You are not logged in. <a href="login.html">Log in</a> to view and make payments.</span>`;
+                    paidMonths = [];
+                    renderTable();
+                }
+            });
+        } else {
+            // No Supabase – fallback to localStorage demo mode
+            authStatusDiv.innerHTML = '<span style="color:orange;">⚠️ Demo mode (no Supabase). Payments are stored only in your browser.</span>';
+            // Allow any user (simulate logged in)
+            currentUser = { id: 'demo-user' };
+            loadPaidMonths('demo-user');
+        }
 
+        // Initial table render (all unpaid)
         renderTable();
 
+        // Mobile menu toggle
         window.toggleMobileMenu = function() {
             const menu = document.querySelector('.main-nav ul');
             if (menu) menu.classList.toggle('show-mobile');
