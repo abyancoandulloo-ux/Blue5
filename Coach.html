@@ -7,200 +7,50 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f0f4fa;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f0f4fa; }
+        
         /* Navbar */
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 40px;
-            background: white;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-        }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .logo-icon {
-            font-size: 28px;
-            color: #0a4da4;
-        }
-        .logo-text {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #0a4da4;
-        }
-        .logo-text .accent {
-            font-weight: 800;
-            color: #1e6fdf;
-        }
-        .logo-link {
-            text-decoration: none;
-        }
-        .main-nav ul {
-            display: flex;
-            gap: 28px;
-            list-style: none;
-        }
-        .main-nav a {
-            text-decoration: none;
-            color: #1f2a44;
-            font-weight: 500;
-        }
-        .main-nav a.active-nav {
-            color: #0a4da4;
-            font-weight: 600;
-        }
-        .mobile-menu-icon {
-            display: none;
-            font-size: 24px;
-            cursor: pointer;
-        }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { font-size: 28px; color: #0a4da4; }
+        .logo-text { font-size: 1.3rem; font-weight: 700; color: #0a4da4; }
+        .logo-text .accent { font-weight: 800; color: #1e6fdf; }
+        .logo-link { text-decoration: none; }
+        .main-nav ul { display: flex; gap: 28px; list-style: none; }
+        .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
+        .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
+        .mobile-menu-icon { display: none; font-size: 24px; cursor: pointer; }
+        
         /* Main Content */
-        .container {
-            max-width: 1300px;
-            margin: 30px auto;
-            padding: 20px;
-        }
-        .section-title {
-            text-align: center;
-            color: #0a4da4;
-            margin-bottom: 20px;
-        }
-        .title-underline {
-            width: 80px;
-            height: 3px;
-            background: #0a4da4;
-            margin: 0 auto 30px;
-            border-radius: 3px;
-        }
+        .container { max-width: 1300px; margin: 30px auto; padding: 20px; }
+        .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
+        .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
+        
         /* Table Styles */
-        .coach-table-wrapper {
-            overflow-x: auto;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            padding: 5px;
-        }
-        .payment-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-        .payment-table th {
-            background: #0a4da4;
-            color: white;
-            padding: 14px 10px;
-            text-align: center;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-        }
-        .payment-table td {
-            padding: 12px 8px;
-            text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .payment-table tr:first-child th:first-child {
-            border-top-left-radius: 20px;
-        }
-        .payment-table tr:first-child th:last-child {
-            border-top-right-radius: 20px;
-        }
-        .student-name-cell {
-            font-weight: 600;
-            background: #f8fafd;
-            text-align: left;
-            padding-left: 20px;
-        }
-        .paid-cell {
-            background-color: #d1fae5;
-            color: #0a6e44;
-            font-weight: 500;
-        }
-        .unpaid-cell {
-            background-color: #fff9ef;
-            color: #b45309;
-        }
-        .paid-icon {
-            color: #10b981;
-            margin-right: 5px;
-        }
-        .unpaid-icon {
-            color: #f59e0b;
-            margin-right: 5px;
-        }
+        .coach-table-wrapper { overflow-x: auto; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 5px; }
+        .payment-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
+        .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+        .payment-table tr:first-child th:first-child { border-top-left-radius: 20px; }
+        .payment-table tr:first-child th:last-child { border-top-right-radius: 20px; }
+        
+        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; }
+        .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; }
+        .unpaid-cell { background-color: #fff9ef; color: #b45309; }
+        .paid-icon { color: #10b981; margin-right: 5px; }
+        .unpaid-icon { color: #f59e0b; margin-right: 5px; }
+        
         /* Password Modal */
-        .password-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-        .password-box {
-            background: white;
-            padding: 35px 30px;
-            border-radius: 32px;
-            text-align: center;
-            width: 360px;
-            max-width: 90%;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
-        }
-        .password-box i {
-            font-size: 48px;
-            color: #0a4da4;
-            margin-bottom: 15px;
-        }
-        .password-box h3 {
-            margin-bottom: 20px;
-            color: #1e2a45;
-        }
-        .password-box input {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 60px;
-            border: 1px solid #ccc;
-            margin-bottom: 20px;
-            font-size: 1rem;
-        }
-        .password-box button {
-            background: #0a4da4;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-        .error-msg {
-            color: #e53e3e;
-            margin-top: 12px;
-            font-size: 0.85rem;
-        }
-        .footer {
-            background: #0c1b33;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-        }
+        .password-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .password-box { background: white; padding: 35px 30px; border-radius: 32px; text-align: center; width: 360px; max-width: 90%; box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
+        .password-box i { font-size: 48px; color: #0a4da4; margin-bottom: 15px; }
+        .password-box h3 { margin-bottom: 20px; color: #1e2a45; }
+        .password-box input { width: 100%; padding: 12px 15px; border-radius: 60px; border: 1px solid #ccc; margin-bottom: 20px; font-size: 1rem; text-align: center; }
+        .password-box button { background: #0a4da4; color: white; border: none; padding: 10px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; }
+        .error-msg { color: #e53e3e; margin-top: 12px; font-size: 0.85rem; }
+        
+        .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
         @media (max-width: 768px) {
             .top-nav { padding: 12px 20px; }
             .main-nav ul { gap: 15px; }
@@ -210,9 +60,8 @@
 </head>
 <body>
 
-    <!-- Navbar -->
     <div class="top-nav">
-        <a href="Home.html" class="logo-link">
+        <a href="index.html" class="logo-link">
             <div class="logo-area">
                 <i class="fas fa-futbol logo-icon"></i>
                 <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
@@ -230,168 +79,155 @@
         <div class="mobile-menu-icon" onclick="alert('Mobile menu')"><i class="fas fa-bars"></i></div>
     </div>
 
-    <!-- Main Content (hidden until password success) -->
     <div id="coachContent" style="display: none;">
         <div class="container">
-            <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Student Payment Overview</h2>
+            <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Live Student Payment Overview</h2>
             <div class="title-underline"></div>
             <div class="coach-table-wrapper">
                 <table class="payment-table" id="studentPaymentTable">
-                    <thead id="tableHeader">
-                        <!-- Header will be dynamically generated -->
-                    </thead>
+                    <thead id="tableHeader"></thead>
                     <tbody id="tableBody">
-                        <!-- Student rows will be injected -->
+                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading live database records...</td></tr>
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Updates are saved automatically.</p>
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Updates are synchronized directly with live student transactions.</p>
         </div>
     </div>
 
     <footer class="footer" id="footer" style="display: none;">
-        <div class="copyright">© 2025 Blue5 Football Academy — Coach Portal</div>
+        <div class="copyright">© 2026 Blue5 Football Academy — Coach Portal</div>
     </footer>
 
-    <!-- Password Modal -->
     <div id="passwordModal" class="password-modal">
         <div class="password-box">
             <i class="fas fa-lock"></i>
             <h3>Coach Access Required</h3>
-            <input type="password" id="coachPassword" placeholder="Enter password" autofocus>
+            <input type="password" id="coachPassword" placeholder="Enter security password" autofocus>
             <button id="submitPasswordBtn">Unlock Portal</button>
             <div id="passwordError" class="error-msg"></div>
         </div>
     </div>
 
-    <script>
-        (function() {
-            // Correct password
-            const CORRECT_PASSWORD = "Saliim007";
+    <script type="module">
+        // Import your standard database configuration module
+        let supabase = null;
+        try {
+            const module = await import('./supabase-config.js');
+            supabase = module.supabase;
+        } catch (err) {
+            console.error("Supabase config failed to map within the coach runtime layout:", err);
+        }
+
+        const CORRECT_PASSWORD = "Saliim007";
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // --- DOM Elements ---
+        const passwordInput = document.getElementById('coachPassword');
+        const submitBtn = document.getElementById('submitPasswordBtn');
+        const errorDiv = document.getElementById('passwordError');
+        const coachContent = document.getElementById('coachContent');
+        const footer = document.getElementById('footer');
+        const modal = document.getElementById('passwordModal');
+
+        // Lock window scrolling while the auth challenge is visible
+        document.body.style.overflow = 'hidden';
+
+        // --- Fetch and Render Live Supabase Data ---
+        async function loadAndRenderLivePayments() {
+            const thead = document.getElementById('tableHeader');
+            const tbody = document.getElementById('tableBody');
             
-            // ---------- STUDENT DATA & PAYMENT STATUS ----------
-            // List of students
-            const students = [
-                "Liam O'Connor", "Ethan Williams", "Mason Brown", "Noah Jones", 
-                "Oliver Davis", "James Miller", "Benjamin Wilson", "Lucas Moore", 
-                "Henry Taylor", "Alexander Anderson"
-            ];
-            
-            const months = ["January", "February", "March", "April", "May", "June", 
-                            "July", "August", "September", "October", "November", "December"];
-            
-            // Load or initialize payment data: studentPayment[student][month] = true/false
-            let studentPayments = {};
-            
-            function loadPaymentData() {
-                const stored = localStorage.getItem('blue5_coach_payments');
-                if (stored) {
-                    studentPayments = JSON.parse(stored);
-                } else {
-                    // Initialize: randomly set some months as paid for demo
-                    students.forEach(student => {
-                        studentPayments[student] = {};
-                        months.forEach(month => {
-                            // Randomly assign paid status (60% paid for demo)
-                            studentPayments[student][month] = Math.random() > 0.4;
-                        });
-                    });
-                    // Ensure some specific months are paid for realism (first student fully paid)
-                    students.forEach(s => {
-                        months.forEach(m => {
-                            if (s === students[0]) studentPayments[s][m] = true;
-                        });
-                    });
-                    savePaymentData();
-                }
+            if (!supabase) {
+                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Configuration Error: Connection link to 'supabase-config.js' is unavailable.</td></tr>`;
+                return;
             }
-            
-            function savePaymentData() {
-                localStorage.setItem('blue5_coach_payments', JSON.stringify(studentPayments));
-            }
-            
-            // Render the table
-            function renderTable() {
-                const thead = document.getElementById('tableHeader');
-                const tbody = document.getElementById('tableBody');
-                if (!thead || !tbody) return;
-                
-                // Build header row
-                let headerHtml = '<tr><th>Student / Month</th>';
+
+            try {
+                // 1. Fetch live user records from your lookup profiles table
+                const { data: users, error: userError } = await supabase
+                    .from('profiles')
+                    .select('id, full_name')
+                    .order('full_name', { ascending: true });
+
+                if (userError) throw userError;
+
+                // 2. Fetch all verified settlement records
+                const { data: payments, error: paymentError } = await supabase
+                    .from('user_payments')
+                    .select('user_id, month, paid')
+                    .eq('paid', true);
+
+                if (paymentError) throw paymentError;
+
+                // 3. Render Table Header Structure
+                let headerHtml = '<tr><th>Student Name</th>';
                 months.forEach(month => {
                     headerHtml += `<th>${month.substring(0,3)}</th>`;
                 });
                 headerHtml += '</tr>';
                 thead.innerHTML = headerHtml;
-                
-                // Build body rows
+
+                // Evaluate if database tables returned query nodes
+                if (!users || users.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No student profile structures found in database.</td></tr>`;
+                    return;
+                }
+
+                // 4. Map cross-references into presentation tables
                 let bodyHtml = '';
-                students.forEach(student => {
-                    bodyHtml += `<tr>
-                        <td class="student-name-cell"><i class="fas fa-user-graduate"></i> ${student}</td>`;
+                users.forEach(user => {
+                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-graduate"></i> ${user.full_name}</td>`;
+                    
                     months.forEach(month => {
-                        const isPaid = studentPayments[student]?.[month] || false;
-                        const cellClass = isPaid ? 'paid-cell' : 'unpaid-cell';
-                        const icon = isPaid ? '<i class="fas fa-check-circle paid-icon"></i>' : '<i class="fas fa-times-circle unpaid-icon"></i>';
-                        bodyHtml += `<td class="${cellClass}">${icon} ${isPaid ? 'Paid' : 'Pending'}</td>`;
+                        // Check if a row instance matches current user mapping coordinates
+                        const matchPaid = payments.some(p => 
+                            p.user_id === user.id && 
+                            p.month.toLowerCase() === month.toLowerCase() && 
+                            p.paid === true
+                        );
+                        
+                        const cellClass = matchPaid ? 'paid-cell' : 'unpaid-cell';
+                        const icon = matchPaid ? '<i class="fas fa-check-circle paid-icon"></i>' : '<i class="fas fa-times-circle unpaid-icon"></i>';
+                        const statusLabel = matchPaid ? 'Paid' : 'Pending';
+
+                        bodyHtml += `<td class="${cellClass}">${icon} ${statusLabel}</td>`;
                     });
+                    
                     bodyHtml += '</tr>';
                 });
                 tbody.innerHTML = bodyHtml;
+
+            } catch (error) {
+                console.error("Data pipeline processing mapping failure:", error);
+                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;"><i class="fas fa-exclamation-circle"></i> Live data query failed: ${error.message}</td></tr>`;
             }
-            
-            // Function to toggle payment for a specific student-month (optional for future admin, but not required now)
-            // We keep it as demo data only, coach can view.
-            
-            // Initialize data and show content after password
-            function unlockPortal() {
-                loadPaymentData();
-                renderTable();
-                document.getElementById('coachContent').style.display = 'block';
-                document.getElementById('footer').style.display = 'block';
-                // Remove password modal
-                const modal = document.getElementById('passwordModal');
-                if (modal) modal.remove();
-            }
-            
-            // Password validation
-            const passwordInput = document.getElementById('coachPassword');
-            const submitBtn = document.getElementById('submitPasswordBtn');
-            const errorDiv = document.getElementById('passwordError');
-            
-            function checkPassword() {
-                const entered = passwordInput.value.trim();
-                if (entered === CORRECT_PASSWORD) {
-                    unlockPortal();
-                } else {
-                    errorDiv.textContent = 'Incorrect password. Access denied.';
-                    passwordInput.value = '';
-                    passwordInput.focus();
-                }
-            }
-            
-            submitBtn.addEventListener('click', checkPassword);
-            passwordInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') checkPassword();
-            });
-            
-            // Prevent background scroll while modal is active
-            document.body.style.overflow = 'hidden';
-            // When unlocking, restore scroll
-            const originalOverflow = document.body.style.overflow;
-            function restoreScroll() {
+        }
+
+        // --- Security Password Flow ---
+        function checkPassword() {
+            const entered = passwordInput.value.trim();
+            if (entered === CORRECT_PASSWORD) {
+                // Restore regular document scroll operations
                 document.body.style.overflow = '';
+                if (modal) modal.remove();
+                coachContent.style.display = 'block';
+                footer.style.display = 'block';
+                
+                // Initialize cloud database payload extraction loops
+                loadAndRenderLivePayments();
+            } else {
+                errorDiv.textContent = 'Incorrect password. Access denied.';
+                passwordInput.value = '';
+                passwordInput.focus();
             }
-            // Override unlockPortal to restore scroll
-            const originalUnlock = unlockPortal;
-            window.unlockPortal = function() {
-                originalUnlock();
-                restoreScroll();
-            };
-            unlockPortal = window.unlockPortal;
-            // But we need to replace reference
-            window.checkPassword = checkPassword;
-        })();
+        }
+
+        // --- Action Listeners ---
+        submitBtn.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPassword();
+        });
     </script>
 </body>
 </html>
