@@ -97,6 +97,14 @@
 
     <script type="module">
         // Import Supabase (if supabase-config.js exists, otherwise it will fail gracefully)
+        // Import Supabase statically at the top
+        import { supabase } from './supabase-config.js';
+
+        // --- DOM elements ---
+        const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        const amount = 49;
+        let currentUser = null;
+        let paidMonths = [];
         let supabase;
         try {
             const module = await import('./supabase-config.js');
@@ -108,10 +116,10 @@
         }
 
         // --- DOM elements ---
-        const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        /*const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
         const amount = 49;
         let currentUser = null;
-        let paidMonths = [];
+        let paidMonths = [];*/
 
         const tbody = document.getElementById('monthTableBody');
         const authStatusDiv = document.getElementById('authStatus');
