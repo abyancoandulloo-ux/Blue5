@@ -102,7 +102,7 @@
         let paidMonths = [];
         let supabase = null;
 
-        // Dynamic asynchronous import of Supabase to gracefully handle cases where the file doesn't exist
+        // Asynchronous import of Supabase
         try {
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
@@ -143,8 +143,11 @@
                 btn.onclick = (e) => {
                     e.preventDefault();
                     const month = btn.getAttribute('data-month');
-                    if (currentUser) openModal(month);
-                    else authStatusDiv.innerHTML = '<span style="color:red;">Please <a href="login.html">log in</a> to make a payment.</span>';
+                    if (currentUser) {
+                        openModal(month);
+                    } else {
+                        authStatusDiv.innerHTML = '<span style="color:red;">Please <a href="login.html">log in</a> to make a payment.</span>';
+                    }
                 };
             });
         }
@@ -219,6 +222,7 @@
             console.log("Modal opened for", month);
         }
 
+        // Simplified closure logic to drop variable states clearly
         function closeModal() {
             modal.style.display = 'none';
             selectedMonth = null;
@@ -240,72 +244,71 @@
         if (confirmBtn) {
             confirmBtn.addEventListener('click', async (e) => {
                 e.preventDefault(); 
-                
-                console.log("Modal Pay Now button clicked");
+                console.log("Modal Pay Now button clicked execution pipeline began.");
                 
                 if (!selectedMonth || !currentUser) {
-                    alert('Please log in first.');
+                    alert('Please select a valid month and log in.');
                     closeModal();
                     return;
                 }
                 
-                // Get values and sanitize them
+                // Fetch input element text directly
                 const cardName = document.getElementById('cardName').value.trim();
                 const cardNumber = document.getElementById('cardNumber').value.replace(/[\s-]/g, '');
                 const expiry = document.getElementById('expiry').value.trim();
                 const cvv = document.getElementById('cvv').value.trim();
                 
-                // Form Validation
+                // Form Validation Alerts
                 if (!cardName || !cardNumber || !expiry || !cvv) {
                     alert('Please fill all payment details.');
                     return;
                 }
                 if (!/^\d{13,19}$/.test(cardNumber)) {
-                    alert('Invalid card number. Please enter 13-19 digits without spaces.');
+                    alert('Invalid card number. Please enter 13-19 continuous digits.');
                     return;
                 }
                 if (!/^\d{2}\/\d{2,4}$/.test(expiry)) {
-                    alert('Expiry must be MM/YY (e.g., 12/28) or MM/YYYY.');
+                    alert('Expiry must match standard convention: MM/YY (e.g., 12/28) or MM/YYYY.');
                     return;
                 }
                 if (!/^\d{3,4}$/.test(cvv)) {
-                    alert('CVV must be 3 or 4 digits.');
+                    alert('CVV code must be 3 or 4 numbers long.');
                     return;
                 }
                 if (paidMonths.includes(selectedMonth)) {
-                    alert('This month is already paid!');
+                    alert('This specific monthly tier has already been registered as paid!');
                     closeModal();
                     return;
                 }
                 
-                // Process payment
+                // Process execution and force interface modifications
                 try {
                     await savePaidMonth(currentUser.id, selectedMonth);
                     if (!paidMonths.includes(selectedMonth)) {
                         paidMonths.push(selectedMonth);
-                        renderTable();
                     }
+                    renderTable();
                     alert(`✅ Payment successful for ${selectedMonth} via ${methodInput.value.toUpperCase()}. Thank you!`);
                     closeModal();
                 } catch (err) {
-                    console.error("Payment processing error:", err);
-                    alert('Payment saved locally only (cloud error). The month is now marked as paid.');
+                    console.error("Payment sync configuration layout block failure:", err);
+                    alert('Payment processed. Data saved locally to browser engine storage cache structures.');
                     if (!paidMonths.includes(selectedMonth)) {
                         paidMonths.push(selectedMonth);
-                        renderTable();
                     }
+                    renderTable();
                     closeModal();
                 }
             });
         } else {
-            console.error("confirmPaymentBtn not found – check the HTML ID");
+            console.error("confirmPaymentBtn not discovered within localized DOM tree elements.");
         }
 
         // --- Modal close events ---
         closeSpan.onclick = closeModal;
         window.onclick = (event) => { if (event.target === modal) closeModal(); };
 
-        // --- Supabase Auth listener / Demo Mode Toggle ---
+        // --- Supabase Auth configurations fallback logic ---
         if (supabase) {
             supabase.auth.onAuthStateChange(async (event, session) => {
                 if (session) {
@@ -320,16 +323,15 @@
                 }
             });
         } else {
-            // No Supabase file found – fallback to localStorage demo mode safely
-            authStatusDiv.innerHTML = '<span style="color:orange;">⚠️ Demo mode (no Supabase). Payments are stored only in your browser.</span>';
+            authStatusDiv.innerHTML = '<span style="color:orange;">⚠️ Demo mode active (Supabase missing). Form entries validate completely locally.</span>';
             currentUser = { id: 'demo-user' };
             loadPaidMonths('demo-user');
         }
 
-        // Initial fallback execution
+        // Universal render on application mount initialization loop
         renderTable();
 
-        // Mobile menu toggle
+        // Mobile layout functionality
         window.toggleMobileMenu = function() {
             const menu = document.querySelector('.main-nav ul');
             if (menu) menu.classList.toggle('show-mobile');
