@@ -9,8 +9,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4fa; }
-        
-        /* Navbar */
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-icon { font-size: 28px; color: #0a4da4; }
@@ -20,28 +18,18 @@
         .main-nav ul { display: flex; gap: 28px; list-style: none; }
         .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
-        .mobile-menu-icon { display: none; font-size: 24px; cursor: pointer; }
-        
-        /* Main Content */
         .container { max-width: 1300px; margin: 30px auto; padding: 20px; }
         .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
         .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
-        
-        /* Table Styles */
         .coach-table-wrapper { overflow-x: auto; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 5px; }
         .payment-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
         .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
-        .payment-table tr:first-child th:first-child { border-top-left-radius: 20px; }
-        .payment-table tr:first-child th:last-child { border-top-right-radius: 20px; }
-        
         .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; }
         .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; }
         .unpaid-cell { background-color: #fff9ef; color: #b45309; }
         .paid-icon { color: #10b981; margin-right: 5px; }
         .unpaid-icon { color: #f59e0b; margin-right: 5px; }
-        
-        /* Password Modal */
         .password-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
         .password-box { background: white; padding: 35px 30px; border-radius: 32px; text-align: center; width: 360px; max-width: 90%; box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
         .password-box i { font-size: 48px; color: #0a4da4; margin-bottom: 15px; }
@@ -49,13 +37,7 @@
         .password-box input { width: 100%; padding: 12px 15px; border-radius: 60px; border: 1px solid #ccc; margin-bottom: 20px; font-size: 1rem; text-align: center; }
         .password-box button { background: #0a4da4; color: white; border: none; padding: 10px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; }
         .error-msg { color: #e53e3e; margin-top: 12px; font-size: 0.85rem; }
-        
         .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
-        @media (max-width: 768px) {
-            .top-nav { padding: 12px 20px; }
-            .main-nav ul { gap: 15px; }
-            .payment-table th, .payment-table td { padding: 8px 4px; font-size: 0.75rem; }
-        }
     </style>
 </head>
 <body>
@@ -86,11 +68,10 @@
                 <table class="payment-table" id="studentPaymentTable">
                     <thead id="tableHeader"></thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Fetching active user payment listings...</td></tr>
+                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Student labels represent metadata stored during user registration.</p>
         </div>
     </div>
 
@@ -114,7 +95,7 @@
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
         } catch (err) {
-            console.error("Supabase engine module link lost:", err);
+            console.error("Supabase load missing:", err);
         }
 
         const CORRECT_PASSWORD = "Saliim007";
@@ -133,52 +114,37 @@
             const thead = document.getElementById('tableHeader');
             const tbody = document.getElementById('tableBody');
             
-            if (!supabase) {
-                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Configuration Error: Connection link to 'supabase-config.js' is unavailable.</td></tr>`;
-                return;
-            }
-
             try {
-                // 1. Fetch user payment transactions
+                // Fetch user payments alongside the student_name column
                 const { data: allPayments, error: paymentError } = await supabase
                     .from('user_payments')
-                    .select('user_id, month, paid');
+                    .select('user_id, student_name, month, paid');
 
                 if (paymentError) throw paymentError;
 
-                // Build Table Header Matrix
-                let headerHtml = '<tr><th>Student Name / Account</th>';
-                months.forEach(month => {
-                    headerHtml += `<th>${month.substring(0,3)}</th>`;
-                });
+                let headerHtml = '<tr><th>Student Name</th>';
+                months.forEach(month => { headerHtml += `<th>${month.substring(0,3)}</th>`; });
                 headerHtml += '</tr>';
                 thead.innerHTML = headerHtml;
 
                 if (!allPayments || allPayments.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The 'user_payments' table is currently empty. No entries found.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The table is empty.</td></tr>`;
                     return;
                 }
 
-                // Find distinct user IDs
-                const uniqueUserIds = [...new Set(allPayments.map(p => p.user_id))];
+                // Group by User ID map
+                const uniqueUsers = {};
+                allPayments.forEach(p => {
+                    if (!uniqueUsers[p.user_id]) {
+                        // Use saved name string, or fall back cleanly if legacy row
+                        uniqueUsers[p.user_id] = p.student_name || `User (...${p.user_id.substring(0,6)})`;
+                    }
+                });
 
-                // 2. Fetch all user accounts from Supabase Auth to display real names
-                // Note: The visibility of this query depends on your API settings or profile hooks.
-                const { data: authUsers, error: authUsersError } = await supabase.auth.admin?.listUsers() || { data: {}, error: null };
-                const userMap = {};
-                if (authUsers && authUsers.users) {
-                    authUsers.users.forEach(u => {
-                        userMap[u.id] = u.user_metadata?.full_name || u.email;
-                    });
-                }
-
-                // 3. Generate individual payment summary rows
                 let bodyHtml = '';
-                uniqueUserIds.forEach(userId => {
-                    // Fall back cleanly to email indicators or shortened hash IDs if name parameters are unassigned
-                    let userLabel = userMap[userId] || `User (...${userId.substring(0, 6)})`;
-                    
-                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${userLabel}</td>`;
+                Object.keys(uniqueUsers).forEach(userId => {
+                    const studentDisplayLabel = uniqueUsers[userId];
+                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${studentDisplayLabel}</td>`;
                     
                     months.forEach(month => {
                         const matchRecord = allPayments.find(p => 
@@ -193,37 +159,29 @@
 
                         bodyHtml += `<td class="${cellClass}">${icon} ${statusLabel}</td>`;
                     });
-                    
                     bodyHtml += '</tr>';
                 });
                 tbody.innerHTML = bodyHtml;
 
             } catch (error) {
-                console.error("Live monitoring render error encountered:", error);
-                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;"><i class="fas fa-exclamation-circle"></i> Data processing pipeline error: ${error.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Error: ${error.message}</td></tr>`;
             }
         }
 
         function checkPassword() {
-            const entered = passwordInput.value.trim();
-            if (entered === CORRECT_PASSWORD) {
+            if (passwordInput.value.trim() === CORRECT_PASSWORD) {
                 document.body.style.overflow = '';
                 if (modal) modal.remove();
                 coachContent.style.display = 'block';
                 footer.style.display = 'block';
-                
                 loadAndRenderLivePayments();
             } else {
-                errorDiv.textContent = 'Incorrect password. Access denied.';
-                passwordInput.value = '';
-                passwordInput.focus();
+                errorDiv.textContent = 'Incorrect password.';
             }
         }
 
         submitBtn.addEventListener('click', checkPassword);
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkPassword();
-        });
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
     </script>
 </body>
 </html>
