@@ -70,7 +70,7 @@
         <div id="errorMsg" style="color:red; text-align:center; margin-top:20px;"></div>
     </div>
 
-    <!-- Payment Modal (same as before) -->
+    <!-- Payment Modal -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -95,89 +95,71 @@
     <footer class="footer"><div class="copyright">© 2025 Blue5 Football Academy — Secure Payments</div></footer>
 
     <script type="module">
-        // Import Supabase
         import { supabase } from './supabase-config.js';
 
-        // Month list
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const amount = 49;
         let currentUser = null;
         let paidMonths = [];
-        let tableRows = {}; // store row elements by month
 
         const tbody = document.getElementById('monthTableBody');
         const authStatusDiv = document.getElementById('authStatus');
         const errorMsgDiv = document.getElementById('errorMsg');
         
-        // Immediately render the table with all months (default unpaid)
-        function renderInitialTable() {
+        // Render the initial table (all unpaid)
+        function renderTable() {
+            if (!tbody) return;
             tbody.innerHTML = '';
             months.forEach(month => {
+                const isPaid = paidMonths.includes(month);
                 const row = document.createElement('tr');
-                row.className = 'unpaid-row';
-                row.id = `row-${month}`;
+                row.className = isPaid ? 'paid-row' : 'unpaid-row';
                 row.innerHTML = `
                     <td><strong>${month}</strong></td>
-                    <td><span class="status-badge status-unpaid"><i class="fas fa-hourglass-half"></i> Pending</span></td>
+                    <td>${isPaid ? '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Paid</span>' : '<span class="status-badge status-unpaid"><i class="fas fa-hourglass-half"></i> Pending</span>'}</td>
                     <td>$${amount}</td>
-                    <td><button class="pay-btn-small" data-month="${month}">Pay Now</button></td>
+                    <td>${isPaid ? '<i class="fas fa-check" style="color:#10b981;"></i> Completed' : `<button class="pay-btn-small" data-month="${month}">Pay Now</button>`}</td>
                 `;
                 tbody.appendChild(row);
-                tableRows[month] = row;
             });
-            // attach event listeners to all pay buttons
+            // Attach event listeners to all Pay Now buttons
             document.querySelectorAll('.pay-btn-small').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const month = btn.getAttribute('data-month');
-                    if (currentUser) {
-                        openModal(month);
-                    } else {
-                        authStatusDiv.innerHTML = '<span style="color:red;">Please <a href="login.html">log in</a> to make a payment.</span>';
-                    }
-                });
+                btn.removeEventListener('click', payHandler);
+                btn.addEventListener('click', payHandler);
             });
         }
 
-        // Update a row to paid status
-        function updateRowToPaid(month) {
-            const row = tableRows[month];
-            if (row) {
-                row.className = 'paid-row';
-                row.cells[1].innerHTML = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Paid</span>';
-                row.cells[3].innerHTML = '<i class="fas fa-check" style="color:#10b981;"></i> Completed';
+        function payHandler(e) {
+            const month = e.currentTarget.getAttribute('data-month');
+            if (currentUser) {
+                openModal(month);
+            } else {
+                authStatusDiv.innerHTML = '<span style="color:red;">Please <a href="login.html">log in</a> to make a payment.</span>';
             }
         }
 
-        // Load paid months from Supabase and update UI
-        async function loadPaidStatus(userId) {
+        // Load paid months from Supabase
+        async function loadPaidMonths(userId) {
             try {
                 const { data, error } = await supabase
                     .from('user_payments')
                     .select('month')
                     .eq('user_id', userId)
                     .eq('paid', true);
-                if (error) {
-                    console.error('Error loading payments:', error);
-                    errorMsgDiv.innerText = 'Could not load payment data, but you can still pay.';
-                    return;
-                }
-                if (data && data.length > 0) {
-                    data.forEach(item => {
-                        if (!paidMonths.includes(item.month)) {
-                            paidMonths.push(item.month);
-                            updateRowToPaid(item.month);
-                        }
-                    });
-                }
+                if (error) throw error;
+                paidMonths = data.map(row => row.month);
+                renderTable();
             } catch (err) {
-                console.error('Unexpected error:', err);
-                errorMsgDiv.innerText = 'Network error loading payment data.';
+                console.error('Error loading payments:', err);
+                errorMsgDiv.innerText = 'Could not load payment data. Please refresh.';
+                renderTable(); // still show table with all unpaid
             }
         }
 
         // Save payment to Supabase
         async function savePaidMonth(userId, month) {
             try {
+                // Check if record exists
                 const { data: existing } = await supabase
                     .from('user_payments')
                     .select('id')
@@ -197,10 +179,10 @@
                     if (error) throw error;
                 }
                 paidMonths.push(month);
-                updateRowToPaid(month);
+                renderTable();
             } catch (err) {
                 console.error(err);
-                throw new Error('Payment save failed.');
+                throw new Error('Payment could not be saved.');
             }
         }
 
@@ -214,6 +196,7 @@
         function openModal(month) {
             selectedMonth = month;
             modalMonthName.innerText = `Month: ${month} - $${amount}`;
+            // Clear form fields
             document.getElementById('cardName').value = '';
             document.getElementById('cardNumber').value = '';
             document.getElementById('expiry').value = '';
@@ -237,12 +220,14 @@
             });
         });
 
+        // Confirm button click
         confirmBtn.addEventListener('click', async () => {
             if (!selectedMonth || !currentUser) {
                 alert('Please log in first.');
                 closeModal();
                 return;
             }
+            // Validate card details (basic)
             const cardName = document.getElementById('cardName').value.trim();
             const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
             const expiry = document.getElementById('expiry').value.trim();
@@ -280,39 +265,20 @@
         closeSpan.addEventListener('click', closeModal);
         window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-        // Auth state listener
+        // Supabase auth listener
         supabase.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 currentUser = session.user;
                 authStatusDiv.innerHTML = `<span style="color:green;">✅ Logged in as ${currentUser.email}</span>`;
-                await loadPaidStatus(currentUser.id);
+                await loadPaidMonths(currentUser.id);
             } else {
                 currentUser = null;
                 authStatusDiv.innerHTML = `<span style="color:red;">⚠️ You are not logged in. <a href="login.html">Log in</a> to view and make payments.</span>`;
-                // Reset all rows to unpaid (clear any paid styling)
-                months.forEach(month => {
-                    const row = tableRows[month];
-                    if (row) {
-                        row.className = 'unpaid-row';
-                        row.cells[1].innerHTML = '<span class="status-badge status-unpaid"><i class="fas fa-hourglass-half"></i> Pending</span>';
-                        row.cells[3].innerHTML = '<button class="pay-btn-small" data-month="'+month+'">Pay Now</button>';
-                        // reattach event listener
-                        const btn = row.cells[3].querySelector('button');
-                        if (btn) {
-                            btn.addEventListener('click', () => {
-                                if (currentUser) openModal(month);
-                                else authStatusDiv.innerHTML = '<span style="color:red;">Please <a href="login.html">log in</a> to make a payment.</span>';
-                            });
-                        }
-                    }
-                });
+                paidMonths = [];
+                renderTable();
             }
         });
 
-        // Start: render table immediately
-        renderInitialTable();
-
-        // Mobile menu toggle
         window.toggleMobileMenu = function() {
             const menu = document.querySelector('.main-nav ul');
             if (menu) menu.classList.toggle('show-mobile');
