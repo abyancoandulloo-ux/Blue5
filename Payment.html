@@ -235,36 +235,42 @@
             };
         });
 
-        // --- 🔥 CRITICAL: Attach the modal "Pay Now" button handler early ---
+       // --- 🔥 CRITICAL: Attach the modal "Pay Now" button handler early ---
         const confirmBtn = document.getElementById('confirmPaymentBtn');
         if (confirmBtn) {
-            // Use addEventListener to avoid being overwritten
-            confirmBtn.addEventListener('click', async () => {
+            confirmBtn.addEventListener('click', async (e) => {
+                e.preventDefault(); // Prevent accidental page reloads
+                
                 console.log("✅ Modal Pay Now button clicked");
+                
                 if (!selectedMonth || !currentUser) {
                     alert('Please log in first.');
                     closeModal();
                     return;
                 }
-                // Basic validation (replace with real payment gateway later)
+                
+                // Get values and sanitize them (removes both spaces and hyphens)
                 const cardName = document.getElementById('cardName').value.trim();
-                const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+                const cardNumber = document.getElementById('cardNumber').value.replace(/[\s-]/g, '');
                 const expiry = document.getElementById('expiry').value.trim();
                 const cvv = document.getElementById('cvv').value.trim();
+                
+                // Form Validation
                 if (!cardName || !cardNumber || !expiry || !cvv) {
                     alert('Please fill all payment details.');
                     return;
                 }
                 if (!/^\d{13,19}$/.test(cardNumber)) {
-                    alert('Invalid card number (13‑19 digits).');
+                    alert('Invalid card number. Please enter 13-19 digits without spaces.');
                     return;
                 }
-                if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-                    alert('Expiry must be MM/YY (e.g., 12/28).');
+                // Allow both MM/YY and MM/YYYY
+                if (!/^\d{2}\/\d{2,4}$/.test(expiry)) {
+                    alert('Expiry must be MM/YY (e.g., 12/28) or MM/YYYY.');
                     return;
                 }
                 if (!/^\d{3,4}$/.test(cvv)) {
-                    alert('CVV must be 3‑4 digits.');
+                    alert('CVV must be 3 or 4 digits.');
                     return;
                 }
                 if (paidMonths.includes(selectedMonth)) {
@@ -272,6 +278,7 @@
                     closeModal();
                     return;
                 }
+                
                 // Process payment
                 try {
                     await savePaidMonth(currentUser.id, selectedMonth);
@@ -282,6 +289,7 @@
                     alert(`✅ Payment successful for ${selectedMonth} via ${methodInput.value.toUpperCase()}. Thank you!`);
                     closeModal();
                 } catch (err) {
+                    console.error("Payment processing error:", err);
                     alert('Payment saved locally only (cloud error). The month is now marked as paid.');
                     if (!paidMonths.includes(selectedMonth)) {
                         paidMonths.push(selectedMonth);
@@ -293,7 +301,6 @@
         } else {
             console.error("confirmPaymentBtn not found – check the HTML ID");
         }
-
         // --- Modal close events ---
         closeSpan.onclick = closeModal;
         window.onclick = (event) => { if (event.target === modal) closeModal(); };
