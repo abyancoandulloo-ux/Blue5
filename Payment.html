@@ -102,13 +102,13 @@
         let paidMonths = [];
         let supabase = null;
 
-        // Dynamic asynchronous initialization import loop
+        // Dynamic asynchronous config loader
         try {
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
-            console.log("Supabase file mapped successfully.");
+            console.log("Supabase mapping established successfully.");
         } catch (err) {
-            console.warn("Supabase connectivity absent. Reverting strictly to browser local cache layer:", err);
+            console.warn("Supabase context missing. Operating exclusively out of localized LocalStorage caches:", err);
             supabase = null;
         }
 
@@ -138,7 +138,7 @@
                 tbody.appendChild(row);
             });
             
-            // Re-assign interactive buttons
+            // Re-assign action click handlers to newly painted table nodes
             document.querySelectorAll('.pay-btn-small').forEach(btn => {
                 btn.onclick = (e) => {
                     e.preventDefault();
@@ -166,8 +166,8 @@
                     renderTable();
                     return;
                 } catch (err) {
-                    console.error("Supabase data extraction fault:", err);
-                    errorMsgDiv.innerText = 'Database offline. Pulling browser system storage parameters...';
+                    console.error("Supabase select parsing error:", err);
+                    errorMsgDiv.innerText = 'Database synchronization lag. Falling back to local cache parameters...';
                 }
             }
             const local = localStorage.getItem(`blue5_payments_${userId}`);
@@ -175,10 +175,11 @@
             renderTable();
         }
 
-        // --- Save paid months securely without hanging execution loops ---
+        // --- Save a paid month with error alerts and streamlined payload ---
         async function savePaidMonth(userId, month) {
             if (supabase) {
                 try {
+                    // Check if an entry already exists for this specific validation profile
                     const { data: existing, error: fetchErr } = await supabase
                         .from('user_payments')
                         .select('id')
@@ -187,23 +188,46 @@
                         .maybeSingle();
 
                     if (fetchErr) {
+                        alert(`Supabase Query Fetch Error: ${fetchErr.message}`);
                         console.error("Database fetch rejected:", fetchErr.message);
-                    } else if (existing) {
-                        await supabase
-                            .from('user_payments')
-                            .update({ paid: true, payment_date: new Date().toISOString() })
-                            .eq('id', existing.id);
-                    } else {
-                        await supabase
-                            .from('user_payments')
-                            .insert({ user_id: userId, month: month, paid: true, amount: amount, payment_date: new Date().toISOString() });
+                        return;
                     }
+
+                    if (existing) {
+                        // If it exists, update it to true
+                        const { error: updateErr } = await supabase
+                            .from('user_payments')
+                            .update({ paid: true })
+                            .eq('id', existing.id);
+                        
+                        if (updateErr) {
+                            alert(`Supabase Table Update Error: ${updateErr.message}`);
+                            throw updateErr;
+                        }
+                    } else {
+                        // If completely new row instance, execute structured insert pipeline
+                        const { error: insertErr } = await supabase
+                            .from('user_payments')
+                            .insert({ 
+                                user_id: userId, 
+                                month: month, 
+                                paid: true, 
+                                amount: amount
+                                // payment_date is handled implicitly by DB default or fallback systems
+                            });
+                        
+                        if (insertErr) {
+                            alert(`Supabase Table Insert Error: ${insertErr.message}`);
+                            throw insertErr;
+                        }
+                    }
+                    console.log("Payment payload safely stored in remote database.");
                 } catch (err) {
-                    console.error("Supabase storage error skipped gracefully:", err);
+                    console.error("Cloud pipeline crash isolated completely:", err);
                 }
             }
             
-            // Local fallback execution is forced to persist interface updates
+            // Local redundant fallbacks run immediately to avoid crashing presentation templates
             const local = JSON.parse(localStorage.getItem(`blue5_payments_${userId}`) || '[]');
             if (!local.includes(month)) {
                 local.push(month);
@@ -211,7 +235,7 @@
             }
         }
 
-        // --- Modal visibility managers ---
+        // --- Modal visibility layout tools ---
         function openModal(month) {
             selectedMonth = month;
             modalMonthName.innerText = `Month: ${month} - $${amount}`;
@@ -227,7 +251,7 @@
             selectedMonth = null;
         }
 
-        // --- Payment method bindings ---
+        // --- Payment method select controls ---
         const methodOptions = document.querySelectorAll('.payment-option');
         const methodInput = document.getElementById('selectedMethod');
         methodOptions.forEach(opt => {
@@ -238,14 +262,14 @@
             };
         });
 
-        // --- Execution Action Pipeline ---
+        // --- Form processing action binding pipelines ---
         const confirmBtn = document.getElementById('confirmPaymentBtn');
         if (confirmBtn) {
             confirmBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 
                 if (!selectedMonth || !currentUser) {
-                    alert('Session tracking lost. Please re-authenticate your connection profiles.');
+                    alert('Authentication context missing. Re-login required.');
                     closeModal();
                     return;
                 }
@@ -255,56 +279,56 @@
                 const expiry = document.getElementById('expiry').value.trim();
                 const cvv = document.getElementById('cvv').value.trim();
                 
-                // Form entry checking loops
+                // Explicit Validation Loops
                 if (!cardName || !cardNumber || !expiry || !cvv) {
                     alert('Please fill all payment details.');
                     return;
                 }
                 if (!/^\d{13,19}$/.test(cardNumber)) {
-                    alert('Invalid card number. Please enter 13-19 digits without spaces.');
+                    alert('Invalid card number. Please enter 13-19 continuous digits.');
                     return;
                 }
                 if (!/^\d{2}\/\d{2,4}$/.test(expiry)) {
-                    alert('Expiry must match standard convention format: MM/YY.');
+                    alert('Expiry must match standard notation format: MM/YY.');
                     return;
                 }
                 if (!/^\d{3,4}$/.test(cvv)) {
-                    alert('CVV must contain 3 or 4 digits precisely.');
+                    alert('CVV code layout must contain 3 or 4 numbers.');
                     return;
                 }
                 if (paidMonths.includes(selectedMonth)) {
-                    alert('This month tier has already been settled previously.');
+                    alert('This month payment is already completed.');
                     closeModal();
                     return;
                 }
                 
-                // Final Processing Pipeline Block
+                // Final Operational Core execution block
                 try {
-                    // Update state models right away
+                    // Update presentation arrays directly to avoid rendering lags
                     if (!paidMonths.includes(selectedMonth)) {
                         paidMonths.push(selectedMonth);
                     }
                     renderTable();
                     
-                    // Trigger alert notification safely before database connectivity tasks execute
-                    alert(`Passthrough confirmation check passed.\n\n✅ Payment successful for ${selectedMonth} via ${methodInput.value.toUpperCase()}. Thank you!`);
+                    // Alert system triggers immediately ensuring synchronous user notifications run smoothly
+                    alert(`✅ Payment successful for ${selectedMonth} via ${methodInput.value.toUpperCase()}. Thank you!`);
                     closeModal();
                     
-                    // Run database sync operations passively in the background
+                    // Run database cloud writing processes passively down the threat stream pipeline
                     await savePaidMonth(currentUser.id, selectedMonth);
-                } catch (pipelineErr) {
-                    console.error("Processing pipeline fault caught:", pipelineErr);
-                    alert(`✅ Payment logged for ${selectedMonth}. Action processed successfully.`);
+                } catch (pipelineFailure) {
+                    console.error("Critical execution flow interrupt handled:", pipelineFailure);
+                    alert(`✅ Payment noted for ${selectedMonth}. Form handling finished.`);
                     closeModal();
                 }
             });
         }
 
-        // --- Modal close behaviors ---
+        // --- Close triggers ---
         closeSpan.onclick = closeModal;
         window.onclick = (event) => { if (event.target === modal) closeModal(); };
 
-        // --- Supabase Connection State Evaluation ---
+        // --- Supabase Global Authorization Sync Listener ---
         if (supabase) {
             supabase.auth.onAuthStateChange(async (event, session) => {
                 if (session) {
@@ -319,15 +343,15 @@
                 }
             });
         } else {
-            authStatusDiv.innerHTML = '<span style="color:orange;">⚠️ Demo mode active. Validation processing happens entirely locally.</span>';
+            authStatusDiv.innerHTML = '<span style="color:orange;">⚠️ Demo state active. Data mutations proceed with localized state storage structures.</span>';
             currentUser = { id: 'demo-user' };
             loadPaidMonths('demo-user');
         }
 
-        // Standard init execution call
+        // Core compilation mount invocation tracking loop
         renderTable();
 
-        // Mobile layout functionality
+        // Mobile responsiveness menu logic
         window.toggleMobileMenu = function() {
             const menu = document.querySelector('.main-nav ul');
             if (menu) menu.classList.toggle('show-mobile');
