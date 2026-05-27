@@ -33,10 +33,15 @@
         .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
         
         .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; }
+        
+        /* Interactive Cells */
         .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; }
-        .unpaid-cell { background-color: #fff9ef; color: #b45309; }
+        .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s, color 0.2s; }
+        .unpaid-cell:hover { background-color: #ffeccf; color: #78350f; font-weight: 600; }
+        
         .paid-icon { color: #10b981; margin-right: 5px; }
         .unpaid-icon { color: #f59e0b; margin-right: 5px; }
+        .updating-icon { color: #0a4da4; margin-right: 5px; }
         
         /* Password Modal */
         .password-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
@@ -81,7 +86,7 @@
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Ensure the global SELECT policy is applied in your SQL Editor to view multiple user rows.</p>
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Coach Tip:</strong> Click on any orange "Pending" cell to instantly toggle it to "Paid" and sync it with the database.</p>
         </div>
     </div>
 
@@ -115,7 +120,7 @@
         const submitBtn = document.getElementById('submitPasswordBtn');
         const errorDiv = document.getElementById('passwordError');
         const coachContent = document.getElementById('coachContent');
-        const footer = document.getElementById('footer');
+        .footer = document.getElementById('footer');
         const modal = document.getElementById('passwordModal');
 
         document.body.style.overflow = 'hidden';
@@ -125,14 +130,12 @@
             const tbody = document.getElementById('tableBody');
             
             try {
-                // Fetch the master payment list from your table
                 const { data: allPayments, error: paymentError } = await supabase
                     .from('user_payments')
                     .select('user_id, student_name, month, paid');
 
                 if (paymentError) throw paymentError;
 
-                // Build Table Columns Header
                 let headerHtml = '<tr><th>Student Name</th>';
                 months.forEach(month => { headerHtml += `<th>${month.substring(0,3)}</th>`; });
                 headerHtml += '</tr>';
@@ -143,15 +146,11 @@
                     return;
                 }
 
-                // Extract isolated distinct user IDs into a stable index array matrix
                 const uniqueUserIds = [...new Set(allPayments.map(p => p.user_id))];
 
                 let bodyHtml = '';
                 uniqueUserIds.forEach(userId => {
-                    // Filter down to rows belonging strictly to this user iteration
                     const userRecords = allPayments.filter(p => p.user_id === userId);
-                    
-                    // Look for an entry containing a valid text string in the student_name column
                     const nameRecord = userRecords.find(p => p.student_name);
                     const studentDisplayLabel = nameRecord ? nameRecord.student_name : `User (...${userId.substring(0,6)})`;
 
@@ -159,13 +158,14 @@
                     
                     months.forEach(month => {
                         const matchRecord = userRecords.find(p => p.month.toLowerCase() === month.toLowerCase());
-                        
                         const isPaid = matchRecord ? matchRecord.paid : false;
-                        const cellClass = isPaid ? 'paid-cell' : 'unpaid-cell';
-                        const icon = isPaid ? '<i class="fas fa-check-circle paid-icon"></i>' : '<i class="fas fa-times-circle unpaid-icon"></i>';
-                        const statusLabel = isPaid ? 'Paid' : 'Pending';
-
-                        bodyHtml += `<td class="${cellClass}">${icon} ${statusLabel}</td>`;
+                        
+                        if (isPaid) {
+                            bodyHtml += `<td class="paid-cell"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
+                        } else {
+                            // Give pending cells a unique ID tracking context and click handle event passing properties
+                            bodyHtml += `<td id="cell-${userId}-${month.toLowerCase()}" class="unpaid-cell" onclick="toggleToPaid('${userId}', '${studentDisplayLabel}', '${month}')"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
+                        }
                     });
                     bodyHtml += '</tr>';
                 });
@@ -177,12 +177,53 @@
             }
         }
 
+        // --- NEW: Function to handle interactive table cell updates ---
+        window.toggleToPaid = async (userId, studentName, monthName) => {
+            const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
+            const targetCell = document.getElementById(cellId);
+            
+            if (!targetCell) return;
+
+            // Optimistic interface loading state modification
+            targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i> Updating...`;
+            targetCell.onclick = null; // Block double clicking actions during pending requests
+
+            try {
+                // Upsert structural status to target transaction row directly
+                const { error } = await supabase
+                    .from('user_payments')
+                    .upsert({
+                        user_id: userId,
+                        student_name: studentName,
+                        month: monthName,
+                        paid: true,
+                        amount: 49.00,
+                        payment_date: new Date().toISOString()
+                    }, { onConflict: 'user_id, month' });
+
+                if (error) throw error;
+
+                // Transform visual aesthetics definitively to match successful records
+                targetCell.className = "paid-cell";
+                targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
+
+            } catch (err) {
+                console.error("Database status sync failure:", err);
+                alert(`Could not mark month as paid: ${err.message}`);
+                
+                // Revert to stable pending properties on request failures
+                targetCell.className = "unpaid-cell";
+                targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
+                targetCell.setAttribute("onclick", `toggleToPaid('${userId}', '${studentName}', '${monthName}')`);
+            }
+        };
+
         function checkPassword() {
             if (passwordInput.value.trim() === CORRECT_PASSWORD) {
                 document.body.style.overflow = '';
                 if (modal) modal.remove();
                 coachContent.style.display = 'block';
-                footer.style.display = 'block';
+                document.getElementById('footer').style.display = 'block';
                 loadAndRenderLivePayments();
             } else {
                 errorDiv.textContent = 'Incorrect password.';
