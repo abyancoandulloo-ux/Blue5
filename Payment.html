@@ -89,6 +89,7 @@
             currentStudentName = user.user_metadata?.full_name || user.email || "Unknown Student";
             document.getElementById('userWelcome').innerHTML = `<i class="fas fa-user-circle"></i> Logged in as: <strong>${currentStudentName}</strong>`;
 
+            // Pull historical payments for this specific logged-in user
             try {
                 const { data: databasePayments, error: dbError } = await supabase
                     .from('user_payments')
@@ -96,6 +97,8 @@
                     .eq('user_id', currentUserId);
 
                 if (dbError) throw dbError;
+                
+                // Pass records directly into grid builder
                 generateBaseGrid(databasePayments || []);
             } catch (err) {
                 console.error("Error loading historical payments:", err);
@@ -103,12 +106,18 @@
             }
         });
 
+        // Generates the layout dynamically based on DB values
         function generateBaseGrid(paidRecordsList) {
             const grid = document.getElementById('monthsGrid');
             grid.innerHTML = '';
 
             months.forEach(month => {
-                const isPaid = paidRecordsList.some(record => record.month.toLowerCase() === month.toLowerCase() && record.paid === true);
+                // Find matching row for this month
+                const record = paidRecordsList.find(r => r.month.toLowerCase() === month.toLowerCase());
+                
+                // Condition: If record exists and paid is explicitly true, mark as paid. Otherwise, default to pending.
+                const isPaid = record ? record.paid === true : false;
+                
                 const card = document.createElement('div');
                 card.className = 'month-card';
                 card.innerHTML = `
@@ -146,7 +155,7 @@
                     .from('user_payments')
                     .upsert({
                         user_id: currentUserId,
-                        student_name: currentStudentName, // SAVES REAL DISPLAY NAME
+                        student_name: currentStudentName, 
                         month: monthName,
                         paid: true,
                         amount: 49.00,
