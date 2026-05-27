@@ -9,6 +9,8 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4fa; }
+        
+        /* Navbar */
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-icon { font-size: 28px; color: #0a4da4; }
@@ -18,18 +20,25 @@
         .main-nav ul { display: flex; gap: 28px; list-style: none; }
         .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
+        
+        /* Main Content */
         .container { max-width: 1300px; margin: 30px auto; padding: 20px; }
         .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
         .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
+        
+        /* Table Styles */
         .coach-table-wrapper { overflow-x: auto; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 5px; }
         .payment-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
         .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+        
         .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; }
         .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; }
         .unpaid-cell { background-color: #fff9ef; color: #b45309; }
         .paid-icon { color: #10b981; margin-right: 5px; }
         .unpaid-icon { color: #f59e0b; margin-right: 5px; }
+        
+        /* Password Modal */
         .password-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
         .password-box { background: white; padding: 35px 30px; border-radius: 32px; text-align: center; width: 360px; max-width: 90%; box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
         .password-box i { font-size: 48px; color: #0a4da4; margin-bottom: 15px; }
@@ -68,10 +77,11 @@
                 <table class="payment-table" id="studentPaymentTable">
                     <thead id="tableHeader"></thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading live database logs...</td></tr>
                     </tbody>
                 </table>
             </div>
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-info-circle"></i> Green = Paid, Orange = Pending. Ensure the global SELECT policy is applied in your SQL Editor to view multiple user rows.</p>
         </div>
     </div>
 
@@ -95,7 +105,7 @@
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
         } catch (err) {
-            console.error("Supabase load missing:", err);
+            console.error("Configuration import reference exception:", err);
         }
 
         const CORRECT_PASSWORD = "Saliim007";
@@ -115,42 +125,40 @@
             const tbody = document.getElementById('tableBody');
             
             try {
-                // Fetch user payments alongside the student_name column
+                // Fetch the master payment list from your table
                 const { data: allPayments, error: paymentError } = await supabase
                     .from('user_payments')
                     .select('user_id, student_name, month, paid');
 
                 if (paymentError) throw paymentError;
 
+                // Build Table Columns Header
                 let headerHtml = '<tr><th>Student Name</th>';
                 months.forEach(month => { headerHtml += `<th>${month.substring(0,3)}</th>`; });
                 headerHtml += '</tr>';
                 thead.innerHTML = headerHtml;
 
                 if (!allPayments || allPayments.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The table is empty.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The table is empty. No transaction history found.</td></tr>`;
                     return;
                 }
 
-                // Group by User ID map
-                const uniqueUsers = {};
-                allPayments.forEach(p => {
-                    if (!uniqueUsers[p.user_id]) {
-                        // Use saved name string, or fall back cleanly if legacy row
-                        uniqueUsers[p.user_id] = p.student_name || `User (...${p.user_id.substring(0,6)})`;
-                    }
-                });
+                // Extract isolated distinct user IDs into a stable index array matrix
+                const uniqueUserIds = [...new Set(allPayments.map(p => p.user_id))];
 
                 let bodyHtml = '';
-                Object.keys(uniqueUsers).forEach(userId => {
-                    const studentDisplayLabel = uniqueUsers[userId];
+                uniqueUserIds.forEach(userId => {
+                    // Filter down to rows belonging strictly to this user iteration
+                    const userRecords = allPayments.filter(p => p.user_id === userId);
+                    
+                    // Look for an entry containing a valid text string in the student_name column
+                    const nameRecord = userRecords.find(p => p.student_name);
+                    const studentDisplayLabel = nameRecord ? nameRecord.student_name : `User (...${userId.substring(0,6)})`;
+
                     bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${studentDisplayLabel}</td>`;
                     
                     months.forEach(month => {
-                        const matchRecord = allPayments.find(p => 
-                            p.user_id === userId && 
-                            p.month.toLowerCase() === month.toLowerCase()
-                        );
+                        const matchRecord = userRecords.find(p => p.month.toLowerCase() === month.toLowerCase());
                         
                         const isPaid = matchRecord ? matchRecord.paid : false;
                         const cellClass = isPaid ? 'paid-cell' : 'unpaid-cell';
@@ -164,7 +172,8 @@
                 tbody.innerHTML = bodyHtml;
 
             } catch (error) {
-                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Error: ${error.message}</td></tr>`;
+                console.error("Rendering flow exception encountered:", error);
+                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Error running query: ${error.message}</td></tr>`;
             }
         }
 
