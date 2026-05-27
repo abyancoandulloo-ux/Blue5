@@ -104,7 +104,7 @@
         </div>
     </div>
 
-    <script type="module">
+   <script type="module">
         let supabase = null;
         try {
             const module = await import('./supabase-config.js');
@@ -120,7 +120,7 @@
         const submitBtn = document.getElementById('submitPasswordBtn');
         const errorDiv = document.getElementById('passwordError');
         const coachContent = document.getElementById('coachContent');
-        .footer = document.getElementById('footer');
+        const footer = document.getElementById('footer');
         const modal = document.getElementById('passwordModal');
 
         document.body.style.overflow = 'hidden';
@@ -163,7 +163,6 @@
                         if (isPaid) {
                             bodyHtml += `<td class="paid-cell"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
                         } else {
-                            // Give pending cells a unique ID tracking context and click handle event passing properties
                             bodyHtml += `<td id="cell-${userId}-${month.toLowerCase()}" class="unpaid-cell" onclick="toggleToPaid('${userId}', '${studentDisplayLabel}', '${month}')"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
                         }
                     });
@@ -177,19 +176,16 @@
             }
         }
 
-        // --- NEW: Function to handle interactive table cell updates ---
         window.toggleToPaid = async (userId, studentName, monthName) => {
             const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
             const targetCell = document.getElementById(cellId);
             
             if (!targetCell) return;
 
-            // Optimistic interface loading state modification
             targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i> Updating...`;
-            targetCell.onclick = null; // Block double clicking actions during pending requests
+            targetCell.onclick = null; 
 
             try {
-                // Upsert structural status to target transaction row directly
                 const { error } = await supabase
                     .from('user_payments')
                     .upsert({
@@ -203,7 +199,6 @@
 
                 if (error) throw error;
 
-                // Transform visual aesthetics definitively to match successful records
                 targetCell.className = "paid-cell";
                 targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
 
@@ -211,7 +206,6 @@
                 console.error("Database status sync failure:", err);
                 alert(`Could not mark month as paid: ${err.message}`);
                 
-                // Revert to stable pending properties on request failures
                 targetCell.className = "unpaid-cell";
                 targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
                 targetCell.setAttribute("onclick", `toggleToPaid('${userId}', '${studentName}', '${monthName}')`);
@@ -223,7 +217,7 @@
                 document.body.style.overflow = '';
                 if (modal) modal.remove();
                 coachContent.style.display = 'block';
-                document.getElementById('footer').style.display = 'block';
+                if (footer) footer.style.display = 'block';
                 loadAndRenderLivePayments();
             } else {
                 errorDiv.textContent = 'Incorrect password.';
