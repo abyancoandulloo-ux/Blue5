@@ -9,8 +9,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4fa; color: #1f2a44; }
-        
-        /* Navbar */
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-icon { font-size: 28px; color: #0a4da4; }
@@ -20,28 +18,21 @@
         .main-nav ul { display: flex; gap: 28px; list-style: none; }
         .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
-        
-        /* Layout Grid */
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
         .header-section { text-align: center; margin-bottom: 40px; }
         .header-section h2 { color: #0a4da4; font-size: 2rem; margin-bottom: 10px; }
         .title-underline { width: 60px; height: 3px; background: #0a4da4; margin: 0 auto; border-radius: 3px; }
-        
         .months-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
         .month-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); text-align: center; border: 1px solid #eef2f7; transition: transform 0.2s; }
         .month-card:hover { transform: translateY(-3px); }
         .month-name { font-size: 1.2rem; font-weight: 600; color: #0a4da4; margin-bottom: 5px; }
         .fee-amount { font-size: 1.4rem; font-weight: 700; color: #1f2a44; margin-bottom: 15px; }
-        
-        /* Badges & Buttons */
         .status-badge { display: inline-block; padding: 6px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 500; margin-bottom: 20px; }
         .status-pending { background: #fff9ef; color: #b45309; }
         .status-paid { background: #d1fae5; color: #0a6e44; font-weight: 600; }
-        
         .pay-btn { width: 100%; background: #0a4da4; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .pay-btn:hover { background: #1e6fdf; }
         .pay-btn:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
-        
         .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 60px; }
     </style>
 </head>
@@ -71,9 +62,7 @@
             <div class="title-underline"></div>
             <p id="userWelcome" style="margin-top: 15px; color: #5a6e8a; font-weight: 500;"></p>
         </div>
-
-        <div class="months-grid" id="monthsGrid">
-            </div>
+        <div class="months-grid" id="monthsGrid"></div>
     </div>
 
     <footer class="footer">
@@ -85,23 +74,21 @@
 
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         let currentUserId = null;
+        let currentStudentName = "Unknown Student";
 
-        // Initialize Page
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Fetch user data context
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             
             if (authError || !user) {
                 document.getElementById('userWelcome').innerHTML = `<span style="color: #e53e3e;"><i class="fas fa-exclamation-circle"></i> Please <a href="login.html">log in</a> to view and submit payments.</span>`;
-                generateBaseGrid([]); // Empty template layout block
+                generateBaseGrid([]);
                 return;
             }
 
             currentUserId = user.id;
-            const displayName = user.user_metadata?.full_name || user.email;
-            document.getElementById('userWelcome').innerHTML = `<i class="fas fa-user-circle"></i> Logged in as: <strong>${displayName}</strong>`;
+            currentStudentName = user.user_metadata?.full_name || user.email || "Unknown Student";
+            document.getElementById('userWelcome').innerHTML = `<i class="fas fa-user-circle"></i> Logged in as: <strong>${currentStudentName}</strong>`;
 
-            // 2. Load historical transactions from Supabase
             try {
                 const { data: databasePayments, error: dbError } = await supabase
                     .from('user_payments')
@@ -109,25 +96,19 @@
                     .eq('user_id', currentUserId);
 
                 if (dbError) throw dbError;
-
-                // 3. Render the dynamic UI layer with matched rows
                 generateBaseGrid(databasePayments || []);
-
             } catch (err) {
-                console.error("Historical ledger loading crash:", err);
+                console.error("Error loading historical payments:", err);
                 generateBaseGrid([]);
             }
         });
 
-        // Generate DOM Layout Structure Matrix
         function generateBaseGrid(paidRecordsList) {
             const grid = document.getElementById('monthsGrid');
-            grid.innerHTML = ''; // Reset layout buffer
+            grid.innerHTML = '';
 
             months.forEach(month => {
-                // Match month string formatting constraints exactly
                 const isPaid = paidRecordsList.some(record => record.month.toLowerCase() === month.toLowerCase() && record.paid === true);
-                
                 const card = document.createElement('div');
                 card.className = 'month-card';
                 card.innerHTML = `
@@ -146,7 +127,6 @@
             });
         }
 
-        // Write Transaction Rows Directly to Cloud Databases
         window.processPayment = async (monthName) => {
             if (!currentUserId) {
                 alert('Session expired. Please log in again.');
@@ -158,16 +138,15 @@
             const actionButton = document.getElementById(`btn-${cleanMonthKey}`);
             const statusBadge = document.getElementById(`badge-${cleanMonthKey}`);
 
-            // Optimistic Loading Lock
             actionButton.disabled = true;
             actionButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
 
             try {
-                // Upsert to enforce matching constraints safely without causing key duplication crashes
                 const { error } = await supabase
                     .from('user_payments')
                     .upsert({
                         user_id: currentUserId,
+                        student_name: currentStudentName, // SAVES REAL DISPLAY NAME
                         month: monthName,
                         paid: true,
                         amount: 49.00,
@@ -176,19 +155,15 @@
 
                 if (error) throw error;
 
-                // Success State Persistence Change
                 statusBadge.className = "status-badge status-paid";
                 statusBadge.innerHTML = `<i class="fas fa-check-circle"></i> Paid`;
                 actionButton.innerHTML = `<i class="fas fa-check"></i> Completed`;
                 actionButton.disabled = true;
 
-                alert(`Payment setup successful for ${monthName}! Your coach overview dashboard has updated.`);
-
+                alert(`Payment successful for ${monthName}!`);
             } catch (error) {
-                console.error("Payment registration terminal transaction dropped:", error);
-                alert(`Transaction error occurred: ${error.message}`);
-                
-                // Revert lock UI elements if operations break
+                console.error("Payment failure:", error);
+                alert(`Transaction error: ${error.message}`);
                 actionButton.disabled = false;
                 actionButton.innerHTML = `<i class="fas fa-credit-card"></i> Pay Fee`;
             }
