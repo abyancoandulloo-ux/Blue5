@@ -34,8 +34,10 @@
         
         .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; }
         
-        /* Interactive Cells */
-        .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; }
+        /* Interactive Toggle Cells */
+        .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        .paid-cell:hover { background-color: #fca5a5; color: #991b1b; } /* Turns reddish on hover to show toggle action */
+        
         .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s, color 0.2s; }
         .unpaid-cell:hover { background-color: #ffeccf; color: #78350f; font-weight: 600; }
         
@@ -86,7 +88,7 @@
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Coach Tip:</strong> Click on any orange "Pending" cell to instantly toggle it to "Paid" and sync it with the database.</p>
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Interactive Mode:</strong> Click any cell to switch its status. Click "Pending" to mark as Paid, or click "Paid" to change it back to Pending.</p>
         </div>
     </div>
 
@@ -104,7 +106,7 @@
         </div>
     </div>
 
-   <script type="module">
+    <script type="module">
         let supabase = null;
         try {
             const module = await import('./supabase-config.js');
@@ -159,11 +161,12 @@
                     months.forEach(month => {
                         const matchRecord = userRecords.find(p => p.month.toLowerCase() === month.toLowerCase());
                         const isPaid = matchRecord ? matchRecord.paid : false;
+                        const cellId = `cell-${userId}-${month.toLowerCase()}`;
                         
                         if (isPaid) {
-                            bodyHtml += `<td class="paid-cell"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
+                            bodyHtml += `<td id="${cellId}" class="paid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel}', '${month}', true)"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
                         } else {
-                            bodyHtml += `<td id="cell-${userId}-${month.toLowerCase()}" class="unpaid-cell" onclick="toggleToPaid('${userId}', '${studentDisplayLabel}', '${month}')"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
+                            bodyHtml += `<td id="${cellId}" class="unpaid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel}', '${month}', false)"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
                         }
                     });
                     bodyHtml += '</tr>';
@@ -176,14 +179,19 @@
             }
         }
 
-        window.toggleToPaid = async (userId, studentName, monthName) => {
+        // Handles two-way interactive state toggling (Pending <-> Paid)
+        window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
             const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
             const targetCell = document.getElementById(cellId);
             
             if (!targetCell) return;
 
+            // Visual Loading UI Lock
             targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i> Updating...`;
             targetCell.onclick = null; 
+
+            // If it's currently paid, we want to toggle it to unpaid (false)
+            const newPaidState = !currentPaidState;
 
             try {
                 const { error } = await supabase
@@ -192,23 +200,38 @@
                         user_id: userId,
                         student_name: studentName,
                         month: monthName,
-                        paid: true,
+                        paid: newPaidState,
                         amount: 49.00,
                         payment_date: new Date().toISOString()
                     }, { onConflict: 'user_id, month' });
 
                 if (error) throw error;
 
-                targetCell.className = "paid-cell";
-                targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
+                // Dynamically update UI appearance and re-attach click listener with flipped state values
+                if (newPaidState) {
+                    targetCell.className = "paid-cell";
+                    targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, true);
+                } else {
+                    targetCell.className = "unpaid-cell";
+                    targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, false);
+                }
 
             } catch (err) {
-                console.error("Database status sync failure:", err);
-                alert(`Could not mark month as paid: ${err.message}`);
+                console.error("Database toggle operation drop error:", err);
+                alert(`Could not change status: ${err.message}`);
                 
-                targetCell.className = "unpaid-cell";
-                targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
-                targetCell.setAttribute("onclick", `toggleToPaid('${userId}', '${studentName}', '${monthName}')`);
+                // Rollback UI cleanly if request fails
+                if (currentPaidState) {
+                    targetCell.className = "paid-cell";
+                    targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, true);
+                } else {
+                    targetCell.className = "unpaid-cell";
+                    targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, false);
+                }
             }
         };
 
