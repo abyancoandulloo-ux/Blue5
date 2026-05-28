@@ -1,153 +1,507 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue5 Academy | Sign In</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-</head>
-<body>
-    <div class="site-wrapper">
-        <div class="top-nav">
-            <a href="index.html" class="logo-link">
-                <div class="logo-area">
-                    <i class="fas fa-futbol logo-icon"></i>
-                    <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
-                </div>
-            </a>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="Home.html">Home</a></li>
-                    <li><a href="login.html" class="active-nav">Log in</a></li>
-                    <li><a href="Payment.html">Payment</a></li>
-                    <li><a href="sessions.html">Sessions</a></li>
-                    <li><a href="Coach.html">Coach</a></li>
-                </ul>
-            </nav>
-            <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
-        </div>
 
-        <div class="form-card login-register-card">
-            <h2><i class="fas fa-user-astronaut"></i> Welcome to Blue5</h2>
-            <div class="form-toggle">
-                <span id="loginTab" class="active-toggle" onclick="showLogin()">Login</span>
-                <span id="registerTab" onclick="showRegister()">Register</span>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Blue5 Academy | Coach Portal</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body { font-family: 'Poppins', sans-serif; background: #f0f4fa; }
+
+        
+
+        /* Navbar */
+
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+
+        .logo-icon { font-size: 28px; color: #0a4da4; }
+
+        .logo-text { font-size: 1.3rem; font-weight: 700; color: #0a4da4; }
+
+        .logo-text .accent { font-weight: 800; color: #1e6fdf; }
+
+        .logo-link { text-decoration: none; }
+
+        .main-nav ul { display: flex; gap: 28px; list-style: none; }
+
+        .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
+
+        .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
+
+        
+
+        /* Main Content */
+
+        .container { max-width: 1300px; margin: 30px auto; padding: 20px; }
+
+        .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
+
+        .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
+
+        
+
+        /* Table Styles */
+
+        .coach-table-wrapper { overflow-x: auto; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 5px; }
+
+        .payment-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+        .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
+
+        .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+
+        
+
+        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; }
+
+        
+
+        /* Interactive Toggle Cells */
+
+        .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+
+        .paid-cell:hover { background-color: #fca5a5; color: #991b1b; } /* Turns reddish on hover to show toggle action */
+
+        
+
+        .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s, color 0.2s; }
+
+        .unpaid-cell:hover { background-color: #ffeccf; color: #78350f; font-weight: 600; }
+
+        
+
+        .paid-icon { color: #10b981; margin-right: 5px; }
+
+        .unpaid-icon { color: #f59e0b; margin-right: 5px; }
+
+        .updating-icon { color: #0a4da4; margin-right: 5px; }
+
+        
+
+        /* Password Modal */
+
+        .password-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+
+        .password-box { background: white; padding: 35px 30px; border-radius: 32px; text-align: center; width: 360px; max-width: 90%; box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
+
+        .password-box i { font-size: 48px; color: #0a4da4; margin-bottom: 15px; }
+
+        .password-box h3 { margin-bottom: 20px; color: #1e2a45; }
+
+        .password-box input { width: 100%; padding: 12px 15px; border-radius: 60px; border: 1px solid #ccc; margin-bottom: 20px; font-size: 1rem; text-align: center; }
+
+        .password-box button { background: #0a4da4; color: white; border: none; padding: 10px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; }
+
+        .error-msg { color: #e53e3e; margin-top: 12px; font-size: 0.85rem; }
+
+        .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <div class="top-nav">
+
+        <a href="index.html" class="logo-link">
+
+            <div class="logo-area">
+
+                <i class="fas fa-futbol logo-icon"></i>
+
+                <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
+
             </div>
-            
-            <form id="LoginForm" onsubmit="event.preventDefault(); loginUser()">
-                <div class="input-group">
-                    <i class="fas fa-envelope input-icon"></i>
-                    <input type="email" id="loginEmail" placeholder="Email Address" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-lock input-icon"></i>
-                    <input type="password" id="loginPassword" placeholder="Password" required>
-                </div>
-                <button type="submit" class="btn-block">Login</button>
-            </form>
-            
-            <form id="RegForm" style="display:none;" onsubmit="event.preventDefault(); registerUser()">
-                <div class="input-group">
-                    <i class="fas fa-user input-icon"></i>
-                    <input type="text" id="regName" placeholder="Full Name" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-envelope input-icon"></i>
-                    <input type="email" id="regEmail" placeholder="Email Address" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-lock input-icon"></i>
-                    <input type="password" id="regPassword" placeholder="Password" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-check-circle input-icon"></i>
-                    <input type="password" id="regConfirm" placeholder="Confirm Password" required>
-                </div>
-                <button type="submit" class="btn-block">Create Account</button>
-            </form>
-            
-            <div class="social-divider"><span>or continue with</span></div>
-            <div class="social-login-group">
-                <button class="social-btn google-btn" onclick="alert('Google OAuth not set up yet. Use email/password.')"><i class="fab fa-google"></i> Google</button>
-                <button class="social-btn yahoo-btn" onclick="alert('Yahoo OAuth not set up')"><i class="fab fa-yahoo"></i> Yahoo</button>
-                <button class="social-btn hotmail-btn" onclick="alert('Hotmail OAuth not set up')"><i class="fas fa-envelope"></i> Hotmail</button>
-            </div>
-        </div>
-        <footer class="footer login-footer"><div class="copyright">© 2026 Blue5 Football Academy</div></footer>
+
+        </a>
+
+        <nav class="main-nav">
+
+            <ul>
+
+                <li><a href="index.html">Home</a></li>
+
+                <li><a href="login.html">Log in</a></li>
+
+                <li><a href="Payment.html">Payment</a></li>
+
+                <li><a href="sessions.html">Sessions</a></li>
+
+                <li><a href="Coach.html" class="active-nav">Coach</a></li>
+
+            </ul>
+
+        </nav>
+
     </div>
 
+
+
+    <div id="coachContent" style="display: none;">
+
+        <div class="container">
+
+            <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Active Student Payment Overview</h2>
+
+            <div class="title-underline"></div>
+
+            <div class="coach-table-wrapper">
+
+                <table class="payment-table" id="studentPaymentTable">
+
+                    <thead id="tableHeader"></thead>
+
+                    <tbody id="tableBody">
+
+                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading live database logs...</td></tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Interactive Mode:</strong> Click any cell to switch its status. Click "Pending" to mark as Paid, or click "Paid" to change it back to Pending.</p>
+
+        </div>
+
+    </div>
+
+
+
+    <footer class="footer" id="footer" style="display: none;">
+
+        <div class="copyright">© 2026 Blue5 Football Academy — Coach Portal</div>
+
+    </footer>
+
+
+
+    <div id="passwordModal" class="password-modal">
+
+        <div class="password-box">
+
+            <i class="fas fa-lock"></i>
+
+            <h3>Coach Access Required</h3>
+
+            <input type="password" id="coachPassword" placeholder="Enter security password" autofocus>
+
+            <button id="submitPasswordBtn">Unlock Portal</button>
+
+            <div id="passwordError" class="error-msg"></div>
+
+        </div>
+
+    </div>
+
+
+
     <script type="module">
-        import { supabase } from './supabase-config.js';
-        
-        window.showLogin = () => {
-            document.getElementById('LoginForm').style.display = 'block';
-            document.getElementById('RegForm').style.display = 'none';
-            document.getElementById('loginTab').classList.add('active-toggle');
-            document.getElementById('registerTab').classList.remove('active-toggle');
-        };
-        
-        window.showRegister = () => {
-            document.getElementById('LoginForm').style.display = 'none';
-            document.getElementById('RegForm').style.display = 'block';
-            document.getElementById('registerTab').classList.add('active-toggle');
-            document.getElementById('loginTab').classList.remove('active-toggle');
-        };
-        
-        window.loginUser = async () => {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) alert('Login failed: ' + error.message);
-            else window.location.href = 'Home.html';
-        };
-        
-        window.registerUser = async () => {
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirm').value;
-            const fullName = document.getElementById('regName').value;
+
+        let supabase = null;
+
+        try {
+
+            const module = await import('./supabase-config.js');
+
+            supabase = module.supabase;
+
+        } catch (err) {
+
+            console.error("Configuration import reference exception:", err);
+
+        }
+
+
+
+        const CORRECT_PASSWORD = "Saliim007";
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+
+
+        const passwordInput = document.getElementById('coachPassword');
+
+        const submitBtn = document.getElementById('submitPasswordBtn');
+
+        const errorDiv = document.getElementById('passwordError');
+
+        const coachContent = document.getElementById('coachContent');
+
+        const footer = document.getElementById('footer');
+
+        const modal = document.getElementById('passwordModal');
+
+
+
+        document.body.style.overflow = 'hidden';
+
+
+
+        async function loadAndRenderLivePayments() {
+
+            const thead = document.getElementById('tableHeader');
+
+            const tbody = document.getElementById('tableBody');
+
             
-            if (password !== confirm) { 
-                alert('Passwords do not match'); 
-                return; 
-            }
-            
-            // 1. Authenticate and register user in Supabase Auth [cite: 13, 17]
-            const { data, error } = await supabase.auth.signUp({ 
-                email, 
-                password, 
-                options: { data: { full_name: fullName } } 
-            });
-            
-            if (error) {
-                alert('Registration failed: ' + error.message);
-            } else if (data && data.user) {
-                try {
-                    // 2. Insert foundational baseline record into user_payments table so user shows up on Coach dashboard immediately
-                    await supabase
-                        .from('user_payments')
-                        .insert({
-                            user_id: data.user.id,
-                            student_name: fullName,
-                            month: 'January',
-                            paid: false,
-                            amount: 49.00,
-                            payment_date: new Date().toISOString()
-                        });
-                } catch (dbErr) {
-                    console.error("Database seed row insert failed:", dbErr);
+
+            try {
+
+                const { data: allPayments, error: paymentError } = await supabase
+
+                    .from('user_payments')
+
+                    .select('user_id, student_name, month, paid');
+
+
+
+                if (paymentError) throw paymentError;
+
+
+
+                let headerHtml = '<tr><th>Student Name</th>';
+
+                months.forEach(month => { headerHtml += `<th>${month.substring(0,3)}</th>`; });
+
+                headerHtml += '</tr>';
+
+                thead.innerHTML = headerHtml;
+
+
+
+                if (!allPayments || allPayments.length === 0) {
+
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The table is empty. No transaction history found.</td></tr>`;
+
+                    return;
+
                 }
-                
-                alert('Registration successful! Please log in.'); 
-                showLogin(); 
+
+
+
+                const uniqueUserIds = [...new Set(allPayments.map(p => p.user_id))];
+
+
+
+                let bodyHtml = '';
+
+                uniqueUserIds.forEach(userId => {
+
+                    const userRecords = allPayments.filter(p => p.user_id === userId);
+
+                    const nameRecord = userRecords.find(p => p.student_name);
+
+                    const studentDisplayLabel = nameRecord ? nameRecord.student_name : `User (...${userId.substring(0,6)})`;
+
+
+
+                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${studentDisplayLabel}</td>`;
+
+                    
+
+                    months.forEach(month => {
+
+                        const matchRecord = userRecords.find(p => p.month.toLowerCase() === month.toLowerCase());
+
+                        const isPaid = matchRecord ? matchRecord.paid : false;
+
+                        const cellId = `cell-${userId}-${month.toLowerCase()}`;
+
+                        
+
+                        if (isPaid) {
+
+                            bodyHtml += `<td id="${cellId}" class="paid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel}', '${month}', true)"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
+
+                        } else {
+
+                            bodyHtml += `<td id="${cellId}" class="unpaid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel}', '${month}', false)"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
+
+                        }
+
+                    });
+
+                    bodyHtml += '</tr>';
+
+                });
+
+                tbody.innerHTML = bodyHtml;
+
+
+
+            } catch (error) {
+
+                console.error("Rendering flow exception encountered:", error);
+
+                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Error running query: ${error.message}</td></tr>`;
+
             }
+
+        }
+
+
+
+        // Handles two-way interactive state toggling (Pending <-> Paid)
+
+        window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
+
+            const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
+
+            const targetCell = document.getElementById(cellId);
+
+            
+
+            if (!targetCell) return;
+
+
+
+            // Visual Loading UI Lock
+
+            targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i> Updating...`;
+
+            targetCell.onclick = null; 
+
+
+
+            // If it's currently paid, we want to toggle it to unpaid (false)
+
+            const newPaidState = !currentPaidState;
+
+
+
+            try {
+
+                const { error } = await supabase
+
+                    .from('user_payments')
+
+                    .upsert({
+
+                        user_id: userId,
+
+                        student_name: studentName,
+
+                        month: monthName,
+
+                        paid: newPaidState,
+
+                        amount: 49.00,
+
+                        payment_date: new Date().toISOString()
+
+                    }, { onConflict: 'user_id, month' });
+
+
+
+                if (error) throw error;
+
+
+
+                // Dynamically update UI appearance and re-attach click listener with flipped state values
+
+                if (newPaidState) {
+
+                    targetCell.className = "paid-cell";
+
+                    targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
+
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, true);
+
+                } else {
+
+                    targetCell.className = "unpaid-cell";
+
+                    targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
+
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, false);
+
+                }
+
+
+
+            } catch (err) {
+
+                console.error("Database toggle operation drop error:", err);
+
+                alert(`Could not change status: ${err.message}`);
+
+                
+
+                // Rollback UI cleanly if request fails
+
+                if (currentPaidState) {
+
+                    targetCell.className = "paid-cell";
+
+                    targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
+
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, true);
+
+                } else {
+
+                    targetCell.className = "unpaid-cell";
+
+                    targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
+
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, false);
+
+                }
+
+            }
+
         };
-        
-        window.toggleMobileMenu = () => {
-            document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
-        };
+
+
+
+        function checkPassword() {
+
+            if (passwordInput.value.trim() === CORRECT_PASSWORD) {
+
+                document.body.style.overflow = '';
+
+                if (modal) modal.remove();
+
+                coachContent.style.display = 'block';
+
+                if (footer) footer.style.display = 'block';
+
+                loadAndRenderLivePayments();
+
+            } else {
+
+                errorDiv.textContent = 'Incorrect password.';
+
+            }
+
+        }
+
+
+
+        submitBtn.addEventListener('click', checkPassword);
+
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
+
     </script>
+
 </body>
+
 </html>
