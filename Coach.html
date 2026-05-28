@@ -10,7 +10,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4fa; }
         
-        /* Navbar */
+        /* Navbar Layout */
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-icon { font-size: 28px; color: #0a4da4; }
@@ -46,7 +46,7 @@
         .unpaid-icon { color: #f59e0b; margin-right: 5px; }
         .updating-icon { color: #0a4da4; margin-right: 5px; }
         
-        /* Modals Structure Layout Component Overlay Base */
+        /* Modals Structure Layout */
         .password-modal, .info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.7); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .password-modal.active, .info-modal.active { opacity: 1; pointer-events: auto; }
         
@@ -66,7 +66,7 @@
         .left-visual-panel { flex: 1.1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 24px; padding: 20px; background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 100%); }
         .right-inputs-panel { flex: 1.9; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* --- FUT FUT GOLD PREMIUM GRAPHICAL CARD STYLE --- */
+        /* --- FUT GOLD PREMIUM GRAPHICAL CARD STYLE --- */
         .fifa-card { width: 240px; height: 350px; background: linear-gradient(135deg, #ffe066 0%, #f5af19 50%, #e65c00 100%); border-radius: 18px; position: relative; padding: 18px; color: #1a1a1a; box-shadow: 0 15px 35px rgba(230, 92, 0, 0.3); border: 3px solid #fff2a3; display: flex; flex-direction: column; overflow: hidden; }
         .fifa-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent); transform: rotate(45deg); pointer-events: none; }
         .card-top-row { display: flex; align-items: center; height: 110px; margin-bottom: 5px; }
@@ -86,7 +86,7 @@
         .card-stat-val { font-size: 1rem; font-weight: 800; color: #000; margin-right: 4px; width: 22px; text-align: right; }
         .card-stat-lbl { color: #333; font-weight: 500; text-transform: uppercase; font-size: 0.75rem; }
         
-        /* Control Panel Right Form Fields */
+        /* Control Panel Form Elements */
         .profile-title-header h3 { font-size: 1.4rem; color: #0a4da4; font-weight: 700; margin-bottom: 2px; }
         .profile-title-header p { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; }
         
@@ -144,7 +144,7 @@
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Coach Module:</strong> Click any student name row link to tweak skill ratings and update their card asset profile. Click payment cells to cycle transaction logs states.</p>
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Coach Control:</strong> Click a student's name to modify skill stats and view their live card profile. Click monthly cells to toggle execution payment status.</p>
         </div>
     </div>
 
@@ -177,7 +177,7 @@
                             </div>
                             <div class="card-avatar-photo">
                                 <i class="fas fa-user-ninja" id="cardFallbackIcon"></i>
-                                <img src="" id="cardAvatarImg">
+                                <img src="" id="cardAvatarImg" alt="Player Photo">
                             </div>
                         </div>
                         <div class="card-player-name" id="cardPlayerName">ATHLETE</div>
@@ -251,7 +251,7 @@
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
         } catch (err) {
-            console.error("Supabase config initialization failure:", err);
+            console.error("Supabase configuration load failure:", err);
         }
 
         const CORRECT_PASSWORD = "Saliim007";
@@ -291,7 +291,7 @@
                 thead.innerHTML = headerHtml;
 
                 if (globalCachedUsersList.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No student profiles found. Run SQL script.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No student profiles discovered. Check user trigger execution logs.</td></tr>`;
                     return;
                 }
 
@@ -318,7 +318,7 @@
                 tbody.innerHTML = bodyHtml;
 
             } catch (error) {
-                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Execution Failed: ${error.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Roster generation broke down: ${error.message}</td></tr>`;
             }
         }
 
@@ -332,7 +332,7 @@
             document.getElementById('modalUserEmail').textContent = targetUser.email || 'No email attached';
             document.getElementById('cardPlayerName').textContent = (targetUser.name || 'PLAYER').split(' ')[0].toUpperCase();
 
-            // Handle Photo Rendering Toggle Logic
+            // Image URL Parsing Rendering Logic
             const imgEl = document.getElementById('cardAvatarImg');
             const fallbackIcon = document.getElementById('cardFallbackIcon');
             if (targetUser.avatar_url) {
@@ -396,7 +396,7 @@
             const sta = parseInt(document.getElementById('inputStamina').value);
             const phy = parseInt(document.getElementById('inputPhysicality').value);
 
-            document.getElementById('syncIndicator').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving changes to database...`;
+            document.getElementById('syncIndicator').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Committing changes to system record...`;
             document.getElementById('syncIndicator').style.color = "#0a4da4";
 
             try {
@@ -417,7 +417,7 @@
                 }
                 closeStudentModal();
             } catch (err) {
-                alert(`Operation failure: ${err.message}`);
+                alert(`DB Sync operation failed: ${err.message}`);
             }
         };
 
@@ -471,7 +471,7 @@
                 coachContent.style.display = 'block';
                 if (footer) footer.style.display = 'block';
                 loadAndRenderLivePayments();
-            } else { errorDiv.textContent = 'Incorrect security code. Access Denied.'; }
+            } else { errorDiv.textContent = 'Incorrect credentials validation sequence failed.'; }
         }
 
         submitBtn.addEventListener('click', checkPassword);
