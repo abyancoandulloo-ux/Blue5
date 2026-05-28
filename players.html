@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue5 Academy | Player Roster</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f0f4fa; color: #1f2a44; }
+        
+        /* Navbar Navigation */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { font-size: 28px; color: #0a4da4; }
+        .logo-text { font-size: 1.3rem; font-weight: 700; color: #0a4da4; }
+        .logo-text .accent { font-weight: 800; color: #1e6fdf; }
+        .logo-link { text-decoration: none; }
+        .main-nav ul { display: flex; gap: 28px; list-style: none; }
+        .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
+        .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
+        .mobile-menu-icon { display: none; cursor: pointer; font-size: 24px; color: #0a4da4; }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; min-height: 70vh; }
+        
+        .section-header { text-align: center; margin-bottom: 30px; }
+        .section-header h2 { color: #0a4da4; font-size: 2rem; font-weight: 700; margin-bottom: 5px; }
+        .title-underline { width: 70px; height: 3px; background: #1e6fdf; margin: 0 auto; border-radius: 2px; }
+
+        /* Optimized Utility Filter Toolbar Box */
+        .filter-toolbar { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 40px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .search-wrapper { flex: 1; min-width: 280px; position: relative; }
+        .search-wrapper i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem; }
+        .search-input { width: 100%; padding: 12px 12px 12px 48px; border-radius: 50px; border: 1px solid #e2e8f0; background: #f8fafc; font-family: inherit; font-size: 0.95rem; outline: none; transition: all 0.2s; }
+        .search-input:focus { border-color: #1e6fdf; background: white; box-shadow: 0 0 0 3px rgba(30,111,223,0.1); }
+        
+        .sort-wrapper { display: flex; align-items: center; gap: 10px; min-width: 240px; }
+        .sort-wrapper label { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; color: #64748b; white-space: nowrap; }
+        .sort-select { width: 100%; padding: 12px 20px; border-radius: 50px; border: 1px solid #e2e8f0; background: #f8fafc; font-family: inherit; font-size: 0.9rem; font-weight: 500; color: #1f2a44; outline: none; cursor: pointer; }
+        .sort-select:focus { border-color: #1e6fdf; }
+
+        /* Loading & Empty Handlers */
+        .status-message { text-align: center; padding: 60px 0; color: #64748b; font-size: 1.1rem; width: 100%; }
+        .status-message i { font-size: 2.5rem; color: #0a4da4; margin-bottom: 15px; display: block; }
+
+        /* Grid Responsive Structure Container */
+        .players-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; justify-items: center; }
+
+        /* Premium Gold FUT Custom Card Layout */
+        .fifa-card { width: 240px; height: 350px; background: linear-gradient(135deg, #ffe066 0%, #f5af19 50%, #e65c00 100%); border-radius: 18px; position: relative; padding: 18px; color: #1a1a1a; box-shadow: 0 10px 25px rgba(230, 92, 0, 0.2); border: 3px solid #fff2a3; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .fifa-card:hover { transform: translateY(-8px); box-shadow: 0 18px 35px rgba(230, 92, 0, 0.35); }
+        .fifa-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent); transform: rotate(45deg); pointer-events: none; }
+        .card-top-row { display: flex; align-items: center; height: 110px; margin-bottom: 5px; }
+        .card-metrics-badge { display: flex; flex-direction: column; align-items: center; width: 35%; line-height: 1.1; text-align: center; border-right: 1px solid rgba(0,0,0,0.1); }
+        .card-ovr-value { font-size: 2.5rem; font-weight: 800; color: #000; letter-spacing: -1px; }
+        .card-pos-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #222; }
+        .card-crest-logo { font-size: 1.4rem; margin-top: 5px; color: #0a4da4; }
+        
+        .card-avatar-photo { width: 65%; height: 100%; display: flex; align-items: flex-end; justify-content: center; font-size: 5rem; color: rgba(0,0,0,0.15); position: relative; overflow: hidden; }
+        .card-avatar-photo i { position: absolute; bottom: -5px; }
+        .card-avatar-photo img { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+        .card-player-name { text-align: center; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; padding: 4px 0; border-top: 1px solid rgba(0,0,0,0.15); border-bottom: 1px solid rgba(0,0,0,0.15); margin-bottom: 10px; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-stats-grid { display: flex; width: 100%; justify-content: space-between; padding: 0 5px; }
+        .card-stats-col { width: 48%; display: flex; flex-direction: column; gap: 4px; }
+        .card-stat-line { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 700; }
+        .card-stat-val { font-size: 1rem; font-weight: 800; color: #000; margin-right: 4px; width: 22px; text-align: right; }
+        .card-stat-lbl { color: #333; font-weight: 500; text-transform: uppercase; font-size: 0.75rem; }
+
+        .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 60px; }
+
+        @media (max-width: 768px) {
+            .top-nav { padding: 15px 20px; }
+            .main-nav ul { display: none; flex-direction: column; position: absolute; top: 65px; left: 0; width: 100%; background: white; padding: 20px; z-index: 100; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+            .main-nav ul.show-mobile { display: flex; }
+            .mobile-menu-icon { display: block; }
+            .filter-toolbar { flex-direction: column; align-items: stretch; gap: 15px; }
+            .sort-wrapper { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <a href="index.html" class="logo-link">
+            <div class="logo-area">
+                <i class="fas fa-futbol logo-icon"></i>
+                <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
+            </div>
+        </a>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">Log in</a></li>
+                <li><a href="Payment.html">Payment</a></li>
+                <li><a href="sessions.html">Sessions</a></li>
+                <li><a href="Coach.html">Coach</a></li>
+            </ul>
+        </nav>
+        <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
+    </div>
+
+    <div class="container">
+        <div class="section-header">
+            <h2>Academy Ultimate Roster</h2>
+            <div class="title-underline"></div>
+        </div>
+
+        <div class="filter-toolbar">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchBar" class="search-input" placeholder="Search athletes by name...">
+            </div>
+            <div class="sort-wrapper">
+                <label for="sortSelect">Sort By:</label>
+                <select id="sortSelect" class="sort-select">
+                    <option value="ovr">Overall Rating (OVR)</option>
+                    <option value="pac">Pace (PAC)</option>
+                    <option value="dri">Dribbling (DRI)</option>
+                    <option value="def">Defending (DEF)</option>
+                    <option value="sta">Stamina (STA)</option>
+                    <option value="phy">Physicality (PHY)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="gridStatus" class="status-message">
+            <i class="fas fa-spinner fa-spin"></i> Loading squad performance cards...
+        </div>
+        <div class="players-grid" id="playersGrid"></div>
+    </div>
+
+    <footer class="footer"><div>© 2026 Blue5 Football Academy</div></footer>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+
+        let cachedPlayersList = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const gridEl = document.getElementById('playersGrid');
+            const statusEl = document.getElementById('gridStatus');
+            const searchBar = document.getElementById('searchBar');
+            const sortSelect = document.getElementById('sortSelect');
+
+            try {
+                // Fetch players from database table sorted by OVR structural parameters
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('*');
+
+                if (error) throw error;
+
+                // Process player overall metric scores locally
+                cachedPlayersList = (users || []).map(player => {
+                    const pac = player.pace ?? 50;
+                    const dri = player.dribbling ?? 50;
+                    const def = player.defending ?? 50;
+                    const sta = player.stamina ?? 50;
+                    const phy = player.physicality ?? 50;
+                    const ovr = Math.round((pac + dri + def + sta + phy) / 5);
+
+                    return {
+                        ...player,
+                        stats: { pac, dri, def, sta, phy, ovr },
+                        displayName: player.name || 'Academy Athlete'
+                    };
+                });
+
+                statusEl.style.display = 'none';
+                
+                // Initial execution layout process filter
+                processAndFilterDisplay();
+
+                // Bind performance live input response handles
+                searchBar.addEventListener('input', processAndFilterDisplay);
+                sortSelect.addEventListener('change', processAndFilterDisplay);
+
+            } catch (err) {
+                console.error(err);
+                statusEl.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i> Failed compiling rosters matrix context: ${err.message}`;
+            }
+        });
+
+        // Combined Filter, Sort, and Render Pipeline
+        function processAndFilterDisplay() {
+            const gridEl = document.getElementById('playersGrid');
+            const searchVal = document.getElementById('searchBar').value.toLowerCase().trim();
+            const sortBy = document.getElementById('sortSelect').value;
+
+            // 1. Filter elements by textual parameters match queries
+            let filtered = cachedPlayersList.filter(player => 
+                player.displayName.toLowerCase().includes(searchVal)
+            );
+
+            // 2. Sort elements descending based on selection criteria
+            filtered.sort((a, b) => b.stats[sortBy] - a.stats[sortBy]);
+
+            // 3. Render HTML template string injection block mappings
+            if (filtered.length === 0) {
+                gridEl.innerHTML = '';
+                document.getElementById('gridStatus').style.display = 'block';
+                document.getElementById('gridStatus').innerHTML = `<i class="fas fa-user-slash" style="color:#64748b;"></i> No athletes discovered matching current search criteria.`;
+                return;
+            }
+
+            document.getElementById('gridStatus').style.display = 'none';
+            
+            let cardsHtml = '';
+            filtered.forEach(player => {
+                const shortName = player.displayName.split(' ')[0].toUpperCase();
+                
+                // Choose image reference structures safely
+                const hasAvatar = !!player.avatar_url;
+                const imgStyle = hasAvatar ? 'style="display: block;"' : '';
+                const fallbackStyle = hasAvatar ? 'style="display: none;"' : '';
+
+                cardsHtml += `
+                    <div class="fifa-card">
+                        <div class="card-top-row">
+                            <div class="card-metrics-badge">
+                                <div class="card-ovr-value">${player.stats.ovr}</div>
+                                <div class="card-pos-label">ST</div>
+                                <i class="fas fa-futbol card-crest-logo"></i>
+                            </div>
+                            <div class="card-avatar-photo">
+                                <i class="fas fa-user-ninja" ${fallbackStyle}></i>
+                                <img src="${player.avatar_url || ''}" ${imgStyle} alt="Athlete Photo">
+                            </div>
+                        </div>
+                        <div class="card-player-name">${shortName}</div>
+                        <div class="card-stats-grid">
+                            <div class="card-stats-col">
+                                <div class="card-stat-line"><span class="card-stat-val">${player.stats.pac}</span><span class="card-stat-lbl">PAC</span></div>
+                                <div class="card-stat-line"><span class="card-stat-val">${player.stats.dri}</span><span class="card-stat-lbl">DRI</span></div>
+                                <div class="card-stat-line"><span class="card-stat-val">${player.stats.def}</span><span class="card-stat-lbl">DEF</span></div>
+                            </div>
+                            <div class="card-stats-col">
+                                <div class="card-stat-line"><span class="card-stat-val">${player.stats.sta}</span><span class="card-stat-lbl">STA</span></div>
+                                <div class="card-stat-line"><span class="card-stat-val">${player.stats.phy}</span><span class="card-stat-lbl">PHY</span></div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            
+            gridEl.innerHTML = cardsHtml;
+        }
+
+        window.toggleMobileMenu = () => {
+            document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
+        };
+    </script>
+</body>
+</html>
