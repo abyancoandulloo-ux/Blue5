@@ -443,4 +443,39 @@
             });
         });
 
-        window.togglePaymentStatus = async (userId, studentName,
+        window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
+            const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
+            const targetCell = document.getElementById(cellId);
+            if (!targetCell) return;
+
+            targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i>...`;
+            targetCell.onclick = null; 
+            const newPaidState = !currentPaidState;
+
+            try {
+                const { error } = await supabase
+                    .from('user_payments')
+                    .upsert({ user_id: userId, student_name: studentName, month: monthName, paid: newPaidState, amount: 49.00, payment_date: new Date().toISOString() }, { onConflict: 'user_id, month' });
+
+                if (error) throw error;
+                loadAndRenderLivePayments();
+            } catch (err) {
+                loadAndRenderLivePayments();
+            }
+        };
+
+        function checkPassword() {
+            if (passwordInput.value.trim() === CORRECT_PASSWORD) {
+                document.body.style.overflow = '';
+                if (modal) modal.remove();
+                coachContent.style.display = 'block';
+                if (footer) footer.style.display = 'block';
+                loadAndRenderLivePayments();
+            } else { errorDiv.textContent = 'Incorrect security code. Access Denied.'; }
+        }
+
+        submitBtn.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
+    </script>
+</body>
+</html>
