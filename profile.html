@@ -10,7 +10,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4fa; color: #1f2a44; }
         
-        /* Navbar */
+        /* Navbar navigation links row styling matrix components */
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-icon { font-size: 28px; color: #0a4da4; }
@@ -22,20 +22,14 @@
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
         .mobile-menu-icon { display: none; cursor: pointer; font-size: 24px; color: #0a4da4; }
 
-        /* Main Container */
         .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
-        
-        /* Loading Screen */
         .loading-overlay { text-align: center; padding: 100px 0; color: #0a4da4; }
         .loading-overlay i { font-size: 3rem; margin-bottom: 15px; }
 
-        /* Profile Layout split */
         .profile-grid { display: flex; gap: 35px; align-items: start; display: none; }
-        
-        /* Left Column: Card & Identity */
         .profile-sidebar { flex: 1; display: flex; flex-direction: column; align-items: center; background: white; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         
-        /* FIFA FUT Card styling details matching coach view */
+        /* Premium Gold FUT Custom Card Layout */
         .fifa-card { width: 240px; height: 350px; background: linear-gradient(135deg, #ffe066 0%, #f5af19 50%, #e65c00 100%); border-radius: 18px; position: relative; padding: 18px; color: #1a1a1a; box-shadow: 0 15px 35px rgba(230, 92, 0, 0.3); border: 3px solid #fff2a3; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 20px; }
         .fifa-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent); transform: rotate(45deg); pointer-events: none; }
         .card-top-row { display: flex; align-items: center; height: 110px; margin-bottom: 5px; }
@@ -43,8 +37,11 @@
         .card-ovr-value { font-size: 2.5rem; font-weight: 800; color: #000; letter-spacing: -1px; }
         .card-pos-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #222; }
         .card-crest-logo { font-size: 1.4rem; margin-top: 5px; color: #0a4da4; }
-        .card-avatar-photo { width: 65%; height: 100%; display: flex; align-items: flex-end; justify-content: center; font-size: 5rem; color: rgba(0,0,0,0.15); position: relative; }
+        
+        .card-avatar-photo { width: 65%; height: 100%; display: flex; align-items: flex-end; justify-content: center; font-size: 5rem; color: rgba(0,0,0,0.15); position: relative; overflow: hidden; }
         .card-avatar-photo i { position: absolute; bottom: -5px; }
+        .card-avatar-photo img { width: 100%; height: 100%; object-fit: cover; display: none; }
+
         .card-player-name { text-align: center; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; padding: 4px 0; border-top: 1px solid rgba(0,0,0,0.15); border-bottom: 1px solid rgba(0,0,0,0.15); margin-bottom: 10px; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-stats-grid { display: flex; width: 100%; justify-content: space-between; padding: 0 5px; }
         .card-stats-col { width: 48%; display: flex; flex-direction: column; gap: 4px; }
@@ -56,7 +53,6 @@
         .star-display i.active { color: #fbbf24; }
         .star-lbl { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
 
-        /* Right Column: Text Metadata & Payments metrics log */
         .profile-main-content { flex: 1.8; display: flex; flex-direction: column; gap: 25px; }
         .data-card { background: white; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .card-title { font-size: 1.1rem; font-weight: 700; color: #0a4da4; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #f0f4fa; padding-bottom: 10px; }
@@ -66,28 +62,24 @@
         .info-label { width: 120px; font-weight: 600; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
         .info-value { flex: 1; font-weight: 500; color: #1f2a44; font-size: 0.95rem; }
 
-        /* Payment history grid layout modules */
         .payments-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
         .month-badge { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; text-align: center; }
         .month-name { font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase; margin-bottom: 5px; }
-        
         .status-pill { font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 8px; display: inline-block; }
         .status-paid { background: #d1fae5; color: #0a6e44; }
         .status-pending { background: #fff9ef; color: #b45309; }
 
-        .logout-btn { background: #e53e3e; color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%; transition: background 0.2s; text-align: center; display: block; text-decoration: none; }
-        .logout-btn:hover { background: #c53030; }
+        .logout-btn { background: #e53e3e; color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%; text-align: center; display: block; text-decoration: none; }
+        .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 60px; }
 
-        /* Responsive Media Layout rules */
         @media (max-width: 850px) {
             .profile-grid { flex-direction: column; }
             .profile-sidebar, .profile-main-content { width: 100%; flex: none; }
             .top-nav { padding: 15px 20px; }
-            .main-nav ul { display: none; flex-direction: column; position: absolute; top: 65px; left: 0; width: 100%; background: white; box-shadow: 0 10px 15px rgba(0,0,0,0.05); padding: 20px; z-index: 100; gap: 15px; }
+            .main-nav ul { display: none; flex-direction: column; position: absolute; top: 65px; left: 0; width: 100%; background: white; padding: 20px; z-index: 100; gap: 15px; }
             .main-nav ul.show-mobile { display: flex; }
             .mobile-menu-icon { display: block; }
         }
-        .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 60px; }
     </style>
 </head>
 <body>
@@ -106,7 +98,6 @@
                 <li><a href="Payment.html">Payment</a></li>
                 <li><a href="sessions.html">Sessions</a></li>
                 <li><a href="Coach.html">Coach</a></li>
-                 <li><a href="profile.html">Profile</a></li>
             </ul>
         </nav>
         <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
@@ -115,11 +106,10 @@
     <div class="container">
         <div class="loading-overlay" id="loadingView">
             <i class="fas fa-spinner fa-spin"></i>
-            <p style="font-weight: 500;">Syncing account profile data...</p>
+            <p style="font-weight: 500;">Syncing performance profile stats data rows...</p>
         </div>
 
         <div class="profile-grid" id="profileView">
-            
             <div class="profile-sidebar">
                 <div class="fifa-card">
                     <div class="card-top-row">
@@ -129,169 +119,9 @@
                             <i class="fas fa-futbol card-crest-logo"></i>
                         </div>
                         <div class="card-avatar-photo">
-                            <i class="fas fa-user-ninja"></i>
+                            <i class="fas fa-user-ninja" id="profileFallbackIcon"></i>
+                            <img src="" id="profileCardImg">
                         </div>
                     </div>
                     <div class="card-player-name" id="cardPlayerName">ATHLETE</div>
-                    <div class="card-stats-grid">
-                        <div class="card-stats-col">
-                            <div class="card-stat-line"><span class="card-stat-val" id="cardPac">50</span><span class="card-stat-lbl">PAC</span></div>
-                            <div class="card-stat-line"><span class="card-stat-val" id="cardDri">50</span><span class="card-stat-lbl">DRI</span></div>
-                            <div class="card-stat-line"><span class="card-stat-val" id="cardDef">50</span><span class="card-stat-lbl">DEF</span></div>
-                        </div>
-                        <div class="card-stats-col">
-                            <div class="card-stat-line"><span class="card-stat-val" id="cardSta">50</span><span class="card-stat-lbl">STA</span></div>
-                            <div class="card-stat-line"><span class="card-stat-val" id="cardPhy">50</span><span class="card-stat-lbl">PHY</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="star-display" id="starOutput">
-                    <i class="fas fa-star" data-index="1"></i>
-                    <i class="fas fa-star" data-index="2"></i>
-                    <i class="fas fa-star" data-index="3"></i>
-                    <i class="fas fa-star" data-index="4"></i>
-                    <i class="fas fa-star" data-index="5"></i>
-                </div>
-                <div class="star-lbl">Academy Star Rank</div>
-
-                <button class="logout-btn" onclick="handleLogout()">Sign Out Account</button>
-            </div>
-
-            <div class="profile-main-content">
-                <div class="data-card">
-                    <div class="card-title"><i class="fas fa-id-card-alt"></i> Account Registry Details</div>
-                    <div class="info-row">
-                        <div class="info-label">Full Name:</div>
-                        <div class="info-value" id="profileName">---</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Email:</div>
-                        <div class="info-value" id="profileEmail">---</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Student ID:</div>
-                        <div class="info-value" id="profileId" style="font-family: monospace; font-size: 0.85rem;">---</div>
-                    </div>
-                </div>
-
-                <div class="data-card">
-                    <div class="card-title"><i class="fas fa-money-check-dollar"></i> My Attendance & Payments Logs</div>
-                    <div class="payments-grid" id="paymentsBadgeGrid">
-                        </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <footer class="footer"><div class="copyright">© 2026 Blue5 Football Academy</div></footer>
-
-    <script type="module">
-        import { supabase } from './supabase-config.js';
-
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // 1. Verify active session authentication credentials
-                const { data: { user }, error: authError } = await supabase.auth.getUser();
-                
-                if (authError || !user) {
-                    alert("No active session found. Rerouting to gateway secure interface.");
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                // 2. Extract matched row parameters from public.users profile table
-                const { data: userProfile, error: profileError } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profileError) {
-                    console.error("Profile matching data check exception:", profileError);
-                }
-
-                // 3. Extract transaction payment rows from public.user_payments
-                const { data: paymentRecords, error: paymentError } = await supabase
-                    .from('user_payments')
-                    .select('*')
-                    .eq('user_id', user.id);
-
-                // --- UI Rendering Operations processing ---
-                document.getElementById('loadingView').style.display = 'none';
-                document.getElementById('profileView').style.display = 'flex';
-
-                // Populate text tags parameters
-                const studentName = userProfile?.name || user.user_metadata?.full_name || 'Academy Student';
-                document.getElementById('profileName').textContent = studentName;
-                document.getElementById('profileEmail').textContent = userProfile?.email || user.email;
-                document.getElementById('profileId').textContent = user.id;
-                document.getElementById('cardPlayerName').textContent = studentName.split(' ')[0].toUpperCase();
-
-                // Setup default slider fallbacks if record array parameters are null
-                const pac = userProfile?.pace ?? 50;
-                const dri = userProfile?.dribbling ?? 50;
-                const def = userProfile?.defending ?? 50;
-                const sta = userProfile?.stamina ?? 50;
-                const phy = userProfile?.physicality ?? 50;
-
-                // Bind inside individual FIFA card tags
-                document.getElementById('cardPac').textContent = pac;
-                document.getElementById('cardDri').textContent = dri;
-                document.getElementById('cardDef').textContent = def;
-                document.getElementById('cardSta').textContent = sta;
-                document.getElementById('cardPhy').textContent = phy;
-
-                // Render Calculated FUT OVR Rating value
-                const ovrScore = Math.round((pac + dri + def + sta + phy) / 5);
-                document.getElementById('cardOvr').textContent = ovrScore;
-
-                // Render star ranking configuration loops
-                const starRank = userProfile?.rating || 0;
-                const starIcons = document.querySelectorAll('#starOutput i');
-                starIcons.forEach(icon => {
-                    if (parseInt(icon.getAttribute('data-index')) <= starRank) {
-                        icon.classList.add('active');
-                    }
-                });
-
-                // Build monthly historical grid log modules matrix
-                const paymentsGrid = document.getElementById('paymentsBadgeGrid');
-                let gridHtml = '';
-                
-                months.forEach(m => {
-                    const match = (paymentRecords || []).find(p => p.month && p.month.toLowerCase() === m.toLowerCase());
-                    const isPaid = match ? match.paid : false;
-                    
-                    gridHtml += `
-                        <div class="month-badge">
-                            <div class="month-name">${m.substring(0,3)}</div>
-                            <span class="status-pill ${isPaid ? 'status-paid' : 'status-pending'}">
-                                ${isPaid ? '<i class="fas fa-check"></i> Paid' : '<i class="fas fa-clock"></i> Pending'}
-                            </span>
-                        </div>
-                    `;
-                });
-                paymentsGrid.innerHTML = gridHtml;
-
-            } catch (err) {
-                console.error("Layout population breakdown error:", err);
-                alert("An error occurred loading profile metadata logs.");
-            }
-        });
-
-        window.handleLogout = async () => {
-            const { error } = await supabase.auth.signOut();
-            if (error) alert("Sign-out procedure execution anomaly: " + error.message);
-            else window.location.href = 'login.html';
-        };
-
-        window.toggleMobileMenu = () => {
-            document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
-        };
-    </script>
-</body>
-</html>
+                    <div class="card
