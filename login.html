@@ -99,7 +99,7 @@
     <script type="module">
         import { supabase } from './supabase-config.js';
 
-        // Check authentication state on layout instantiation
+        // Verify active authentication state on load
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const { data: { user }, error } = await supabase.auth.getUser();
@@ -113,7 +113,7 @@
                     document.getElementById('loggedOutInterface').style.display = 'block';
                 }
             } catch (err) {
-                console.error("Session verification failure:", err);
+                console.error("Session verification breakdown:", err);
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('loggedOutInterface').style.display = 'block';
             }
@@ -150,7 +150,7 @@
             if (error) {
                 alert('Login failed: ' + error.message);
             } else {
-                // Fixed redirect from Home.html to index.html to eliminate 404 tracking bugs
+                // Fixed routing directly to index.html to avoid 404 breakdown
                 window.location.href = 'index.html';
             }
         };
@@ -176,6 +176,7 @@
                 alert('Registration failed: ' + error.message);
             } else if (data && data.user) {
                 try {
+                    // Seed primary foundation row so user shows on Coach table instantly
                     await supabase
                         .from('user_payments')
                         .insert({
@@ -187,7 +188,7 @@
                             payment_date: new Date().toISOString()
                         });
                 } catch (dbErr) {
-                    console.error("Database seed failed:", dbErr);
+                    console.error("Database seed row update exception:", dbErr);
                 }
                 
                 alert('Registration successful! Please log in.'); 
