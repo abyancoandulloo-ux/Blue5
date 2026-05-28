@@ -168,11 +168,6 @@
                     <span class="info-label">User ID:</span>
                     <span class="info-val" id="modalUserId">---</span>
                 </div>
-                <div class="info-row" style="display: none;">
-                    <i class="fas fa-envelope"></i>
-                    <span class="info-label">Email:</span>
-                    <span class="info-val" id="modalUserEmail">---</span>
-                </div>
                 <div class="info-row">
                     <i class="fas fa-calendar-check"></i>
                     <span class="info-label">Logs:</span>
@@ -212,10 +207,10 @@
             const tbody = document.getElementById('tableBody');
             
             try {
-                // Dynamically queries all payments recorded across the entire system
+                // Queries all rows from user_payments table to verify every logged user account
                 const { data: allPayments, error: paymentError } = await supabase
                     .from('user_payments')
-                    .select('user_id, student_name, month, paid');
+                    .select('*');
 
                 if (paymentError) throw paymentError;
 
@@ -225,24 +220,25 @@
                 thead.innerHTML = headerHtml;
 
                 if (!allPayments || allPayments.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The table is empty. No logged-in students found yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No logged-in student records or logs found.</td></tr>`;
                     return;
                 }
 
-                // Filters data to display every student record that has logged-in/interacted with the database
+                // Generates lists dynamically ensuring every logged-in user is registered
                 const uniqueUserIds = [...new Set(allPayments.map(p => p.user_id))];
 
                 let bodyHtml = '';
                 uniqueUserIds.forEach(userId => {
                     const userRecords = allPayments.filter(p => p.user_id === userId);
-                    const nameRecord = userRecords.find(p => p.student_name);
                     
-                    let studentDisplayLabel = nameRecord && nameRecord.student_name ? nameRecord.student_name : `Student (${userId.substring(0,6)})`;
+                    // Dynamic fallback verification ensures name shows properly
+                    const validNameRecord = userRecords.find(p => p.student_name && p.student_name.trim() !== "");
+                    let studentDisplayLabel = validNameRecord ? validNameRecord.student_name : `Student (${userId.substring(0,6)})`;
 
                     bodyHtml += `<tr><td class="student-name-cell" onclick="openStudentModal('${userId}', '${studentDisplayLabel.replace(/'/g, "\\'")}')"><i class="fas fa-user-circle"></i> ${studentDisplayLabel}</td>`;
                     
                     months.forEach(month => {
-                        const matchRecord = userRecords.find(p => p.month.toLowerCase() === month.toLowerCase());
+                        const matchRecord = userRecords.find(p => p.month && p.month.toLowerCase() === month.toLowerCase());
                         const isPaid = matchRecord ? matchRecord.paid : false;
                         const cellId = `cell-${userId}-${month.toLowerCase()}`;
                         
@@ -257,12 +253,12 @@
                 tbody.innerHTML = bodyHtml;
 
             } catch (error) {
-                console.error("Rendering overview layout exception:", error);
+                console.error("Rendering overview dashboard layout failure:", error);
                 tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Error running query: ${error.message}</td></tr>`;
             }
         }
 
-        // Opens details dashboard layout
+        // Opens dynamic profile popup dashboard modal
         window.openStudentModal = async (userId, studentName) => {
             currentActiveModalUserId = userId; 
             const infoModal = document.getElementById('studentInfoModal');
@@ -278,13 +274,14 @@
                 const { count, error: countErr } = await supabase
                     .from('user_payments')
                     .select('*', { count: 'exact', head: true })
-                    .eq('user_id', userId);
+                    .eq('user_id', userId)
+                    .not('month', 'is', null);
                 
                 if (!countErr) {
-                    document.getElementById('modalTotalLogs').textContent = `${count} Months Total`;
+                    document.getElementById('modalTotalLogs').textContent = `${count} Months Tracked`;
                 }
 
-                // Safely query database for current rating configuration
+                // Query and fetch valid assigned star ratings configuration live from the DB rows
                 const { data: dbData, error: dbErr } = await supabase
                     .from('user_payments') 
                     .select('rating')
@@ -297,7 +294,7 @@
                 }
 
             } catch(e) {
-                console.error("Error matching student overview statistics:", e);
+                console.error("Error matching customer profile metrics:", e);
             }
         };
 
@@ -353,8 +350,8 @@
                             .from('user_payments')
                             .upsert({
                                 user_id: currentActiveModalUserId,
-                                student_name: latestRecord[0].student_name,
-                                month: latestRecord[0].month,
+                                student_name: studentName,
+                                month: latestRecord[0].month || 'January',
                                 rating: chosenRating
                             }, { onConflict: 'user_id, month' });
 
@@ -381,7 +378,7 @@
             });
         });
 
-        // Toggle state update logic
+        // Toggle state update handler
         window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
             const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
             const targetCell = document.getElementById(cellId);
@@ -418,7 +415,7 @@
                 }
 
             } catch (err) {
-                console.error("Cell switch state failure exception:", err);
+                console.error("Cell interface state configuration modification failure:", err);
                 alert(`Could not change status: ${err.message}`);
                 
                 if (currentPaidState) {
@@ -433,7 +430,7 @@
             }
         };
 
-        // Stripped whitespace password verification
+        // Screen lock password logic
         function checkPassword() {
             const enteredPassword = passwordInput.value.trim();
             
