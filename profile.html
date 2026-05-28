@@ -120,7 +120,7 @@
                         </div>
                         <div class="card-avatar-photo">
                             <i class="fas fa-user-ninja" id="profileFallbackIcon"></i>
-                            <img src="" id="profileCardImg">
+                            <img src="" id="profileCardImg" alt="Profile Picture">
                         </div>
                     </div>
                     <div class="card-player-name" id="cardPlayerName">ATHLETE</div>
@@ -189,7 +189,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // OPTIMIZATION 1: Use getSession() instead of getUser() for instant local lookup
+                // OPTIMIZATION 1: Local session fetch via getSession prevents network roundtrip lag
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
                 
                 if (sessionError || !session) {
@@ -199,7 +199,7 @@
                 
                 const user = session.user;
 
-                // OPTIMIZATION 2: Run asynchronous table lookups in parallel to remove performance waterfalls
+                // OPTIMIZATION 2: Run asynchronous lookups concurrently via Promise.all to break up network waterfalls
                 const [profileResult, paymentsResult] = await Promise.all([
                     supabase.from('users').select('*').eq('id', user.id).maybeSingle(),
                     supabase.from('user_payments').select('month, paid').eq('user_id', user.id)
@@ -209,18 +209,18 @@
                 const userProfile = profileResult.data;
                 const paymentRecords = paymentsResult.data || [];
 
-                // Swap loading screen element visibility
+                // Update viewport panel structural states
                 document.getElementById('loadingView').style.display = 'none';
                 document.getElementById('profileView').style.display = 'flex';
 
-                // Map standard textual info blocks
+                // Map standard data elements
                 const studentName = userProfile?.name || user.user_metadata?.full_name || 'Academy Athlete';
                 document.getElementById('profileName').textContent = studentName;
                 document.getElementById('profileEmail').textContent = userProfile?.email || user.email;
                 document.getElementById('profileId').textContent = user.id;
                 document.getElementById('cardPlayerName').textContent = studentName.split(' ')[0].toUpperCase();
 
-                // Process image layouts seamlessly
+                // Process image placement layouts
                 const pImg = document.getElementById('profileCardImg');
                 const pFallback = document.getElementById('profileFallbackIcon');
                 if (userProfile?.avatar_url) {
@@ -229,7 +229,7 @@
                     pFallback.style.display = 'none';
                 }
 
-                // Gather attributes metrics vectors
+                // Load performance evaluation indicators
                 const pac = userProfile?.pace ?? 50;
                 const dri = userProfile?.dribbling ?? 50;
                 const def = userProfile?.defending ?? 50;
@@ -243,13 +243,13 @@
                 document.getElementById('cardPhy').textContent = phy;
                 document.getElementById('cardOvr').textContent = Math.round((pac + dri + def + sta + phy) / 5);
 
-                // Set star rendering indicators
+                // Set star rating active elements
                 const starRank = userProfile?.rating || 0;
                 document.querySelectorAll('#starOutput i').forEach(icon => {
                     if (parseInt(icon.getAttribute('data-index')) <= starRank) icon.classList.add('active');
                 });
 
-                // OPTIMIZATION 3: Translate array arrays list layout indexes into direct key-value mapping lookups
+                // OPTIMIZATION 3: Flat object map tracking array mapping values avoids looping searches
                 const paymentMap = {};
                 paymentRecords.forEach(p => { if (p.month) paymentMap[p.month.toLowerCase()] = p.paid; });
 
@@ -267,25 +267,39 @@
                 });
                 paymentsGrid.innerHTML = gridHtml;
 
-                // File Upload handler logic
+                // OPTIMIZATION 4: File upload listener with automatic browser canvas image compression
                 const fileInput = document.getElementById('avatarUploadInput');
                 fileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
 
-                    // Size optimization watch validation guard
-                    if (file.size > 2 * 1024 * 1024) {
-                        alert("Please optimize photo sizes below 2MB to keep load times snappy.");
-                        return;
-                    }
-
                     try {
-                        const fileExt = file.name.split('.').pop();
+                        pFallback.className = "fas fa-spinner fa-spin";
+                        
+                        // Client-side auto compression pipeline execution
+                        const optimizedFile = await compressImage(file, {
+                            maxWidth: 800,
+                            maxHeight: 800,
+                            quality: 0.85
+                        });
+
+                        // Security fallback size validation check
+                        if (optimizedFile.size > 2 * 1024 * 1024) {
+                            alert("Image must be smaller than 2MB.");
+                            pFallback.className = "fas fa-user-ninja";
+                            return;
+                        }
+
+                        const fileExt = 'jpg'; 
                         const filePath = `${user.id}-${Math.floor(Date.now() / 1000)}.${fileExt}`;
 
                         const { error: uploadError } = await supabase.storage
                             .from('avatars')
-                            .upload(filePath, file, { cacheControl: '3600', upsert: true });
+                            .upload(filePath, optimizedFile, { 
+                                cacheControl: '3600', 
+                                upsert: true,
+                                contentType: 'image/jpeg'
+                            });
 
                         if (uploadError) throw uploadError;
 
@@ -298,16 +312,65 @@
                         pImg.src = publicUrl;
                         pImg.style.display = 'block';
                         pFallback.style.display = 'none';
-                        alert("Performance photo updated successfully!");
+                        alert("Photo uploaded and optimized successfully!");
                     } catch (err) {
-                        alert("Failed executing bucket pipeline update request: " + err.message);
+                        alert("Photo upload failure: " + err.message);
+                        pFallback.className = "fas fa-user-ninja";
                     }
                 });
 
             } catch (err) {
-                console.error("Critical rendering failure tracker context details logs:", err);
+                console.error("Critical dashboard execution context error:", err);
             }
         });
+
+        // Browser-Based Canvas Compression Helper Function
+        function compressImage(file, options) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > options.maxWidth) {
+                                height = Math.round((height * options.maxWidth) / width);
+                                width = options.maxWidth;
+                            }
+                        } else {
+                            if (height > options.maxHeight) {
+                                width = Math.round((width * options.maxHeight) / height);
+                                height = options.maxHeight;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                resolve(new File([blob], file.name, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                }));
+                            } else {
+                                reject(new Error("Canvas compression failed."));
+                            }
+                        }, 'image/jpeg', options.quality);
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        }
 
         window.handleLogout = async () => {
             await supabase.auth.signOut();
