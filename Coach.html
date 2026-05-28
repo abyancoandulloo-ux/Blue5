@@ -188,7 +188,7 @@
         let supabase = null;
         let currentActiveModalUserId = null; 
 
-        // Hardcoded identity mappings directly correlated from your db.pdf metadata to perfectly map email lookups!
+        // Cross-referenced identity database map aligned directly from authentication metadata strings
         const databaseUserMap = {
             "bd01245c-b582-4da0-be68-d3a420141431": { email: "iqracoar@gmail.com", name: "Iqra" },
             "e3f30170-ba53-4fcf-913f-f205d58b8147": { email: "zarinecc@gmail.com", name: "Imaane" },
@@ -199,7 +199,7 @@
             const module = await import('./supabase-config.js');
             supabase = module.supabase;
         } catch (err) {
-            console.error("Configuration import reference exception:", err);
+            console.error("Configuration reference exception caught:", err);
         }
 
         const CORRECT_PASSWORD = "Saliim007";
@@ -242,7 +242,6 @@
                     const userRecords = allPayments.filter(p => p.user_id === userId);
                     const nameRecord = userRecords.find(p => p.student_name);
                     
-                    // Cross-reference name lookup matching the hardcoded structure if available
                     let studentDisplayLabel = nameRecord ? nameRecord.student_name : `User (...${userId.substring(0,6)})`;
                     if (databaseUserMap[userId]) {
                         studentDisplayLabel = databaseUserMap[userId].name;
@@ -266,25 +265,25 @@
                 tbody.innerHTML = bodyHtml;
 
             } catch (error) {
-                console.error("Rendering flow exception encountered:", error);
+                console.error("Rendering flow mapping failure exception:", error);
                 tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Error running query: ${error.message}</td></tr>`;
             }
         }
 
-        // Opens Modal and accurately correlates authentic email strings
+        // Opens details dashboard and links user email securely
         window.openStudentModal = async (userId, studentName) => {
             currentActiveModalUserId = userId; 
             const infoModal = document.getElementById('studentInfoModal');
             
             document.getElementById('modalStudentName').textContent = studentName;
             document.getElementById('modalUserId').textContent = userId.substring(0, 10) + '...';
-            document.getElementById('modalUserEmail').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Loading...`;
+            document.getElementById('modalUserEmail').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Syncing...`;
             document.getElementById('modalTotalLogs').textContent = 'Calculating...';
             resetStarsUI(); 
 
             infoModal.classList.add('active');
 
-            // Apply accurate email strings directly matching authentication mappings
+            // Set email string from mapping variables
             if (databaseUserMap[userId]) {
                 document.getElementById('modalUserEmail').textContent = databaseUserMap[userId].email;
             } else {
@@ -301,7 +300,7 @@
                     document.getElementById('modalTotalLogs').textContent = `${count} Months Total`;
                 }
 
-                // Pull current rating status safely without tracking email strings here
+                // Query transaction records for saved rating configurations
                 const { data: dbData, error: dbErr } = await supabase
                     .from('user_payments') 
                     .select('rating')
@@ -314,7 +313,7 @@
                 }
 
             } catch(e) {
-                console.error("Error pulling profile updates:", e);
+                console.error("Error matching customer profile metrics:", e);
             }
         };
 
@@ -327,7 +326,7 @@
             if(e.target === this) closeStudentModal();
         });
 
-        // --- Rating System Logic ---
+        // --- Interactive Rating Component Logic ---
         const stars = document.querySelectorAll('#starsContainer i');
         const ratingStatus = document.getElementById('ratingStatus');
 
@@ -357,7 +356,6 @@
                 updateStarsDisplay(chosenRating, true); 
 
                 try {
-                    // Fetch existing rows to make an accurate conflict update target selection
                     const { data: latestRecord, error: fetchErr } = await supabase
                         .from('user_payments')
                         .select('month, student_name')
@@ -367,7 +365,7 @@
                     if (fetchErr) throw fetchErr;
 
                     if (latestRecord && latestRecord.length > 0) {
-                        // Clean upsert that avoids modifying any non-existent email columns
+                        // Upsert directly targets layout mapping without writing nonexistent columns
                         const { error: upsertErr } = await supabase
                             .from('user_payments')
                             .upsert({
@@ -393,21 +391,21 @@
                     ratingStatus.textContent = `Saved! (${chosenRating}/5 Stars)`;
 
                 } catch (err) {
-                    console.error("Error updating score rating record:", err);
+                    console.error("Error patching tracking metrics:", err);
                     ratingStatus.textContent = "Error saving changes.";
                     alert(`Failed to save rating: ${err.message}`);
                 }
             });
         });
 
-        // Handles payment status updates
+        // Toggle statement execution handler
         window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
             const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
             const targetCell = document.getElementById(cellId);
             
             if (!targetCell) return;
 
-            targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i> Updating...`;
+            targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i> Syncing...`;
             targetCell.onclick = null; 
 
             const newPaidState = !currentPaidState;
@@ -432,4 +430,45 @@
                     targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, true); };
                 } else {
                     targetCell.className = "unpaid-cell";
-                    targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon">
+                    targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
+                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, false); };
+                }
+
+            } catch (err) {
+                console.error("Cell interface state modification failure:", err);
+                alert(`Could not change status: ${err.message}`);
+                
+                if (currentPaidState) {
+                    targetCell.className = "paid-cell";
+                    targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
+                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, true); };
+                } else {
+                    targetCell.className = "unpaid-cell";
+                    targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
+                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, false); };
+                }
+            }
+        };
+
+        // Strict validation security check configuration logic
+        function checkPassword() {
+            const enteredPassword = passwordInput.value.trim();
+            
+            if (enteredPassword === CORRECT_PASSWORD) {
+                document.body.style.overflow = '';
+                if (modal) modal.classList.remove('active');
+                setTimeout(() => { if (modal) modal.remove(); }, 300);
+                coachContent.style.display = 'block';
+                if (footer) footer.style.display = 'block';
+                loadAndRenderLivePayments();
+            } else {
+                errorDiv.textContent = 'Incorrect security code. Please verify layout credentials.';
+                passwordInput.select();
+            }
+        }
+
+        submitBtn.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
+    </script>
+</body>
+</html>
