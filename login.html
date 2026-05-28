@@ -11,8 +11,21 @@
 <body>
     <div class="site-wrapper">
         <div class="top-nav">
-            <a href="index.html" class="logo-link"><div class="logo-area"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">Blue5<span class="accent">Football</span> Academy</span></div></a>
-            <nav class="main-nav"><ul><li><a href="index.html">Home</a></li><li><a href="login.html" class="active-nav">Log in</a></li><li><a href="Payment.html">Payment</a></li><li><a href="sessions.html">Sessions</a></li><li><a href="Coach.html">Coach</a></li></ul></nav>
+            <a href="index.html" class="logo-link">
+                <div class="logo-area">
+                    <i class="fas fa-futbol logo-icon"></i>
+                    <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
+                </div>
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="Home.html">Home</a></li>
+                    <li><a href="login.html" class="active-nav">Log in</a></li>
+                    <li><a href="Payment.html">Payment</a></li>
+                    <li><a href="sessions.html">Sessions</a></li>
+                    <li><a href="Coach.html">Coach</a></li>
+                </ul>
+            </nav>
             <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
         </div>
 
@@ -22,20 +35,39 @@
                 <span id="loginTab" class="active-toggle" onclick="showLogin()">Login</span>
                 <span id="registerTab" onclick="showRegister()">Register</span>
             </div>
-            <!-- Login Form -->
+            
             <form id="LoginForm" onsubmit="event.preventDefault(); loginUser()">
-                <div class="input-group"><i class="fas fa-envelope input-icon"></i><input type="email" id="loginEmail" placeholder="Email Address" required></div>
-                <div class="input-group"><i class="fas fa-lock input-icon"></i><input type="password" id="loginPassword" placeholder="Password" required></div>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="loginEmail" placeholder="Email Address" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                </div>
                 <button type="submit" class="btn-block">Login</button>
             </form>
-            <!-- Register Form -->
+            
             <form id="RegForm" style="display:none;" onsubmit="event.preventDefault(); registerUser()">
-                <div class="input-group"><i class="fas fa-user input-icon"></i><input type="text" id="regName" placeholder="Full Name" required></div>
-                <div class="input-group"><i class="fas fa-envelope input-icon"></i><input type="email" id="regEmail" placeholder="Email Address" required></div>
-                <div class="input-group"><i class="fas fa-lock input-icon"></i><input type="password" id="regPassword" placeholder="Password" required></div>
-                <div class="input-group"><i class="fas fa-check-circle input-icon"></i><input type="password" id="regConfirm" placeholder="Confirm Password" required></div>
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="regName" placeholder="Full Name" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="regEmail" placeholder="Email Address" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="regPassword" placeholder="Password" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-check-circle input-icon"></i>
+                    <input type="password" id="regConfirm" placeholder="Confirm Password" required>
+                </div>
                 <button type="submit" class="btn-block">Create Account</button>
             </form>
+            
             <div class="social-divider"><span>or continue with</span></div>
             <div class="social-login-group">
                 <button class="social-btn google-btn" onclick="alert('Google OAuth not set up yet. Use email/password.')"><i class="fab fa-google"></i> Google</button>
@@ -43,8 +75,9 @@
                 <button class="social-btn hotmail-btn" onclick="alert('Hotmail OAuth not set up')"><i class="fas fa-envelope"></i> Hotmail</button>
             </div>
         </div>
-        <footer class="footer login-footer"><div class="copyright">© 2025 Blue5 Football Academy</div></footer>
+        <footer class="footer login-footer"><div class="copyright">© 2026 Blue5 Football Academy</div></footer>
     </div>
+
     <script type="module">
         import { supabase } from './supabase-config.js';
         
@@ -54,6 +87,7 @@
             document.getElementById('loginTab').classList.add('active-toggle');
             document.getElementById('registerTab').classList.remove('active-toggle');
         };
+        
         window.showRegister = () => {
             document.getElementById('LoginForm').style.display = 'none';
             document.getElementById('RegForm').style.display = 'block';
@@ -66,7 +100,7 @@
             const password = document.getElementById('loginPassword').value;
             const { error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) alert('Login failed: ' + error.message);
-            else window.location.href = 'index.html';
+            else window.location.href = 'Home.html';
         };
         
         window.registerUser = async () => {
@@ -74,10 +108,41 @@
             const password = document.getElementById('regPassword').value;
             const confirm = document.getElementById('regConfirm').value;
             const fullName = document.getElementById('regName').value;
-            if (password !== confirm) { alert('Passwords do not match'); return; }
-            const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
-            if (error) alert('Registration failed: ' + error.message);
-            else { alert('Registration successful! Please log in.'); showLogin(); }
+            
+            if (password !== confirm) { 
+                alert('Passwords do not match'); 
+                return; 
+            }
+            
+            // 1. Authenticate and register user in Supabase Auth [cite: 13, 17]
+            const { data, error } = await supabase.auth.signUp({ 
+                email, 
+                password, 
+                options: { data: { full_name: fullName } } 
+            });
+            
+            if (error) {
+                alert('Registration failed: ' + error.message);
+            } else if (data && data.user) {
+                try {
+                    // 2. Insert foundational baseline record into user_payments table so user shows up on Coach dashboard immediately
+                    await supabase
+                        .from('user_payments')
+                        .insert({
+                            user_id: data.user.id,
+                            student_name: fullName,
+                            month: 'January',
+                            paid: false,
+                            amount: 49.00,
+                            payment_date: new Date().toISOString()
+                        });
+                } catch (dbErr) {
+                    console.error("Database seed row insert failed:", dbErr);
+                }
+                
+                alert('Registration successful! Please log in.'); 
+                showLogin(); 
+            }
         };
         
         window.toggleMobileMenu = () => {
