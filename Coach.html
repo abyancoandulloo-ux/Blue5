@@ -1,454 +1,507 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue5 Academy | Coach Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; background: #f0f4fa; }
-        
-        /* Navbar */
-        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-        .logo-area { display: flex; align-items: center; gap: 10px; }
-        .logo-icon { font-size: 28px; color: #0a4da4; }
-        .logo-text { font-size: 1.3rem; font-weight: 700; color: #0a4da4; }
-        .logo-text .accent { font-weight: 800; color: #1e6fdf; }
-        .logo-link { text-decoration: none; }
-        .main-nav ul { display: flex; gap: 28px; list-style: none; }
-        .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
-        .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
-        
-        /* Main Content */
-        .container { max-width: 1300px; margin: 30px auto; padding: 20px; }
-        .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
-        .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
-        
-        /* Table Styles */
-        .coach-table-wrapper { overflow-x: auto; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 5px; }
-        .payment-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
-        .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
-        
-        /* Student Name Interaction styling */
-        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; cursor: pointer; transition: all 0.2s ease; }
-        .student-name-cell:hover { background: #e0ecfb; color: #0a4da4; }
-        .student-name-cell i { color: #0a4da4; margin-right: 6px; }
-        
-        /* Interactive Toggle Cells */
-        .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-        .paid-cell:hover { background-color: #fca5a5; color: #991b1b; } 
-        
-        .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s, color 0.2s; }
-        .unpaid-cell:hover { background-color: #ffeccf; color: #78350f; font-weight: 600; }
-        
-        .paid-icon { color: #10b981; margin-right: 5px; }
-        .unpaid-icon { color: #f59e0b; margin-right: 5px; }
-        .updating-icon { color: #0a4da4; margin-right: 5px; }
-        
-        /* Modals Architecture */
-        .password-modal, .info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.65); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-        .password-modal.active, .info-modal.active { opacity: 1; pointer-events: auto; }
-        
-        .password-box, .info-box { background: white; padding: 35px 30px; border-radius: 32px; text-align: center; width: 380px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease; }
-        .password-modal.active .password-box, .info-modal.active .info-box { transform: scale(1); }
-        
-        .password-box i { font-size: 48px; color: #0a4da4; margin-bottom: 15px; }
-        .password-box h3 { margin-bottom: 20px; color: #1e2a45; }
-        .password-box input { width: 100%; padding: 12px 15px; border-radius: 60px; border: 1px solid #ccc; margin-bottom: 20px; font-size: 1rem; text-align: center; }
-        .password-box button { background: #0a4da4; color: white; border: none; padding: 12px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; }
-        .error-msg { color: #e53e3e; margin-top: 12px; font-size: 0.85rem; }
-        
-        /* Info Pop-In Component Styles */
-        .info-header { position: relative; margin-bottom: 20px; }
-        .close-info-btn { position: absolute; top: -10px; right: -5px; background: #f0f4fa; border: none; width: 32px; height: 32px; border-radius: 50%; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .close-info-btn:hover { background: #e2e8f0; color: #1e2a45; }
-        .avatar-container { width: 80px; height: 80px; background: #e0ecfb; color: #0a4da4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 36px; border: 3px solid #1e6fdf; }
-        .info-box h3 { font-size: 1.3rem; color: #0a4da4; margin-bottom: 4px; }
-        
-        /* Star Rating Component Styling */
-        .rating-section { margin-bottom: 20px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 16px; padding: 12px; }
-        .rating-title { font-size: 0.75rem; font-weight: 600; color: #b45309; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; }
-        .stars-container { display: flex; justify-content: center; gap: 8px; font-size: 24px; color: #d1d5db; }
-        .stars-container i { cursor: pointer; transition: color 0.15s ease, transform 0.1s ease; }
-        .stars-container i:hover { transform: scale(1.15); }
-        .stars-container i.active { color: #fbbf24; }
-        .rating-status { font-size: 0.75rem; color: #78350f; margin-top: 4px; height: 14px; font-weight: 500; }
 
-        .info-details-list { text-align: left; background: #f8fafd; border-radius: 16px; padding: 15px 20px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
-        .info-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
-        .info-row:last-child { border-bottom: none; }
-        .info-row i { width: 25px; color: #1e6fdf; font-size: 1.05rem; }
-        .info-label { font-size: 0.75rem; color: #64748b; font-weight: 500; width: 80px; text-transform: uppercase; }
-        .info-val { font-size: 0.9rem; color: #1f2a44; font-weight: 600; flex: 1; word-break: break-word; }
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Blue5 Academy | Coach Portal</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body { font-family: 'Poppins', sans-serif; background: #f0f4fa; }
+
         
-        .action-close-btn { background: #0a4da4; color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
-        .action-close-btn:hover { background: #1e6fdf; }
+
+        /* Navbar */
+
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+
+        .logo-icon { font-size: 28px; color: #0a4da4; }
+
+        .logo-text { font-size: 1.3rem; font-weight: 700; color: #0a4da4; }
+
+        .logo-text .accent { font-weight: 800; color: #1e6fdf; }
+
+        .logo-link { text-decoration: none; }
+
+        .main-nav ul { display: flex; gap: 28px; list-style: none; }
+
+        .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
+
+        .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
+
+        
+
+        /* Main Content */
+
+        .container { max-width: 1300px; margin: 30px auto; padding: 20px; }
+
+        .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
+
+        .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
+
+        
+
+        /* Table Styles */
+
+        .coach-table-wrapper { overflow-x: auto; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 5px; }
+
+        .payment-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+        .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
+
+        .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+
+        
+
+        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; }
+
+        
+
+        /* Interactive Toggle Cells */
+
+        .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+
+        .paid-cell:hover { background-color: #fca5a5; color: #991b1b; } /* Turns reddish on hover to show toggle action */
+
+        
+
+        .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s, color 0.2s; }
+
+        .unpaid-cell:hover { background-color: #ffeccf; color: #78350f; font-weight: 600; }
+
+        
+
+        .paid-icon { color: #10b981; margin-right: 5px; }
+
+        .unpaid-icon { color: #f59e0b; margin-right: 5px; }
+
+        .updating-icon { color: #0a4da4; margin-right: 5px; }
+
+        
+
+        /* Password Modal */
+
+        .password-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+
+        .password-box { background: white; padding: 35px 30px; border-radius: 32px; text-align: center; width: 360px; max-width: 90%; box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
+
+        .password-box i { font-size: 48px; color: #0a4da4; margin-bottom: 15px; }
+
+        .password-box h3 { margin-bottom: 20px; color: #1e2a45; }
+
+        .password-box input { width: 100%; padding: 12px 15px; border-radius: 60px; border: 1px solid #ccc; margin-bottom: 20px; font-size: 1rem; text-align: center; }
+
+        .password-box button { background: #0a4da4; color: white; border: none; padding: 10px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; }
+
+        .error-msg { color: #e53e3e; margin-top: 12px; font-size: 0.85rem; }
 
         .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
+
     </style>
+
 </head>
+
 <body>
 
+
+
     <div class="top-nav">
+
         <a href="index.html" class="logo-link">
+
             <div class="logo-area">
+
                 <i class="fas fa-futbol logo-icon"></i>
+
                 <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
+
             </div>
+
         </a>
+
         <nav class="main-nav">
+
             <ul>
+
                 <li><a href="index.html">Home</a></li>
+
                 <li><a href="login.html">Log in</a></li>
+
                 <li><a href="Payment.html">Payment</a></li>
+
                 <li><a href="sessions.html">Sessions</a></li>
+
                 <li><a href="Coach.html" class="active-nav">Coach</a></li>
+
             </ul>
+
         </nav>
+
     </div>
+
+
 
     <div id="coachContent" style="display: none;">
+
         <div class="container">
+
             <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Active Student Payment Overview</h2>
+
             <div class="title-underline"></div>
+
             <div class="coach-table-wrapper">
+
                 <table class="payment-table" id="studentPaymentTable">
+
                     <thead id="tableHeader"></thead>
+
                     <tbody id="tableBody">
+
                         <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading live database logs...</td></tr>
+
                     </tbody>
+
                 </table>
+
             </div>
+
             <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Interactive Mode:</strong> Click any cell to switch its status. Click "Pending" to mark as Paid, or click "Paid" to change it back to Pending.</p>
+
         </div>
+
     </div>
+
+
 
     <footer class="footer" id="footer" style="display: none;">
+
         <div class="copyright">© 2026 Blue5 Football Academy — Coach Portal</div>
+
     </footer>
 
-    <div id="passwordModal" class="password-modal active">
+
+
+    <div id="passwordModal" class="password-modal">
+
         <div class="password-box">
+
             <i class="fas fa-lock"></i>
+
             <h3>Coach Access Required</h3>
+
             <input type="password" id="coachPassword" placeholder="Enter security password" autofocus>
+
             <button id="submitPasswordBtn">Unlock Portal</button>
+
             <div id="passwordError" class="error-msg"></div>
+
         </div>
+
     </div>
 
-    <div id="studentInfoModal" class="info-modal">
-        <div class="info-box">
-            <div class="info-header">
-                <button class="close-info-btn" onclick="closeStudentModal()"><i class="fas fa-times"></i></button>
-                <div class="avatar-container">
-                    <i class="fas fa-user"></i>
-                </div>
-                <h3 id="modalStudentName">Student Name</h3>
-            </div>
 
-            <div class="rating-section">
-                <div class="rating-title">Coach's Player Rating</div>
-                <div class="stars-container" id="starsContainer">
-                    <i class="fas fa-star" data-value="1"></i>
-                    <i class="fas fa-star" data-value="2"></i>
-                    <i class="fas fa-star" data-value="3"></i>
-                    <i class="fas fa-star" data-value="4"></i>
-                    <i class="fas fa-star" data-value="5"></i>
-                </div>
-                <div class="rating-status" id="ratingStatus">Click a star to rate</div>
-            </div>
-            
-            <div class="info-details-list">
-                <div class="info-row">
-                    <i class="fas fa-id-badge"></i>
-                    <span class="info-label">User ID:</span>
-                    <span class="info-val" id="modalUserId">---</span>
-                </div>
-                <div class="info-row">
-                    <i class="fas fa-calendar-check"></i>
-                    <span class="info-label">Logs:</span>
-                    <span class="info-val" id="modalTotalLogs">--- Months Tracked</span>
-                </div>
-            </div>
-            
-            <button class="action-close-btn" onclick="closeStudentModal()">Close Profile</button>
-        </div>
-    </div>
 
     <script type="module">
+
         let supabase = null;
-        let currentActiveModalUserId = null; 
 
         try {
+
             const module = await import('./supabase-config.js');
+
             supabase = module.supabase;
+
         } catch (err) {
-            console.error("Configuration reference exception caught:", err);
+
+            console.error("Configuration import reference exception:", err);
+
         }
 
+
+
         const CORRECT_PASSWORD = "Saliim007";
+
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+
+
         const passwordInput = document.getElementById('coachPassword');
+
         const submitBtn = document.getElementById('submitPasswordBtn');
+
         const errorDiv = document.getElementById('passwordError');
+
         const coachContent = document.getElementById('coachContent');
+
         const footer = document.getElementById('footer');
+
         const modal = document.getElementById('passwordModal');
+
+
 
         document.body.style.overflow = 'hidden';
 
+
+
         async function loadAndRenderLivePayments() {
+
             const thead = document.getElementById('tableHeader');
+
             const tbody = document.getElementById('tableBody');
+
             
+
             try {
-                // Queries all rows from user_payments table to verify every logged user account
+
                 const { data: allPayments, error: paymentError } = await supabase
+
                     .from('user_payments')
-                    .select('*');
+
+                    .select('user_id, student_name, month, paid');
+
+
 
                 if (paymentError) throw paymentError;
 
+
+
                 let headerHtml = '<tr><th>Student Name</th>';
+
                 months.forEach(month => { headerHtml += `<th>${month.substring(0,3)}</th>`; });
+
                 headerHtml += '</tr>';
+
                 thead.innerHTML = headerHtml;
 
+
+
                 if (!allPayments || allPayments.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No logged-in student records or logs found.</td></tr>`;
+
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> The table is empty. No transaction history found.</td></tr>`;
+
                     return;
+
                 }
 
-                // Generates lists dynamically ensuring every logged-in user is registered
+
+
                 const uniqueUserIds = [...new Set(allPayments.map(p => p.user_id))];
 
-                let bodyHtml = '';
-                uniqueUserIds.forEach(userId => {
-                    const userRecords = allPayments.filter(p => p.user_id === userId);
-                    
-                    // Dynamic fallback verification ensures name shows properly
-                    const validNameRecord = userRecords.find(p => p.student_name && p.student_name.trim() !== "");
-                    let studentDisplayLabel = validNameRecord ? validNameRecord.student_name : `Student (${userId.substring(0,6)})`;
 
-                    bodyHtml += `<tr><td class="student-name-cell" onclick="openStudentModal('${userId}', '${studentDisplayLabel.replace(/'/g, "\\'")}')"><i class="fas fa-user-circle"></i> ${studentDisplayLabel}</td>`;
+
+                let bodyHtml = '';
+
+                uniqueUserIds.forEach(userId => {
+
+                    const userRecords = allPayments.filter(p => p.user_id === userId);
+
+                    const nameRecord = userRecords.find(p => p.student_name);
+
+                    const studentDisplayLabel = nameRecord ? nameRecord.student_name : `User (...${userId.substring(0,6)})`;
+
+
+
+                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${studentDisplayLabel}</td>`;
+
                     
+
                     months.forEach(month => {
-                        const matchRecord = userRecords.find(p => p.month && p.month.toLowerCase() === month.toLowerCase());
+
+                        const matchRecord = userRecords.find(p => p.month.toLowerCase() === month.toLowerCase());
+
                         const isPaid = matchRecord ? matchRecord.paid : false;
+
                         const cellId = `cell-${userId}-${month.toLowerCase()}`;
+
                         
+
                         if (isPaid) {
-                            bodyHtml += `<td id="${cellId}" class="paid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel.replace(/'/g, "\\'")}', '${month}', true); event.stopPropagation();"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
+
+                            bodyHtml += `<td id="${cellId}" class="paid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel}', '${month}', true)"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
+
                         } else {
-                            bodyHtml += `<td id="${cellId}" class="unpaid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel.replace(/'/g, "\\'")}', '${month}', false); event.stopPropagation();"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
+
+                            bodyHtml += `<td id="${cellId}" class="unpaid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel}', '${month}', false)"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
+
                         }
+
                     });
+
                     bodyHtml += '</tr>';
+
                 });
+
                 tbody.innerHTML = bodyHtml;
 
+
+
             } catch (error) {
-                console.error("Rendering overview dashboard layout failure:", error);
+
+                console.error("Rendering flow exception encountered:", error);
+
                 tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Error running query: ${error.message}</td></tr>`;
+
             }
+
         }
 
-        // Opens dynamic profile popup dashboard modal
-        window.openStudentModal = async (userId, studentName) => {
-            currentActiveModalUserId = userId; 
-            const infoModal = document.getElementById('studentInfoModal');
-            
-            document.getElementById('modalStudentName').textContent = studentName;
-            document.getElementById('modalUserId').textContent = userId;
-            document.getElementById('modalTotalLogs').textContent = 'Calculating...';
-            resetStarsUI(); 
 
-            infoModal.classList.add('active');
 
-            try {
-                const { count, error: countErr } = await supabase
-                    .from('user_payments')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', userId)
-                    .not('month', 'is', null);
-                
-                if (!countErr) {
-                    document.getElementById('modalTotalLogs').textContent = `${count} Months Tracked`;
-                }
+        // Handles two-way interactive state toggling (Pending <-> Paid)
 
-                // Query and fetch valid assigned star ratings configuration live from the DB rows
-                const { data: dbData, error: dbErr } = await supabase
-                    .from('user_payments') 
-                    .select('rating')
-                    .eq('user_id', userId)
-                    .not('rating', 'is', null)
-                    .limit(1);
-
-                if (!dbErr && dbData && dbData.length > 0 && dbData[0].rating) {
-                    updateStarsDisplay(dbData[0].rating, false); 
-                }
-
-            } catch(e) {
-                console.error("Error matching customer profile metrics:", e);
-            }
-        };
-
-        window.closeStudentModal = () => {
-            document.getElementById('studentInfoModal').classList.remove('active');
-            currentActiveModalUserId = null;
-        };
-
-        document.body.addEventListener('click', function(e) {
-            if(e.target === document.getElementById('studentInfoModal')) closeStudentModal();
-        });
-
-        // --- Interactive Rating Component Logic ---
-        const stars = document.querySelectorAll('#starsContainer i');
-        const ratingStatus = document.getElementById('ratingStatus');
-
-        function resetStarsUI() {
-            stars.forEach(star => star.classList.remove('active'));
-            ratingStatus.textContent = 'Click a star to rate';
-        }
-
-        function updateStarsDisplay(ratingValue, isSavingText = false) {
-            stars.forEach(star => {
-                const starVal = parseInt(star.getAttribute('data-value'));
-                if (starVal <= ratingValue) {
-                    star.classList.add('active');
-                } else {
-                    star.classList.remove('active');
-                }
-            });
-            ratingStatus.textContent = isSavingText ? 'Saving rating...' : `Rating: ${ratingValue}/5 Stars`;
-        }
-
-        stars.forEach(star => {
-            star.addEventListener('click', async (e) => {
-                if (!currentActiveModalUserId || !supabase) return;
-
-                const chosenRating = parseInt(e.target.getAttribute('data-value'));
-                const studentName = document.getElementById('modalStudentName').textContent;
-                updateStarsDisplay(chosenRating, true); 
-
-                try {
-                    const { data: latestRecord, error: fetchErr } = await supabase
-                        .from('user_payments')
-                        .select('month, student_name')
-                        .eq('user_id', currentActiveModalUserId)
-                        .limit(1);
-
-                    if (fetchErr) throw fetchErr;
-
-                    if (latestRecord && latestRecord.length > 0) {
-                        const { error: upsertErr } = await supabase
-                            .from('user_payments')
-                            .upsert({
-                                user_id: currentActiveModalUserId,
-                                student_name: studentName,
-                                month: latestRecord[0].month || 'January',
-                                rating: chosenRating
-                            }, { onConflict: 'user_id, month' });
-
-                        if (upsertErr) throw upsertErr;
-                    } else {
-                        const { error: insertErr } = await supabase
-                            .from('user_payments')
-                            .insert({
-                                user_id: currentActiveModalUserId,
-                                student_name: studentName,
-                                month: 'January', 
-                                rating: chosenRating
-                            });
-                        if (insertErr) throw insertErr;
-                    }
-
-                    ratingStatus.textContent = `Saved! (${chosenRating}/5 Stars)`;
-
-                } catch (err) {
-                    console.error("Error patching tracking metrics:", err);
-                    ratingStatus.textContent = "Error saving changes.";
-                    alert(`Failed to save rating: ${err.message}`);
-                }
-            });
-        });
-
-        // Toggle state update handler
         window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
+
             const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
+
             const targetCell = document.getElementById(cellId);
+
             
+
             if (!targetCell) return;
 
-            targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i> Syncing...`;
+
+
+            // Visual Loading UI Lock
+
+            targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i> Updating...`;
+
             targetCell.onclick = null; 
+
+
+
+            // If it's currently paid, we want to toggle it to unpaid (false)
 
             const newPaidState = !currentPaidState;
 
+
+
             try {
+
                 const { error } = await supabase
+
                     .from('user_payments')
+
                     .upsert({
+
                         user_id: userId,
+
                         student_name: studentName,
+
                         month: monthName,
+
                         paid: newPaidState,
+
                         amount: 49.00,
+
                         payment_date: new Date().toISOString()
+
                     }, { onConflict: 'user_id, month' });
+
+
 
                 if (error) throw error;
 
+
+
+                // Dynamically update UI appearance and re-attach click listener with flipped state values
+
                 if (newPaidState) {
+
                     targetCell.className = "paid-cell";
+
                     targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
-                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, true); };
+
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, true);
+
                 } else {
+
                     targetCell.className = "unpaid-cell";
+
                     targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
-                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, false); };
+
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, false);
+
                 }
+
+
 
             } catch (err) {
-                console.error("Cell interface state configuration modification failure:", err);
+
+                console.error("Database toggle operation drop error:", err);
+
                 alert(`Could not change status: ${err.message}`);
+
                 
+
+                // Rollback UI cleanly if request fails
+
                 if (currentPaidState) {
+
                     targetCell.className = "paid-cell";
+
                     targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
-                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, true); };
+
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, true);
+
                 } else {
+
                     targetCell.className = "unpaid-cell";
+
                     targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
-                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, false); };
+
+                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, false);
+
                 }
+
             }
+
         };
 
-        // Screen lock password logic
+
+
         function checkPassword() {
-            const enteredPassword = passwordInput.value.trim();
-            
-            if (enteredPassword === CORRECT_PASSWORD) {
+
+            if (passwordInput.value.trim() === CORRECT_PASSWORD) {
+
                 document.body.style.overflow = '';
-                if (modal) modal.classList.remove('active');
-                setTimeout(() => { if (modal) modal.remove(); }, 300);
+
+                if (modal) modal.remove();
+
                 coachContent.style.display = 'block';
+
                 if (footer) footer.style.display = 'block';
+
                 loadAndRenderLivePayments();
+
             } else {
-                errorDiv.textContent = 'Incorrect security code. Please verify layout credentials.';
-                passwordInput.select();
+
+                errorDiv.textContent = 'Incorrect password.';
+
             }
+
         }
 
+
+
         submitBtn.addEventListener('click', checkPassword);
+
         passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
+
     </script>
+
 </body>
+
 </html>
