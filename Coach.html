@@ -32,11 +32,14 @@
         .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
         .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
         
-        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; }
+        /* Student Name Interaction styling */
+        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; cursor: pointer; transition: all 0.2s ease; }
+        .student-name-cell:hover { background: #e0ecfb; color: #0a4da4; }
+        .student-name-cell i { color: #0a4da4; margin-right: 6px; }
         
         /* Interactive Toggle Cells */
         .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-        .paid-cell:hover { background-color: #fca5a5; color: #991b1b; } /* Turns reddish on hover to show toggle action */
+        .paid-cell:hover { background-color: #fca5a5; color: #991b1b; } 
         
         .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s, color 0.2s; }
         .unpaid-cell:hover { background-color: #ffeccf; color: #78350f; font-weight: 600; }
@@ -45,14 +48,37 @@
         .unpaid-icon { color: #f59e0b; margin-right: 5px; }
         .updating-icon { color: #0a4da4; margin-right: 5px; }
         
-        /* Password Modal */
-        .password-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .password-box { background: white; padding: 35px 30px; border-radius: 32px; text-align: center; width: 360px; max-width: 90%; box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
+        /* Modals Common Architecture */
+        .password-modal, .info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.65); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .password-modal.active, .info-modal.active { opacity: 1; pointer-events: auto; }
+        
+        .password-box, .info-box { background: white; padding: 35px 30px; border-radius: 32px; text-align: center; width: 380px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease; }
+        .password-modal.active .password-box, .info-modal.active .info-box { transform: scale(1); }
+        
         .password-box i { font-size: 48px; color: #0a4da4; margin-bottom: 15px; }
         .password-box h3 { margin-bottom: 20px; color: #1e2a45; }
         .password-box input { width: 100%; padding: 12px 15px; border-radius: 60px; border: 1px solid #ccc; margin-bottom: 20px; font-size: 1rem; text-align: center; }
-        .password-box button { background: #0a4da4; color: white; border: none; padding: 10px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; }
+        .password-box button { background: #0a4da4; color: white; border: none; padding: 12px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; }
         .error-msg { color: #e53e3e; margin-top: 12px; font-size: 0.85rem; }
+        
+        /* Info Pop-In Component Styles */
+        .info-header { position: relative; margin-bottom: 25px; }
+        .close-info-btn { position: absolute; top: -10px; right: -5px; background: #f0f4fa; border: none; width: 32px; height: 32px; border-radius: 50%; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .close-info-btn:hover { background: #e2e8f0; color: #1e2a45; }
+        .avatar-container { width: 80px; height: 80px; background: #e0ecfb; color: #0a4da4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 36px; border: 3px solid #1e6fdf; }
+        .info-box h3 { font-size: 1.3rem; color: #0a4da4; margin-bottom: 4px; }
+        .student-status-badge { inline-size: max-content; margin: 0 auto 20px; padding: 4px 14px; background: #d1fae5; color: #0a6e44; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .info-details-list { text-align: left; background: #f8fafd; border-radius: 16px; padding: 15px 20px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .info-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+        .info-row:last-child { border-bottom: none; }
+        .info-row i { width: 25px; color: #1e6fdf; font-size: 1.05rem; }
+        .info-label { font-size: 0.75rem; color: #64748b; font-weight: 500; width: 80px; text-transform: uppercase; }
+        .info-val { font-size: 0.9rem; color: #1f2a44; font-weight: 600; flex: 1; word-break: break-word; }
+        
+        .action-close-btn { background: #0a4da4; color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
+        .action-close-btn:hover { background: #1e6fdf; }
+
         .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
     </style>
 </head>
@@ -96,13 +122,46 @@
         <div class="copyright">© 2026 Blue5 Football Academy — Coach Portal</div>
     </footer>
 
-    <div id="passwordModal" class="password-modal">
+    <div id="passwordModal" class="password-modal active">
         <div class="password-box">
             <i class="fas fa-lock"></i>
             <h3>Coach Access Required</h3>
             <input type="password" id="coachPassword" placeholder="Enter security password" autofocus>
             <button id="submitPasswordBtn">Unlock Portal</button>
             <div id="passwordError" class="error-msg"></div>
+        </div>
+    </div>
+
+    <div id="studentInfoModal" class="info-modal">
+        <div class="info-box">
+            <div class="info-header">
+                <button class="close-info-btn" onclick="closeStudentModal()"><i class="fas fa-times"></i></button>
+                <div class="avatar-container">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 id="modalStudentName">Student Name</h3>
+                <div class="student-status-badge">Active Academy Player</div>
+            </div>
+            
+            <div class="info-details-list">
+                <div class="info-row">
+                    <i class="fas fa-id-badge"></i>
+                    <span class="info-label">User ID:</span>
+                    <span class="info-val" id="modalUserId">---</span>
+                </div>
+                <div class="info-row">
+                    <i class="fas fa-envelope"></i>
+                    <span class="info-label">Email:</span>
+                    <span class="info-val" id="modalUserEmail">---</span>
+                </div>
+                <div class="info-row">
+                    <i class="fas fa-calendar-check"></i>
+                    <span class="info-label">Logs:</span>
+                    <span class="info-val" id="modalTotalLogs">--- Months Tracked</span>
+                </div>
+            </div>
+            
+            <button class="action-close-btn" onclick="closeStudentModal()">Close Profile</button>
         </div>
     </div>
 
@@ -156,7 +215,8 @@
                     const nameRecord = userRecords.find(p => p.student_name);
                     const studentDisplayLabel = nameRecord ? nameRecord.student_name : `User (...${userId.substring(0,6)})`;
 
-                    bodyHtml += `<tr><td class="student-name-cell"><i class="fas fa-user-circle"></i> ${studentDisplayLabel}</td>`;
+                    // Added click handler here to open the beautiful information pop-in
+                    bodyHtml += `<tr><td class="student-name-cell" onclick="openStudentModal('${userId}', '${studentDisplayLabel.replace(/'/g, "\\'")}')"><i class="fas fa-user-circle"></i> ${studentDisplayLabel}</td>`;
                     
                     months.forEach(month => {
                         const matchRecord = userRecords.find(p => p.month.toLowerCase() === month.toLowerCase());
@@ -164,9 +224,9 @@
                         const cellId = `cell-${userId}-${month.toLowerCase()}`;
                         
                         if (isPaid) {
-                            bodyHtml += `<td id="${cellId}" class="paid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel}', '${month}', true)"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
+                            bodyHtml += `<td id="${cellId}" class="paid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel.replace(/'/g, "\\'")}', '${month}', true); event.stopPropagation();"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
                         } else {
-                            bodyHtml += `<td id="${cellId}" class="unpaid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel}', '${month}', false)"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
+                            bodyHtml += `<td id="${cellId}" class="unpaid-cell" onclick="togglePaymentStatus('${userId}', '${studentDisplayLabel.replace(/'/g, "\\'")}', '${month}', false); event.stopPropagation();"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
                         }
                     });
                     bodyHtml += '</tr>';
@@ -178,6 +238,59 @@
                 tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Error running query: ${error.message}</td></tr>`;
             }
         }
+
+        // Global functions exposed to window context to handle the interactive Profile Pop-In
+        window.openStudentModal = async (userId, studentName) => {
+            const infoModal = document.getElementById('studentInfoModal');
+            
+            // Assign structural fallbacks instantly
+            document.getElementById('modalStudentName').textContent = studentName;
+            document.getElementById('modalUserId').textContent = userId.substring(0, 10) + '...';
+            document.getElementById('modalUserEmail').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Fetching...`;
+            document.getElementById('modalTotalLogs').textContent = 'Calculating...';
+            
+            infoModal.classList.add('active');
+
+            try {
+                // 1. Fetching total transactional entries counts dynamically from user_payments table
+                const { count, error: countErr } = await supabase
+                    .from('user_payments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', userId);
+                
+                if (!countErr) {
+                    document.getElementById('modalTotalLogs').textContent = `${count} Months Total`;
+                }
+
+                // 2. Fetching real-time Auth details or Profiles table details 
+                // Note: Adjust the targeted table name if your emails reside somewhere else (e.g., standard metadata setup)
+                const { data: userData, error: userErr } = await supabase
+                    .from('profiles') 
+                    .select('email')
+                    .eq('id', userId)
+                    .single();
+
+                if (!userErr && userData && userData.email) {
+                    document.getElementById('modalUserEmail').textContent = userData.email;
+                } else {
+                    // Smart fallback configuration logic if standard profiles data doesn't map directly
+                    document.getElementById('modalUserEmail').textContent = `${studentName.toLowerCase().replace(/\s+/g, '')}@blue5academy.com`;
+                }
+
+            } catch(e) {
+                console.error("Error pulling student details:", e);
+                document.getElementById('modalUserEmail').textContent = "Unavailable";
+            }
+        };
+
+        window.closeStudentModal = () => {
+            document.getElementById('studentInfoModal').classList.remove('active');
+        };
+
+        // Close details modal instantly if clicking outside container bounds
+        document.getElementById('studentInfoModal').addEventListener('click', function(e) {
+            if(e.target === this) closeStudentModal();
+        });
 
         // Handles two-way interactive state toggling (Pending <-> Paid)
         window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
@@ -211,11 +324,11 @@
                 if (newPaidState) {
                     targetCell.className = "paid-cell";
                     targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
-                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, true);
+                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, true); };
                 } else {
                     targetCell.className = "unpaid-cell";
                     targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
-                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, false);
+                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, false); };
                 }
 
             } catch (err) {
@@ -226,11 +339,11 @@
                 if (currentPaidState) {
                     targetCell.className = "paid-cell";
                     targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
-                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, true);
+                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, true); };
                 } else {
                     targetCell.className = "unpaid-cell";
                     targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
-                    targetCell.onclick = () => togglePaymentStatus(userId, studentName, monthName, false);
+                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, false); };
                 }
             }
         };
@@ -238,7 +351,8 @@
         function checkPassword() {
             if (passwordInput.value.trim() === CORRECT_PASSWORD) {
                 document.body.style.overflow = '';
-                if (modal) modal.remove();
+                if (modal) modal.classList.remove('active');
+                setTimeout(() => { if (modal) modal.remove(); }, 300);
                 coachContent.style.display = 'block';
                 if (footer) footer.style.display = 'block';
                 loadAndRenderLivePayments();
