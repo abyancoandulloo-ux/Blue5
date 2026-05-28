@@ -186,7 +186,6 @@
 
     <script type="module">
         let supabase = null;
-        // Keep track of the currently viewed student ID globally within the module scope
         let currentActiveModalUserId = null; 
 
         try {
@@ -260,22 +259,22 @@
             }
         }
 
-        // Exposed Function: Opens Modal and Pulls Profile Data + Rating
+        // Exposed Function: Opens Pop-In Modal, fetches real-time email & rating from 'user_payments' table
         window.openStudentModal = async (userId, studentName) => {
-            currentActiveModalUserId = userId; // Store globally to reference during star clicks
+            currentActiveModalUserId = userId; 
             const infoModal = document.getElementById('studentInfoModal');
             
-            // Set initial placeholders
+            // Set initial loading states
             document.getElementById('modalStudentName').textContent = studentName;
             document.getElementById('modalUserId').textContent = userId.substring(0, 10) + '...';
-            document.getElementById('modalUserEmail').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Fetching...`;
+            document.getElementById('modalUserEmail').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Loading...`;
             document.getElementById('modalTotalLogs').textContent = 'Calculating...';
-            resetStarsUI(); // Clear old star choices instantly
+            resetStarsUI(); 
 
             infoModal.classList.add('active');
 
             try {
-                // 1. Fetch entries from user_payments
+                // 1. Fetch live month count logs
                 const { count, error: countErr } = await supabase
                     .from('user_payments')
                     .select('*', { count: 'exact', head: true })
@@ -285,23 +284,35 @@
                     document.getElementById('modalTotalLogs').textContent = `${count} Months Total`;
                 }
 
-                // 2. Fetch profile data AND rating from 'profiles' table
-                const { data: userData, error: userErr } = await supabase
-                    .from('profiles') 
+                // 2. Fetch the real saved data (email and rating) directly from 'user_payments' 
+                const { data: dbData, error: dbErr } = await supabase
+                    .from('user_payments') 
                     .select('email, rating')
-                    .eq('id', userId)
-                    .single();
+                    .eq('user_id', userId)
+                    .not('email', 'is', null) // prioritize picking up rows where an email is recorded
+                    .limit(1);
 
-                if (!userErr && userData) {
-                    if (userData.email) document.getElementById('modalUserEmail').textContent = userData.email;
-                    if (userData.rating) updateStarsDisplay(userData.rating, false); // Set active stars matching DB save
+                if (!dbErr && dbData && dbData.length > 0) {
+                    const playerRecord = dbData[0];
+                    
+                    // Render real email direct from the database
+                    if (playerRecord.email) {
+                        document.getElementById('modalUserEmail').textContent = playerRecord.email;
+                    } else {
+                        document.getElementById('modalUserEmail').textContent = "Not provided";
+                    }
+                    
+                    // Render saved star configuration value
+                    if (playerRecord.rating) {
+                        updateStarsDisplay(playerRecord.rating, false); 
+                    }
                 } else {
-                    document.getElementById('modalUserEmail').textContent = `${studentName.toLowerCase().replace(/\s+/g, '')}@blue5academy.com`;
+                    document.getElementById('modalUserEmail').textContent = "No log found";
                 }
 
             } catch(e) {
                 console.error("Error pulling student details:", e);
-                document.getElementById('modalUserEmail').textContent = "Unavailable";
+                document.getElementById('modalUserEmail').textContent = "Error loading email";
             }
         };
 
@@ -310,12 +321,11 @@
             currentActiveModalUserId = null;
         };
 
-        // Close details modal if clicking outside container bounds
         document.getElementById('studentInfoModal').addEventListener('click', function(e) {
             if(e.target === this) closeStudentModal();
         });
 
-        // --- Rating Logic System Implementation ---
+        // --- Rating System Implementation ---
         const stars = document.querySelectorAll('#starsContainer i');
         const ratingStatus = document.getElementById('ratingStatus');
 
@@ -336,20 +346,19 @@
             ratingStatus.textContent = isSavingText ? 'Saving rating...' : `Rating: ${ratingValue}/5 Stars`;
         }
 
-        // Attach listener actions to clicking star items
         stars.forEach(star => {
             star.addEventListener('click', async (e) => {
                 if (!currentActiveModalUserId || !supabase) return;
 
                 const chosenRating = parseInt(e.target.getAttribute('data-value'));
-                updateStarsDisplay(chosenRating, true); // Instantly update UI with a saving state loading message
+                updateStarsDisplay(chosenRating, true); 
 
                 try {
-                    // Update rating inside your Supabase 'profiles' table matching user ID
+                    // Saves the rating choice value straight back into the user_payments record row entries
                     const { error } = await supabase
-                        .from('profiles')
+                        .from('user_payments')
                         .update({ rating: chosenRating })
-                        .eq('id', currentActiveModalUserId);
+                        .eq('user_id', currentActiveModalUserId);
 
                     if (error) throw error;
                     ratingStatus.textContent = `Saved! (${chosenRating}/5 Stars)`;
@@ -362,7 +371,7 @@
             });
         });
 
-        // Handles two-way interactive state toggling (Pending <-> Paid)
+        // Handles payment state toggling
         window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
             const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
             const targetCell = document.getElementById(cellId);
@@ -375,11 +384,23 @@
             const newPaidState = !currentPaidState;
 
             try {
+                // Grab existing email if present to ensure the record keeps its structural data integrity upon upsert operations
+                let existingEmail = null;
+                const { data: currentRecord } = await supabase
+                    .from('user_payments')
+                    .select('email')
+                    .eq('user_id', userId)
+                    .limit(1);
+                if (currentRecord && currentRecord.length > 0) {
+                    existingEmail = currentRecord[0].email;
+                }
+
                 const { error } = await supabase
                     .from('user_payments')
                     .upsert({
                         user_id: userId,
                         student_name: studentName,
+                        email: existingEmail,
                         month: monthName,
                         paid: newPaidState,
                         amount: 49.00,
