@@ -10,7 +10,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4fa; color: #1f2a44; }
         
-        /* Navbar navigation links row styling matrix components */
+        /* Navbar navigation links */
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-icon { font-size: 28px; color: #0a4da4; }
@@ -106,7 +106,7 @@
     <div class="container">
         <div class="loading-overlay" id="loadingView">
             <i class="fas fa-spinner fa-spin"></i>
-            <p style="font-weight: 500;">Syncing performance profile stats data rows...</p>
+            <p style="font-weight: 500;">Syncing performance profile data...</p>
         </div>
 
         <div class="profile-grid" id="profileView">
@@ -124,4 +124,195 @@
                         </div>
                     </div>
                     <div class="card-player-name" id="cardPlayerName">ATHLETE</div>
-                    <div class="card
+                    <div class="card-stats-grid">
+                        <div class="card-stats-col">
+                            <div class="card-stat-line"><span class="card-stat-val" id="cardPac">50</span><span class="card-stat-lbl">PAC</span></div>
+                            <div class="card-stat-line"><span class="card-stat-val" id="cardDri">50</span><span class="card-stat-lbl">DRI</span></div>
+                            <div class="card-stat-line"><span class="card-stat-val" id="cardDef">50</span><span class="card-stat-lbl">DEF</span></div>
+                        </div>
+                        <div class="card-stats-col">
+                            <div class="card-stat-line"><span class="card-stat-val" id="cardSta">50</span><span class="card-stat-lbl">STA</span></div>
+                            <div class="card-stat-line"><span class="card-stat-val" id="cardPhy">50</span><span class="card-stat-lbl">PHY</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="star-display" id="starOutput">
+                    <i class="fas fa-star" data-index="1"></i>
+                    <i class="fas fa-star" data-index="2"></i>
+                    <i class="fas fa-star" data-index="3"></i>
+                    <i class="fas fa-star" data-index="4"></i>
+                    <i class="fas fa-star" data-index="5"></i>
+                </div>
+                <div class="star-lbl">Academy Star Rank</div>
+
+                <button class="logout-btn" onclick="handleLogout()">Sign Out Account</button>
+            </div>
+
+            <div class="profile-main-content">
+                <div class="data-card">
+                    <div class="card-title"><i class="fas fa-id-card-alt"></i> Personal Academy Registry Profile</div>
+                    <div class="info-row">
+                        <div class="info-label">Full Name:</div>
+                        <div class="info-value" id="profileName">---</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Email:</div>
+                        <div class="info-value" id="profileEmail">---</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Student ID:</div>
+                        <div class="info-value" id="profileId" style="font-family: monospace; font-size: 0.85rem;">---</div>
+                    </div>
+                    <div class="info-row" style="align-items: center; border-bottom: none;">
+                        <div class="info-label">Card Photo:</div>
+                        <div class="info-value">
+                            <input type="file" id="avatarUploadInput" accept="image/*" style="font-size: 0.8rem; max-width: 220px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="card-title"><i class="fas fa-money-check-dollar"></i> Training Attendance History Logs</div>
+                    <div class="payments-grid" id="paymentsBadgeGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer"><div class="copyright">© 2026 Blue5 Football Academy</div></footer>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // 1. Authenticate user access tokens credentials
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                if (authError || !user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // 2. Load user attributes schema logs
+                const { data: userProfile, error: profileError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                // 3. Load associated transaction log data blocks
+                const { data: paymentRecords } = await supabase
+                    .from('user_payments')
+                    .select('*')
+                    .eq('user_id', user.id);
+
+                // Initialize visibility panels triggers
+                document.getElementById('loadingView').style.display = 'none';
+                document.getElementById('profileView').style.display = 'flex';
+
+                // Map textual registry elements values
+                const studentName = userProfile?.name || user.user_metadata?.full_name || 'Academy Athlete';
+                document.getElementById('profileName').textContent = studentName;
+                document.getElementById('profileEmail').textContent = userProfile?.email || user.email;
+                document.getElementById('profileId').textContent = user.id;
+                document.getElementById('cardPlayerName').textContent = studentName.split(' ')[0].toUpperCase();
+
+                // Load custom picture asset if column path reference resolves properly
+                const pImg = document.getElementById('profileCardImg');
+                const pFallback = document.getElementById('profileFallbackIcon');
+                if (userProfile?.avatar_url) {
+                    pImg.src = userProfile.avatar_url;
+                    pImg.style.display = 'block';
+                    pFallback.style.display = 'none';
+                }
+
+                // Map FUT card structural indicators
+                const pac = userProfile?.pace ?? 50;
+                const dri = userProfile?.dribbling ?? 50;
+                const def = userProfile?.defending ?? 50;
+                const sta = userProfile?.stamina ?? 50;
+                const phy = userProfile?.physicality ?? 50;
+
+                document.getElementById('cardPac').textContent = pac;
+                document.getElementById('cardDri').textContent = dri;
+                document.getElementById('cardDef').textContent = def;
+                document.getElementById('cardSta').textContent = sta;
+                document.getElementById('cardPhy').textContent = phy;
+                document.getElementById('cardOvr').textContent = Math.round((pac + dri + def + sta + phy) / 5);
+
+                // Parse star metric layout states loop
+                const starRank = userProfile?.rating || 0;
+                document.querySelectorAll('#starOutput i').forEach(icon => {
+                    if (parseInt(icon.getAttribute('data-index')) <= starRank) icon.classList.add('active');
+                });
+
+                // Generate tracking badges configuration loop
+                const paymentsGrid = document.getElementById('paymentsBadgeGrid');
+                let gridHtml = '';
+                months.forEach(m => {
+                    const match = (paymentRecords || []).find(p => p.month && p.month.toLowerCase() === m.toLowerCase());
+                    const isPaid = match ? match.paid : false;
+                    gridHtml += `
+                        <div class="month-badge">
+                            <div class="month-name">${m.substring(0,3)}</div>
+                            <span class="status-pill ${isPaid ? 'status-paid' : 'status-pending'}">
+                                ${isPaid ? '<i class="fas fa-check"></i> Paid' : '<i class="fas fa-clock"></i> Pending'}
+                            </span>
+                        </div>`;
+                });
+                paymentsGrid.innerHTML = gridHtml;
+
+                // 4. File picker selection uploader mechanism listener setup
+                const fileInput = document.getElementById('avatarUploadInput');
+                fileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    try {
+                        const fileExt = file.name.split('.').pop();
+                        const filePath = `${user.id}-${Math.floor(Date.now() / 1000)}.${fileExt}`;
+
+                        // Upload asset file directly to bucket path targets configuration
+                        const { error: uploadError } = await supabase.storage
+                            .from('avatars')
+                            .upload(filePath, file);
+
+                        if (uploadError) throw uploadError;
+
+                        // Retrieve the viewable live URL address reference link
+                        const { data: { publicUrl } } = supabase.storage
+                            .from('avatars')
+                            .getPublicUrl(filePath);
+
+                        // Patch path back to the user object data parameters row
+                        await supabase.from('users').update({ avatar_url: publicUrl }).eq('id', user.id);
+
+                        // Rerender active image structures displays parameters
+                        pImg.src = publicUrl;
+                        pImg.style.display = 'block';
+                        pFallback.style.display = 'none';
+                        alert("Performance photo uploaded successfully!");
+                    } catch (err) {
+                        alert("Photo upload execution failure: " + err.message);
+                    }
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        window.handleLogout = async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        };
+
+        window.toggleMobileMenu = () => {
+            document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
+        };
+    </script>
+</body>
+</html>
