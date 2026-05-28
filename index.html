@@ -8,6 +8,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
+        /* Responsive Mobile Navigation Fixes matching layout configuration rules */
+        .top-nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px 40px; 
+            background: white; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+        }
+        .logo-link { text-decoration: none; }
+        .main-nav ul { display: flex; gap: 28px; list-style: none; }
+        .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
+        .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
+        .mobile-menu-icon { display: none; cursor: pointer; font-size: 24px; color: #0a4da4; }
+
         /* Testimonial styles integrated smoothly for layout consistency */
         .testimonial-section {
             background-color: #ffffff;
@@ -64,7 +82,27 @@
             letter-spacing: 1px;
             margin-top: 2px;
         }
+
+        /* Responsive Breakpoints matching sessions.html logic matrix */
         @media (max-width: 768px) {
+            .top-nav { padding: 15px 20px; }
+            .mobile-menu-icon { display: block; }
+            
+            .main-nav ul { 
+                display: none; 
+                flex-direction: column; 
+                position: absolute; 
+                top: 65px; 
+                left: 0; 
+                width: 100%; 
+                background: white; 
+                padding: 20px; 
+                z-index: 100; 
+                gap: 15px; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            }
+            .main-nav ul.show-mobile { display: flex; }
+            
             .testimonial-container {
                 flex-direction: column;
                 text-align: center;
@@ -77,10 +115,12 @@
 <body>
     <div class="site-wrapper">
         <div class="top-nav">
-            <div class="logo-area">
-                <i class="fas fa-futbol logo-icon"></i>
-                <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
-            </div>
+            <a href="index.html" class="logo-link">
+                <div class="logo-area">
+                    <i class="fas fa-futbol logo-icon"></i>
+                    <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
+                </div>
+            </a>
             <nav class="main-nav">
                 <ul>
                     <li><a href="index.html" class="active-nav">Home</a></li>
@@ -88,8 +128,6 @@
                     <li><a href="Payment.html">Payment</a></li>
                     <li><a href="sessions.html">Sessions</a></li>
                     <li><a href="Coach.html">Coach</a></li>
-                    <li><a href="profile.html">Profile</a></li>
-                     <li><a href="players.html">Players</a></li>
                 </ul>
             </nav>
             <div class="mobile-menu-icon" onclick="toggleMobileMenu()">
@@ -153,7 +191,7 @@
                 <div class="footer-col">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="Home.html">Home</a></li>
+                        <li><a href="index.html">Home</a></li>
                         <li><a href="login.html">Log in</a></li>
                         <li><a href="Payment.html">Payment</a></li>
                         <li><a href="sessions.html">Sessions</a></li>
@@ -171,6 +209,12 @@
         </footer>
     </div>
 
+    <script>
+        window.toggleMobileMenu = function() {
+            const menu = document.querySelector('.main-nav ul');
+            if (menu) menu.classList.toggle('show-mobile');
+        };
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
