@@ -30,7 +30,7 @@
         .profile-sidebar { flex: 1; display: flex; flex-direction: column; align-items: center; background: white; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         
         /* Premium Gold FUT Custom Card Layout */
-        .fifa-card { width: 240px; height: 350px; background: linear-gradient(135deg, #ffe066 0%, #f5af19 50%, #e65c00 100%); border-radius: 18px; position: relative; padding: 18px; color: #1a1a1a; box-shadow: 0 15px 35px rgba(230, 92, 0, 0.3); border: 3px solid #fff2a3; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 20px; }
+        .fifa-card { width: 240px; height: 350px; background: linear-gradient(135deg, #ffe066 0%, #f5af19 50%, #e65c00 100%); border-radius: 18px; position: relative; padding: 18px; color: #1a1a1a; box-shadow: 0 10px 25px rgba(230, 92, 0, 0.2); border: 3px solid #fff2a3; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 20px; }
         .fifa-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent); transform: rotate(45deg); pointer-events: none; }
         .card-top-row { display: flex; align-items: center; height: 110px; margin-bottom: 5px; }
         .card-metrics-badge { display: flex; flex-direction: column; align-items: center; width: 35%; line-height: 1.1; text-align: center; border-right: 1px solid rgba(0,0,0,0.1); }
@@ -55,12 +55,23 @@
 
         .profile-main-content { flex: 1.8; display: flex; flex-direction: column; gap: 25px; }
         .data-card { background: white; padding: 30px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .card-title { font-size: 1.1rem; font-weight: 700; color: #0a4da4; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #f0f4fa; padding-bottom: 10px; }
+        .card-title { font-size: 1.1rem; font-weight: 700; color: #0a4da4; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f0f4fa; padding-bottom: 10px; }
+        .card-title-text { display: flex; align-items: center; gap: 10px; }
         
-        .info-row { display: flex; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; }
+        .info-row { display: flex; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; align-items: center; min-height: 55px; }
         .info-row:last-child { border-bottom: none; }
         .info-label { width: 120px; font-weight: 600; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
         .info-value { flex: 1; font-weight: 500; color: #1f2a44; font-size: 0.95rem; }
+        
+        /* Edit Mode Form Controls */
+        .profile-input { width: 100%; padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 0.95rem; color: #1f2a44; outline: none; display: none; }
+        .profile-input:focus { border-color: #1e6fdf; box-shadow: 0 0 0 3px rgba(30,111,223,0.1); }
+        
+        /* Interactive Action Buttons */
+        .edit-profile-btn { background: #0a4da4; color: white; border: none; padding: 6px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .edit-profile-btn:hover { background: #1e6fdf; }
+        .save-profile-btn { background: #10b981; color: white; border: none; padding: 6px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 6px; }
+        .save-profile-btn:hover { background: #059669; }
 
         .payments-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
         .month-badge { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; text-align: center; }
@@ -151,14 +162,22 @@
 
             <div class="profile-main-content">
                 <div class="data-card">
-                    <div class="card-title"><i class="fas fa-id-card-alt"></i> Personal Academy Registry Profile</div>
+                    <div class="card-title">
+                        <div class="card-title-text"><i class="fas fa-id-card-alt"></i> Personal Academy Registry Profile</div>
+                        <div>
+                            <button id="editBtn" class="edit-profile-btn" onclick="enableEditMode()"><i class="fas fa-edit"></i> Edit Profile</button>
+                            <button id="saveBtn" class="save-profile-btn" onclick="saveProfileChanges()"><i class="fas fa-save"></i> Save Changes</button>
+                        </div>
+                    </div>
                     <div class="info-row">
                         <div class="info-label">Full Name:</div>
                         <div class="info-value" id="profileName">---</div>
+                        <input type="text" id="inputName" class="profile-input">
                     </div>
                     <div class="info-row">
                         <div class="info-label">Email:</div>
                         <div class="info-value" id="profileEmail">---</div>
+                        <input type="email" id="inputEmail" class="profile-input">
                     </div>
                     <div class="info-row">
                         <div class="info-label">Student ID:</div>
@@ -173,7 +192,7 @@
                 </div>
 
                 <div class="data-card">
-                    <div class="card-title"><i class="fas fa-money-check-dollar"></i> Training Attendance History Logs</div>
+                    <div class="card-title"><div class="card-title-text"><i class="fas fa-money-check-dollar"></i> Training Attendance History Logs</div></div>
                     <div class="payments-grid" id="paymentsBadgeGrid"></div>
                 </div>
             </div>
@@ -186,10 +205,10 @@
         import { supabase } from './supabase-config.js';
 
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // OPTIMIZATION 1: Local session fetch via getSession prevents network roundtrip lag
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
                 
                 if (sessionError || !session) {
@@ -197,30 +216,35 @@
                     return;
                 }
                 
-                const user = session.user;
+                currentUser = session.user;
 
-                // OPTIMIZATION 2: Run asynchronous lookups concurrently via Promise.all to break up network waterfalls
                 const [profileResult, paymentsResult] = await Promise.all([
-                    supabase.from('users').select('*').eq('id', user.id).maybeSingle(),
-                    supabase.from('user_payments').select('month, paid').eq('user_id', user.id)
+                    supabase.from('users').select('*').eq('id', currentUser.id).maybeSingle(),
+                    supabase.from('user_payments').select('month, paid').eq('user_id', currentUser.id)
                 ]);
 
                 if (profileResult.error) throw profileResult.error;
                 const userProfile = profileResult.data;
                 const paymentRecords = paymentsResult.data || [];
 
-                // Update viewport panel structural states
                 document.getElementById('loadingView').style.display = 'none';
                 document.getElementById('profileView').style.display = 'flex';
 
-                // Map standard data elements
-                const studentName = userProfile?.name || user.user_metadata?.full_name || 'Academy Athlete';
+                // Populate UI components elements
+                const studentName = userProfile?.name || currentUser.user_metadata?.full_name || 'Academy Athlete';
+                const studentEmail = userProfile?.email || currentUser.email;
+
                 document.getElementById('profileName').textContent = studentName;
-                document.getElementById('profileEmail').textContent = userProfile?.email || user.email;
-                document.getElementById('profileId').textContent = user.id;
+                document.getElementById('profileEmail').textContent = studentEmail;
+                document.getElementById('profileId').textContent = currentUser.id;
+                
+                // Set default input fields value elements
+                document.getElementById('inputName').value = studentName;
+                document.getElementById('inputEmail').value = studentEmail;
+                
                 document.getElementById('cardPlayerName').textContent = studentName.split(' ')[0].toUpperCase();
 
-                // Process image placement layouts
+                // Image handling matching structure parameters
                 const pImg = document.getElementById('profileCardImg');
                 const pFallback = document.getElementById('profileFallbackIcon');
                 if (userProfile?.avatar_url) {
@@ -229,7 +253,6 @@
                     pFallback.style.display = 'none';
                 }
 
-                // Load performance evaluation indicators
                 const pac = userProfile?.pace ?? 50;
                 const dri = userProfile?.dribbling ?? 50;
                 const def = userProfile?.defending ?? 50;
@@ -243,13 +266,11 @@
                 document.getElementById('cardPhy').textContent = phy;
                 document.getElementById('cardOvr').textContent = Math.round((pac + dri + def + sta + phy) / 5);
 
-                // Set star rating active elements
                 const starRank = userProfile?.rating || 0;
                 document.querySelectorAll('#starOutput i').forEach(icon => {
                     if (parseInt(icon.getAttribute('data-index')) <= starRank) icon.classList.add('active');
                 });
 
-                // OPTIMIZATION 3: Flat object map tracking array mapping values avoids looping searches
                 const paymentMap = {};
                 paymentRecords.forEach(p => { if (p.month) paymentMap[p.month.toLowerCase()] = p.paid; });
 
@@ -267,7 +288,7 @@
                 });
                 paymentsGrid.innerHTML = gridHtml;
 
-                // OPTIMIZATION 4: File upload listener with automatic browser canvas image compression
+                // Photo Upload workflow execution context handles
                 const fileInput = document.getElementById('avatarUploadInput');
                 fileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
@@ -275,15 +296,8 @@
 
                     try {
                         pFallback.className = "fas fa-spinner fa-spin";
-                        
-                        // Client-side auto compression pipeline execution
-                        const optimizedFile = await compressImage(file, {
-                            maxWidth: 800,
-                            maxHeight: 800,
-                            quality: 0.85
-                        });
+                        const optimizedFile = await compressImage(file, { maxWidth: 800, maxHeight: 800, quality: 0.85 });
 
-                        // Security fallback size validation check
                         if (optimizedFile.size > 2 * 1024 * 1024) {
                             alert("Image must be smaller than 2MB.");
                             pFallback.className = "fas fa-user-ninja";
@@ -291,28 +305,21 @@
                         }
 
                         const fileExt = 'jpg'; 
-                        const filePath = `${user.id}-${Math.floor(Date.now() / 1000)}.${fileExt}`;
+                        const filePath = `${currentUser.id}-${Math.floor(Date.now() / 1000)}.${fileExt}`;
 
                         const { error: uploadError } = await supabase.storage
                             .from('avatars')
-                            .upload(filePath, optimizedFile, { 
-                                cacheControl: '3600', 
-                                upsert: true,
-                                contentType: 'image/jpeg'
-                            });
+                            .upload(filePath, optimizedFile, { cacheControl: '3600', upsert: true, contentType: 'image/jpeg' });
 
                         if (uploadError) throw uploadError;
 
-                        const { data: { publicUrl } } = supabase.storage
-                            .from('avatars')
-                            .getPublicUrl(filePath);
-
-                        await supabase.from('users').update({ avatar_url: publicUrl }).eq('id', user.id);
+                        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+                        await supabase.from('users').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
 
                         pImg.src = publicUrl;
                         pImg.style.display = 'block';
                         pFallback.style.display = 'none';
-                        alert("Photo uploaded and optimized successfully!");
+                        alert("Photo uploaded successfully!");
                     } catch (err) {
                         alert("Photo upload failure: " + err.message);
                         pFallback.className = "fas fa-user-ninja";
@@ -320,11 +327,66 @@
                 });
 
             } catch (err) {
-                console.error("Critical dashboard execution context error:", err);
+                console.error("Dashboard mount issue logs details:", err);
             }
         });
 
-        // Browser-Based Canvas Compression Helper Function
+        // Toggle UI component visibilities to enable editable configurations
+        window.enableEditMode = () => {
+            document.getElementById('profileName').style.display = 'none';
+            document.getElementById('profileEmail').style.display = 'none';
+            document.getElementById('inputName').style.display = 'block';
+            document.getElementById('inputEmail').style.display = 'block';
+            document.getElementById('editBtn').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'flex';
+        };
+
+        // Commit modifications back to user core configuration row layout parameters
+        window.saveProfileChanges = async () => {
+            if (!currentUser) return;
+
+            const updatedName = document.getElementById('inputName').value.trim();
+            const updatedEmail = document.getElementById('inputEmail').value.trim();
+
+            if (!updatedName || !updatedEmail) {
+                alert("Name and Email parameters cannot be left blank.");
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
+            saveBtn.disabled = true;
+
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .update({ name: updatedName, email: updatedEmail })
+                    .eq('id', currentUser.id);
+
+                if (error) throw error;
+
+                // Live update element values locally across active layout display views
+                document.getElementById('profileName').textContent = updatedName;
+                document.getElementById('profileEmail').textContent = updatedEmail;
+                document.getElementById('cardPlayerName').textContent = updatedName.split(' ')[0].toUpperCase();
+
+                // Revert component visible states back to basic view modes
+                document.getElementById('profileName').style.display = 'block';
+                document.getElementById('profileEmail').style.display = 'block';
+                document.getElementById('inputName').style.display = 'none';
+                document.getElementById('inputEmail').style.display = 'none';
+                document.getElementById('editBtn').style.display = 'flex';
+                document.getElementById('saveBtn').style.display = 'none';
+                
+                alert("Profile changes applied successfully!");
+            } catch (err) {
+                alert("Database synchronization transaction failed: " + err.message);
+            } finally {
+                saveBtn.innerHTML = `<i class="fas fa-save"></i> Save Changes`;
+                saveBtn.disabled = false;
+            }
+        };
+
         function compressImage(file, options) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -336,7 +398,6 @@
                         const canvas = document.createElement('canvas');
                         let width = img.width;
                         let height = img.height;
-
                         if (width > height) {
                             if (width > options.maxWidth) {
                                 height = Math.round((height * options.maxWidth) / width);
@@ -348,19 +409,13 @@
                                 height = options.maxHeight;
                             }
                         }
-
                         canvas.width = width;
                         canvas.height = height;
-                        
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-
                         canvas.toBlob((blob) => {
                             if (blob) {
-                                resolve(new File([blob], file.name, {
-                                    type: 'image/jpeg',
-                                    lastModified: Date.now()
-                                }));
+                                resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
                             } else {
                                 reject(new Error("Canvas compression failed."));
                             }
