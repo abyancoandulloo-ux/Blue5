@@ -189,38 +189,38 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // 1. Authenticate user access tokens credentials
-                const { data: { user }, error: authError } = await supabase.auth.getUser();
-                if (authError || !user) {
+                // OPTIMIZATION 1: Use getSession() instead of getUser() for instant local lookup
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionError || !session) {
                     window.location.href = 'login.html';
                     return;
                 }
+                
+                const user = session.user;
 
-                // 2. Load user attributes schema logs
-                const { data: userProfile, error: profileError } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
+                // OPTIMIZATION 2: Run asynchronous table lookups in parallel to remove performance waterfalls
+                const [profileResult, paymentsResult] = await Promise.all([
+                    supabase.from('users').select('*').eq('id', user.id).maybeSingle(),
+                    supabase.from('user_payments').select('month, paid').eq('user_id', user.id)
+                ]);
 
-                // 3. Load associated transaction log data blocks
-                const { data: paymentRecords } = await supabase
-                    .from('user_payments')
-                    .select('*')
-                    .eq('user_id', user.id);
+                if (profileResult.error) throw profileResult.error;
+                const userProfile = profileResult.data;
+                const paymentRecords = paymentsResult.data || [];
 
-                // Initialize visibility panels triggers
+                // Swap loading screen element visibility
                 document.getElementById('loadingView').style.display = 'none';
                 document.getElementById('profileView').style.display = 'flex';
 
-                // Map textual registry elements values
+                // Map standard textual info blocks
                 const studentName = userProfile?.name || user.user_metadata?.full_name || 'Academy Athlete';
                 document.getElementById('profileName').textContent = studentName;
                 document.getElementById('profileEmail').textContent = userProfile?.email || user.email;
                 document.getElementById('profileId').textContent = user.id;
                 document.getElementById('cardPlayerName').textContent = studentName.split(' ')[0].toUpperCase();
 
-                // Load custom picture asset if column path reference resolves properly
+                // Process image layouts seamlessly
                 const pImg = document.getElementById('profileCardImg');
                 const pFallback = document.getElementById('profileFallbackIcon');
                 if (userProfile?.avatar_url) {
@@ -229,7 +229,7 @@
                     pFallback.style.display = 'none';
                 }
 
-                // Map FUT card structural indicators
+                // Gather attributes metrics vectors
                 const pac = userProfile?.pace ?? 50;
                 const dri = userProfile?.dribbling ?? 50;
                 const def = userProfile?.defending ?? 50;
@@ -243,18 +243,20 @@
                 document.getElementById('cardPhy').textContent = phy;
                 document.getElementById('cardOvr').textContent = Math.round((pac + dri + def + sta + phy) / 5);
 
-                // Parse star metric layout states loop
+                // Set star rendering indicators
                 const starRank = userProfile?.rating || 0;
                 document.querySelectorAll('#starOutput i').forEach(icon => {
                     if (parseInt(icon.getAttribute('data-index')) <= starRank) icon.classList.add('active');
                 });
 
-                // Generate tracking badges configuration loop
+                // OPTIMIZATION 3: Translate array arrays list layout indexes into direct key-value mapping lookups
+                const paymentMap = {};
+                paymentRecords.forEach(p => { if (p.month) paymentMap[p.month.toLowerCase()] = p.paid; });
+
                 const paymentsGrid = document.getElementById('paymentsBadgeGrid');
                 let gridHtml = '';
                 months.forEach(m => {
-                    const match = (paymentRecords || []).find(p => p.month && p.month.toLowerCase() === m.toLowerCase());
-                    const isPaid = match ? match.paid : false;
+                    const isPaid = paymentMap[m.toLowerCase()] || false;
                     gridHtml += `
                         <div class="month-badge">
                             <div class="month-name">${m.substring(0,3)}</div>
@@ -265,43 +267,45 @@
                 });
                 paymentsGrid.innerHTML = gridHtml;
 
-                // 4. File picker selection uploader mechanism listener setup
+                // File Upload handler logic
                 const fileInput = document.getElementById('avatarUploadInput');
                 fileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
 
+                    // Size optimization watch validation guard
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert("Please optimize photo sizes below 2MB to keep load times snappy.");
+                        return;
+                    }
+
                     try {
                         const fileExt = file.name.split('.').pop();
                         const filePath = `${user.id}-${Math.floor(Date.now() / 1000)}.${fileExt}`;
 
-                        // Upload asset file directly to bucket path targets configuration
                         const { error: uploadError } = await supabase.storage
                             .from('avatars')
-                            .upload(filePath, file);
+                            .upload(filePath, file, { cacheControl: '3600', upsert: true });
 
                         if (uploadError) throw uploadError;
 
-                        // Retrieve the viewable live URL address reference link
                         const { data: { publicUrl } } = supabase.storage
                             .from('avatars')
                             .getPublicUrl(filePath);
 
-                        // Patch path back to the user object data parameters row
                         await supabase.from('users').update({ avatar_url: publicUrl }).eq('id', user.id);
 
-                        // Rerender active image structures displays parameters
                         pImg.src = publicUrl;
                         pImg.style.display = 'block';
                         pFallback.style.display = 'none';
-                        alert("Performance photo uploaded successfully!");
+                        alert("Performance photo updated successfully!");
                     } catch (err) {
-                        alert("Photo upload execution failure: " + err.message);
+                        alert("Failed executing bucket pipeline update request: " + err.message);
                     }
                 });
 
             } catch (err) {
-                console.error(err);
+                console.error("Critical rendering failure tracker context details logs:", err);
             }
         });
 
