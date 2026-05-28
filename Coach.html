@@ -21,23 +21,23 @@
         .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
         
-        /* Main Content */
+        /* Main Container Content */
         .container { max-width: 1300px; margin: 30px auto; padding: 20px; }
         .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
         .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
         
-        /* Table Styles */
+        /* Table Layout Configuration */
         .coach-table-wrapper { overflow-x: auto; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 5px; }
         .payment-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
         .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
         
-        /* Student Name Interaction styling */
+        /* Interactive Student Name Link Cell */
         .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; cursor: pointer; transition: all 0.2s ease; }
         .student-name-cell:hover { background: #e0ecfb; color: #0a4da4; }
         .student-name-cell i { color: #0a4da4; margin-right: 6px; }
         
-        /* Interactive Toggle Cells */
+        /* Grid Table States Tags */
         .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; cursor: pointer; transition: background 0.2s; }
         .paid-cell:hover { background-color: #fca5a5; color: #991b1b; } 
         .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s; }
@@ -46,7 +46,7 @@
         .unpaid-icon { color: #f59e0b; margin-right: 5px; }
         .updating-icon { color: #0a4da4; margin-right: 5px; }
         
-        /* Security Lock Box Modals */
+        /* Modals Structure Layout Component Overlay Base */
         .password-modal, .info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.7); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .password-modal.active, .info-modal.active { opacity: 1; pointer-events: auto; }
         
@@ -57,37 +57,36 @@
         .password-box button { background: #0a4da4; color: white; border: none; padding: 12px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; width: 100%; }
         .error-msg { color: #e53e3e; margin-top: 12px; font-size: 0.85rem; }
         
-        /* Dual Layout Card Panel Content Area */
+        /* Split Card View Interface Pop-In Inner Grid */
         .info-box { background: #f8fafc; padding: 30px; border-radius: 36px; width: 850px; max-width: 95%; box-shadow: 0 25px 50px rgba(0,0,0,0.3); transform: scale(0.9); transition: transform 0.3s ease; position: relative; }
         .info-modal.active .info-box { transform: scale(1); }
         .close-info-btn { position: absolute; top: 20px; right: 20px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10; }
         
         .panel-split-layout { display: flex; gap: 35px; align-items: stretch; margin-top: 10px; }
-        .left-visual-panel { flex: 1.1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e2e8f0; border-radius: 24px; padding: 20px; position: relative; overflow: hidden; background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 100%); }
+        .left-visual-panel { flex: 1.1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 24px; padding: 20px; background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 100%); }
         .right-inputs-panel { flex: 1.9; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* ---------------- DYNAMIC FIFA ULTIMATE TEAM GOLD CARD ---------------- */
-        .fifa-card { width: 240px; height: 350px; background: linear-gradient(135deg, #ffe066 0%, #f5af19 50%, #e65c00 100%); border-radius: 18px; position: relative; padding: 18px; color: #1a1a1a; box-shadow: 0 15px 35px rgba(230, 92, 0, 0.3); font-family: 'Poppins', sans-serif; border: 3px solid #fff2a3; display: flex; flex-direction: column; overflow: hidden; }
+        /* --- FUT FUT GOLD PREMIUM GRAPHICAL CARD STYLE --- */
+        .fifa-card { width: 240px; height: 350px; background: linear-gradient(135deg, #ffe066 0%, #f5af19 50%, #e65c00 100%); border-radius: 18px; position: relative; padding: 18px; color: #1a1a1a; box-shadow: 0 15px 35px rgba(230, 92, 0, 0.3); border: 3px solid #fff2a3; display: flex; flex-direction: column; overflow: hidden; }
         .fifa-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent); transform: rotate(45deg); pointer-events: none; }
-        
         .card-top-row { display: flex; align-items: center; height: 110px; margin-bottom: 5px; }
         .card-metrics-badge { display: flex; flex-direction: column; align-items: center; width: 35%; line-height: 1.1; text-align: center; border-right: 1px solid rgba(0,0,0,0.1); }
         .card-ovr-value { font-size: 2.5rem; font-weight: 800; color: #000; letter-spacing: -1px; }
         .card-pos-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #222; }
         .card-crest-logo { font-size: 1.4rem; margin-top: 5px; color: #0a4da4; }
         
-        .card-avatar-photo { width: 65%; height: 100%; display: flex; align-items: flex-end; justify-content: center; font-size: 5rem; color: rgba(0,0,0,0.15); position: relative; }
+        .card-avatar-photo { width: 65%; height: 100%; display: flex; align-items: flex-end; justify-content: center; font-size: 5rem; color: rgba(0,0,0,0.15); position: relative; overflow: hidden; }
         .card-avatar-photo i { position: absolute; bottom: -5px; }
-        
-        .card-player-name { text-align: center; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 0; border-top: 1px solid rgba(0,0,0,0.15); border-bottom: 1px solid rgba(0,0,0,0.15); margin-bottom: 10px; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
+        .card-avatar-photo img { width: 100%; height: 100%; object-fit: cover; border-bottom-left-radius: 4px; display: none; }
+
+        .card-player-name { text-align: center; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; padding: 4px 0; border-top: 1px solid rgba(0,0,0,0.15); border-bottom: 1px solid rgba(0,0,0,0.15); margin-bottom: 10px; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-stats-grid { display: flex; width: 100%; justify-content: space-between; padding: 0 5px; }
         .card-stats-col { width: 48%; display: flex; flex-direction: column; gap: 4px; }
         .card-stat-line { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 700; }
         .card-stat-val { font-size: 1rem; font-weight: 800; color: #000; margin-right: 4px; width: 22px; text-align: right; }
         .card-stat-lbl { color: #333; font-weight: 500; text-transform: uppercase; font-size: 0.75rem; }
         
-        /* --- Form Sliders Matrix Inputs --- */
+        /* Control Panel Right Form Fields */
         .profile-title-header h3 { font-size: 1.4rem; color: #0a4da4; font-weight: 700; margin-bottom: 2px; }
         .profile-title-header p { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; }
         
@@ -104,11 +103,10 @@
         .slider-title i { color: #1e6fdf; font-size: 0.9rem; }
         .slider-counter { font-size: 0.95rem; font-weight: 700; color: #0a4da4; background: #e0ecfb; padding: 1px 8px; border-radius: 6px; min-width: 40px; text-align: center; }
         .slider-control-group input[type="range"] { width: 100%; display: block; height: 6px; background: #e2e8f0; border-radius: 5px; appearance: none; outline: none; cursor: pointer; }
-        .slider-control-group input[type="range"]::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #0a4da4; transition: transform 0.1s; }
-        .slider-control-group input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        .slider-control-group input[type="range"]::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #0a4da4; cursor: pointer; }
         
-        .status-sync-indicator { font-size: 0.8rem; text-align: center; color: #059669; font-weight: 500; height: 16px; margin-bottom: 10px; }
-        .action-close-btn { background: #0a4da4; color: white; border: none; padding: 12px; border-radius: 50px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; font-size: 0.95rem; }
+        .status-sync-indicator { font-size: 0.8rem; text-align: center; color: #475569; font-weight: 500; height: 16px; margin-bottom: 10px; }
+        .action-close-btn { background: #0a4da4; color: white; border: none; padding: 12px; border-radius: 50px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.95rem; }
         .action-close-btn:hover { background: #1e6fdf; }
 
         .footer { background: #0c1b33; color: white; text-align: center; padding: 20px; margin-top: 50px; }
@@ -142,11 +140,11 @@
                 <table class="payment-table" id="studentPaymentTable">
                     <thead id="tableHeader"></thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading data rows...</td></tr>
+                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading roster records matrix...</td></tr>
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Coach Instructions:</strong> Click a student's name to manage their FIFA Attribute Card & Rating Score. Click payment tags to cycle states.</p>
+            <p style="text-align: center; margin-top: 25px; color: #5a6e8a;"><i class="fas fa-hand-pointer"></i> <strong>Coach Module:</strong> Click any student name row link to tweak skill ratings and update their card asset profile. Click payment cells to cycle transaction logs states.</p>
         </div>
     </div>
 
@@ -178,10 +176,11 @@
                                 <i class="fas fa-futbol card-crest-logo"></i>
                             </div>
                             <div class="card-avatar-photo">
-                                <i class="fas fa-user-ninja"></i>
+                                <i class="fas fa-user-ninja" id="cardFallbackIcon"></i>
+                                <img src="" id="cardAvatarImg">
                             </div>
                         </div>
-                        <div class="card-player-name" id="cardPlayerName">Player Name</div>
+                        <div class="card-player-name" id="cardPlayerName">ATHLETE</div>
                         <div class="card-stats-grid">
                             <div class="card-stats-col">
                                 <div class="card-stat-line"><span class="card-stat-val" id="cardPac">50</span><span class="card-stat-lbl">PAC</span></div>
@@ -236,7 +235,7 @@
                         </div>
                     </div>
                     
-                    <div class="status-sync-indicator" id="syncIndicator">Card values loaded.</div>
+                    <div class="status-sync-indicator" id="syncIndicator">Modifications pending save action.</div>
                     <button class="action-close-btn" onclick="saveAttributesAndClose()">Save Performance Card</button>
                 </div>
             </div>
@@ -272,7 +271,6 @@
             const tbody = document.getElementById('tableBody');
             
             try {
-                // Fetch student records from public.users table
                 const { data: usersProfiles, error: userError } = await supabase
                     .from('users')
                     .select('*')
@@ -281,7 +279,6 @@
                 if (userError) throw userError;
                 globalCachedUsersList = usersProfiles || [];
 
-                // Fetch full monthly log matrix arrays
                 const { data: allPayments, error: paymentError } = await supabase
                     .from('user_payments')
                     .select('*');
@@ -294,7 +291,7 @@
                 thead.innerHTML = headerHtml;
 
                 if (globalCachedUsersList.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No student profiles found. Run backfill scripts.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No student profiles found. Run SQL script.</td></tr>`;
                     return;
                 }
 
@@ -321,41 +318,44 @@
                 tbody.innerHTML = bodyHtml;
 
             } catch (error) {
-                console.error("Roster rendering breakdown:", error);
                 tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Execution Failed: ${error.message}</td></tr>`;
             }
         }
 
-        // Triggered upon roster link name click activation
         window.openStudentModal = (userId) => {
             currentActiveModalUserId = userId; 
             const infoModal = document.getElementById('studentInfoModal');
-            
             const targetUser = globalCachedUsersList.find(u => u.id === userId);
             if (!targetUser) return;
 
-            // Load textual metadata information profiles
             document.getElementById('modalStudentName').textContent = targetUser.name || 'Unknown Athlete';
             document.getElementById('modalUserEmail').textContent = targetUser.email || 'No email attached';
-            document.getElementById('cardPlayerName').textContent = (targetUser.name || 'PLAYER').split(' ')[0];
+            document.getElementById('cardPlayerName').textContent = (targetUser.name || 'PLAYER').split(' ')[0].toUpperCase();
 
-            // Safely fall back to default of 50 if database values are NULL
+            // Handle Photo Rendering Toggle Logic
+            const imgEl = document.getElementById('cardAvatarImg');
+            const fallbackIcon = document.getElementById('cardFallbackIcon');
+            if (targetUser.avatar_url) {
+                imgEl.src = targetUser.avatar_url;
+                imgEl.style.display = 'block';
+                fallbackIcon.style.display = 'none';
+            } else {
+                imgEl.style.display = 'none';
+                fallbackIcon.style.display = 'block';
+            }
+
             document.getElementById('inputPace').value = targetUser.pace ?? 50;
             document.getElementById('inputDribbling').value = targetUser.dribbling ?? 50;
             document.getElementById('inputDefending').value = targetUser.defending ?? 50;
             document.getElementById('inputStamina').value = targetUser.stamina ?? 50;
             document.getElementById('inputPhysicality').value = targetUser.physicality ?? 50;
 
-            // Render current active layout configurations
             document.getElementById('syncIndicator').innerHTML = "Modifications pending save action.";
             document.getElementById('syncIndicator').style.color = "#475569";
             
             resetStarsUI();
-            if (targetUser.rating) {
-                renderStarsDisplay(targetUser.rating);
-            }
+            if (targetUser.rating) { renderStarsDisplay(targetUser.rating); }
 
-            // Fire UI counter sync updates
             window.liveUpdateCardView();
             infoModal.classList.add('active');
         };
@@ -365,7 +365,6 @@
             currentActiveModalUserId = null;
         };
 
-        // Live processing engine linking html input matrix sliders directly to FIFA FUT element structure
         window.liveUpdateCardView = () => {
             const pac = parseInt(document.getElementById('inputPace').value);
             const dri = parseInt(document.getElementById('inputDribbling').value);
@@ -373,28 +372,21 @@
             const sta = parseInt(document.getElementById('inputStamina').value);
             const phy = parseInt(document.getElementById('inputPhysicality').value);
 
-            // Sync visual numerical label readouts
             document.getElementById('lblPace').textContent = pac;
             document.getElementById('lblDribbling').textContent = dri;
             document.getElementById('lblDefending').textContent = def;
             document.getElementById('lblStamina').textContent = sta;
             document.getElementById('lblPhysicality').textContent = phy;
 
-            // Sync inside FIFA card graphical parameters
             document.getElementById('cardPac').textContent = pac;
             document.getElementById('cardDri').textContent = dri;
             document.getElementById('cardDef').textContent = def;
             document.getElementById('cardSta').textContent = sta;
             document.getElementById('cardPhy').textContent = phy;
 
-            // Calculate overall average value rating score (OVR)
-            const overallAverage = Math.round((pac + merchants_dri(dri) + def + sta + phy) / 5);
-            document.getElementById('cardOvr').textContent = overallAverage;
-
-            function merchants_dri(d) { return d; } // simple assignment helper logic bypass
+            document.getElementById('cardOvr').textContent = Math.round((pac + dri + def + sta + phy) / 5);
         };
 
-        // Batched operational updates pushing card records up to Supabase user rows
         window.saveAttributesAndClose = async () => {
             if (!currentActiveModalUserId || !supabase) return;
 
@@ -410,18 +402,11 @@
             try {
                 const { error } = await supabase
                     .from('users')
-                    .update({
-                        pace: pac,
-                        dribbling: dri,
-                        defending: def,
-                        stamina: sta,
-                        physicality: phy
-                    })
+                    .update({ pace: pac, dribbling: dri, defending: def, stamina: sta, physicality: phy })
                     .eq('id', currentActiveModalUserId);
 
                 if (error) throw error;
 
-                // Sync local run storage index array memory parameters
                 const idx = globalCachedUsersList.findIndex(u => u.id === currentActiveModalUserId);
                 if (idx !== -1) {
                     globalCachedUsersList[idx].pace = pac;
@@ -430,23 +415,14 @@
                     globalCachedUsersList[idx].stamina = sta;
                     globalCachedUsersList[idx].physicality = phy;
                 }
-
                 closeStudentModal();
-
             } catch (err) {
-                console.error("Failed executing attribute script save updates:", err);
-                document.getElementById('syncIndicator').textContent = "Error saving values.";
                 alert(`Operation failure: ${err.message}`);
             }
         };
 
-        // --- Stars Scoring Event Tracking System ---
         const stars = document.querySelectorAll('#starsContainer i');
-
-        function resetStarsUI() {
-            stars.forEach(s => s.classList.remove('active'));
-        }
-
+        function resetStarsUI() { stars.forEach(s => s.classList.remove('active')); }
         function renderStarsDisplay(val) {
             stars.forEach(s => {
                 if (parseInt(s.getAttribute('data-value')) <= val) s.classList.add('active');
@@ -459,70 +435,12 @@
                 if (!currentActiveModalUserId || !supabase) return;
                 const score = parseInt(e.target.getAttribute('data-value'));
                 renderStarsDisplay(score);
-
                 try {
                     await supabase.from('users').update({ rating: score }).eq('id', currentActiveModalUserId);
                     const idx = globalCachedUsersList.findIndex(u => u.id === currentActiveModalUserId);
                     if (idx !== -1) globalCachedUsersList[idx].rating = score;
-                } catch (err) {
-                    console.error("Star sync breakdown:", err);
-                }
+                } catch (err) { console.error(err); }
             });
         });
 
-        // Background calendar matrix cell status modification processing
-        window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
-            const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
-            const targetCell = document.getElementById(cellId);
-            if (!targetCell) return;
-
-            targetCell.innerHTML = `<i class="fas fa-spinner fa-spin updating-icon"></i>...`;
-            targetCell.onclick = null; 
-            const newPaidState = !currentPaidState;
-
-            try {
-                const { error } = await supabase
-                    .from('user_payments')
-                    .upsert({
-                        user_id: userId,
-                        student_name: studentName,
-                        month: monthName,
-                        paid: newPaidState,
-                        amount: 49.00,
-                        payment_date: new Date().toISOString()
-                    }, { onConflict: 'user_id, month' });
-
-                if (error) throw error;
-
-                if (newPaidState) {
-                    targetCell.className = "paid-cell";
-                    targetCell.innerHTML = `<i class="fas fa-check-circle paid-icon"></i> Paid`;
-                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, true); };
-                } else {
-                    targetCell.className = "unpaid-cell";
-                    targetCell.innerHTML = `<i class="fas fa-times-circle unpaid-icon"></i> Pending`;
-                    targetCell.onclick = (e) => { e.stopPropagation(); togglePaymentStatus(userId, studentName, monthName, false); };
-                }
-            } catch (err) {
-                console.error(err);
-                loadAndRenderLivePayments();
-            }
-        };
-
-        function checkPassword() {
-            if (passwordInput.value.trim() === CORRECT_PASSWORD) {
-                document.body.style.overflow = '';
-                if (modal) modal.remove();
-                coachContent.style.display = 'block';
-                if (footer) footer.style.display = 'block';
-                loadAndRenderLivePayments();
-            } else {
-                errorDiv.textContent = 'Incorrect security code. Access Denied.';
-            }
-        }
-
-        submitBtn.addEventListener('click', checkPassword);
-        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
-    </script>
-</body>
-</html>
+        window.togglePaymentStatus = async (userId, studentName,
