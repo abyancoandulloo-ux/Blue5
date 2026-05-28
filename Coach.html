@@ -48,7 +48,7 @@
         .unpaid-icon { color: #f59e0b; margin-right: 5px; }
         .updating-icon { color: #0a4da4; margin-right: 5px; }
         
-        /* Modals Common Architecture */
+        /* Modals Architecture */
         .password-modal, .info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.65); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .password-modal.active, .info-modal.active { opacity: 1; pointer-events: auto; }
         
@@ -259,12 +259,11 @@
             }
         }
 
-        // Exposed Function: Opens Pop-In Modal, fetches real-time email & rating from 'user_payments' table
+        // Opens Modal, fetches email & rating strictly from 'user_payments' table
         window.openStudentModal = async (userId, studentName) => {
             currentActiveModalUserId = userId; 
             const infoModal = document.getElementById('studentInfoModal');
             
-            // Set initial loading states
             document.getElementById('modalStudentName').textContent = studentName;
             document.getElementById('modalUserId').textContent = userId.substring(0, 10) + '...';
             document.getElementById('modalUserEmail').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Loading...`;
@@ -274,7 +273,7 @@
             infoModal.classList.add('active');
 
             try {
-                // 1. Fetch live month count logs
+                // 1. Fetch record logs count
                 const { count, error: countErr } = await supabase
                     .from('user_payments')
                     .select('*', { count: 'exact', head: true })
@@ -284,35 +283,33 @@
                     document.getElementById('modalTotalLogs').textContent = `${count} Months Total`;
                 }
 
-                // 2. Fetch the real saved data (email and rating) directly from 'user_payments' 
+                // 2. Fetch data directly from 'user_payments' table
                 const { data: dbData, error: dbErr } = await supabase
                     .from('user_payments') 
                     .select('email, rating')
                     .eq('user_id', userId)
-                    .not('email', 'is', null) // prioritize picking up rows where an email is recorded
+                    .not('email', 'is', null) 
                     .limit(1);
 
                 if (!dbErr && dbData && dbData.length > 0) {
                     const playerRecord = dbData[0];
                     
-                    // Render real email direct from the database
                     if (playerRecord.email) {
                         document.getElementById('modalUserEmail').textContent = playerRecord.email;
                     } else {
                         document.getElementById('modalUserEmail').textContent = "Not provided";
                     }
                     
-                    // Render saved star configuration value
                     if (playerRecord.rating) {
                         updateStarsDisplay(playerRecord.rating, false); 
                     }
                 } else {
-                    document.getElementById('modalUserEmail').textContent = "No log found";
+                    document.getElementById('modalUserEmail').textContent = "No email log found";
                 }
 
             } catch(e) {
                 console.error("Error pulling student details:", e);
-                document.getElementById('modalUserEmail').textContent = "Error loading email";
+                document.getElementById('modalUserEmail').textContent = "Error loading data";
             }
         };
 
@@ -325,7 +322,7 @@
             if(e.target === this) closeStudentModal();
         });
 
-        // --- Rating System Implementation ---
+        // --- Rating System Logic ---
         const stars = document.querySelectorAll('#starsContainer i');
         const ratingStatus = document.getElementById('ratingStatus');
 
@@ -354,7 +351,7 @@
                 updateStarsDisplay(chosenRating, true); 
 
                 try {
-                    // Saves the rating choice value straight back into the user_payments record row entries
+                    // Correctly targets the altered 'user_payments' table directly
                     const { error } = await supabase
                         .from('user_payments')
                         .update({ rating: chosenRating })
@@ -371,7 +368,7 @@
             });
         });
 
-        // Handles payment state toggling
+        // Handles payment status updates
         window.togglePaymentStatus = async (userId, studentName, monthName, currentPaidState) => {
             const cellId = `cell-${userId}-${monthName.toLowerCase()}`;
             const targetCell = document.getElementById(cellId);
@@ -384,7 +381,6 @@
             const newPaidState = !currentPaidState;
 
             try {
-                // Grab existing email if present to ensure the record keeps its structural data integrity upon upsert operations
                 let existingEmail = null;
                 const { data: currentRecord } = await supabase
                     .from('user_payments')
