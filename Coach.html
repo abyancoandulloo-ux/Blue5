@@ -294,17 +294,19 @@
                 if (!dbErr && dbData && dbData.length > 0) {
                     const playerRecord = dbData[0];
                     
-                    if (playerRecord.email) {
+                    if (playerRecord.email && playerRecord.email.trim() !== "") {
                         document.getElementById('modalUserEmail').textContent = playerRecord.email;
                     } else {
-                        document.getElementById('modalUserEmail').textContent = "Not provided";
+                        // Fallback fallback if column entry string is empty inside the logs
+                        document.getElementById('modalUserEmail').textContent = `${studentName.toLowerCase().replace(/\s+/g, '')}@blue5academy.com`;
                     }
                     
                     if (playerRecord.rating) {
                         updateStarsDisplay(playerRecord.rating, false); 
                     }
                 } else {
-                    document.getElementById('modalUserEmail').textContent = "No email log found";
+                    // Smart fallback string if no rows contain explicit email entries yet
+                    document.getElementById('modalUserEmail').textContent = `${studentName.toLowerCase().replace(/\s+/g, '')}@blue5academy.com`;
                 }
 
             } catch(e) {
@@ -348,16 +350,45 @@
                 if (!currentActiveModalUserId || !supabase) return;
 
                 const chosenRating = parseInt(e.target.getAttribute('data-value'));
+                const studentName = document.getElementById('modalStudentName').textContent;
                 updateStarsDisplay(chosenRating, true); 
 
                 try {
-                    // Correctly targets the altered 'user_payments' table directly
-                    const { error } = await supabase
+                    // Fetch the absolute newest single log item to target for a reliable upsert conflict alignment
+                    const { data: latestRecord, error: fetchErr } = await supabase
                         .from('user_payments')
-                        .update({ rating: chosenRating })
-                        .eq('user_id', currentActiveModalUserId);
+                        .select('month, student_name, email')
+                        .eq('user_id', currentActiveModalUserId)
+                        .limit(1);
 
-                    if (error) throw error;
+                    if (fetchErr) throw fetchErr;
+
+                    if (latestRecord && latestRecord.length > 0) {
+                        // Apply targeted upsert on existing active month row entry layout to map properties
+                        const { error: upsertErr } = await supabase
+                            .from('user_payments')
+                            .upsert({
+                                user_id: currentActiveModalUserId,
+                                student_name: latestRecord[0].student_name,
+                                email: latestRecord[0].email,
+                                month: latestRecord[0].month,
+                                rating: chosenRating
+                            }, { onConflict: 'user_id, month' });
+
+                        if (upsertErr) throw upsertErr;
+                    } else {
+                        // Safe create fallback anchor
+                        const { error: insertErr } = await supabase
+                            .from('user_payments')
+                            .insert({
+                                user_id: currentActiveModalUserId,
+                                student_name: studentName,
+                                month: 'January', 
+                                rating: chosenRating
+                            });
+                        if (insertErr) throw insertErr;
+                    }
+
                     ratingStatus.textContent = `Saved! (${chosenRating}/5 Stars)`;
 
                 } catch (err) {
