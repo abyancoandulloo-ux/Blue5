@@ -19,7 +19,7 @@
             </a>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="Home.html">Home</a></li>
+                    <li><a href="index.html">Home</a></li>
                     <li><a href="login.html" class="active-nav">Log in</a></li>
                     <li><a href="Payment.html">Payment</a></li>
                     <li><a href="sessions.html">Sessions</a></li>
@@ -147,8 +147,12 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) alert('Login failed: ' + error.message);
-            else window.location.href = 'Home.html';
+            if (error) {
+                alert('Login failed: ' + error.message);
+            } else {
+                // Fixed redirect from Home.html to index.html to eliminate 404 tracking bugs
+                window.location.href = 'index.html';
+            }
         };
         
         window.registerUser = async () => {
