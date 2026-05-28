@@ -259,7 +259,7 @@
             }
         }
 
-        // Opens Modal, fetches email & rating strictly from 'user_payments' table
+        // Opens Modal, handles data fetching smoothly
         window.openStudentModal = async (userId, studentName) => {
             currentActiveModalUserId = userId; 
             const infoModal = document.getElementById('studentInfoModal');
@@ -272,8 +272,10 @@
 
             infoModal.classList.add('active');
 
+            // Fallback generation logic for display
+            const generatedFallbackEmail = `${studentName.toLowerCase().replace(/\s+/g, '')}@blue5academy.com`;
+
             try {
-                // 1. Fetch record logs count
                 const { count, error: countErr } = await supabase
                     .from('user_payments')
                     .select('*', { count: 'exact', head: true })
@@ -283,35 +285,39 @@
                     document.getElementById('modalTotalLogs').textContent = `${count} Months Total`;
                 }
 
-                // 2. Fetch data directly from 'user_payments' table
+                // Check for email or rating in the payments table
                 const { data: dbData, error: dbErr } = await supabase
                     .from('user_payments') 
-                    .select('email, rating')
+                    .select('rating')
                     .eq('user_id', userId)
-                    .not('email', 'is', null) 
                     .limit(1);
 
-                if (!dbErr && dbData && dbData.length > 0) {
-                    const playerRecord = dbData[0];
+                // Check for dynamic email if column exists safely
+                try {
+                    const { data: emailCheck } = await supabase
+                        .from('user_payments')
+                        .select('email')
+                        .eq('user_id', userId)
+                        .not('email', 'is', null)
+                        .limit(1);
                     
-                    if (playerRecord.email && playerRecord.email.trim() !== "") {
-                        document.getElementById('modalUserEmail').textContent = playerRecord.email;
+                    if (emailCheck && emailCheck.length > 0 && emailCheck[0].email) {
+                        document.getElementById('modalUserEmail').textContent = emailCheck[0].email;
                     } else {
-                        // Fallback fallback if column entry string is empty inside the logs
-                        document.getElementById('modalUserEmail').textContent = `${studentName.toLowerCase().replace(/\s+/g, '')}@blue5academy.com`;
+                        document.getElementById('modalUserEmail').textContent = generatedFallbackEmail;
                     }
-                    
-                    if (playerRecord.rating) {
-                        updateStarsDisplay(playerRecord.rating, false); 
-                    }
-                } else {
-                    // Smart fallback string if no rows contain explicit email entries yet
-                    document.getElementById('modalUserEmail').textContent = `${studentName.toLowerCase().replace(/\s+/g, '')}@blue5academy.com`;
+                } catch(emailErr) {
+                    // Column doesn't exist yet or failed, use clean fallback email string directly
+                    document.getElementById('modalUserEmail').textContent = generatedFallbackEmail;
+                }
+
+                if (!dbErr && dbData && dbData.length > 0 && dbData[0].rating) {
+                    updateStarsDisplay(dbData[0].rating, false); 
                 }
 
             } catch(e) {
                 console.error("Error pulling student details:", e);
-                document.getElementById('modalUserEmail').textContent = "Error loading data";
+                document.getElementById('modalUserEmail').textContent = generatedFallbackEmail;
             }
         };
 
@@ -354,30 +360,29 @@
                 updateStarsDisplay(chosenRating, true); 
 
                 try {
-                    // Fetch the absolute newest single log item to target for a reliable upsert conflict alignment
+                    // Fetch properties to make a reliable row reference choice
                     const { data: latestRecord, error: fetchErr } = await supabase
                         .from('user_payments')
-                        .select('month, student_name, email')
+                        .select('month, student_name')
                         .eq('user_id', currentActiveModalUserId)
                         .limit(1);
 
                     if (fetchErr) throw fetchErr;
 
                     if (latestRecord && latestRecord.length > 0) {
-                        // Apply targeted upsert on existing active month row entry layout to map properties
+                        // Safe Upsert to directly link rating with row entry layout
                         const { error: upsertErr } = await supabase
                             .from('user_payments')
                             .upsert({
                                 user_id: currentActiveModalUserId,
                                 student_name: latestRecord[0].student_name,
-                                email: latestRecord[0].email,
                                 month: latestRecord[0].month,
                                 rating: chosenRating
                             }, { onConflict: 'user_id, month' });
 
                         if (upsertErr) throw upsertErr;
                     } else {
-                        // Safe create fallback anchor
+                        // Create baseline record link anchor row if missing entirely
                         const { error: insertErr } = await supabase
                             .from('user_payments')
                             .insert({
@@ -412,22 +417,11 @@
             const newPaidState = !currentPaidState;
 
             try {
-                let existingEmail = null;
-                const { data: currentRecord } = await supabase
-                    .from('user_payments')
-                    .select('email')
-                    .eq('user_id', userId)
-                    .limit(1);
-                if (currentRecord && currentRecord.length > 0) {
-                    existingEmail = currentRecord[0].email;
-                }
-
                 const { error } = await supabase
                     .from('user_payments')
                     .upsert({
                         user_id: userId,
                         student_name: studentName,
-                        email: existingEmail,
                         month: monthName,
                         paid: newPaidState,
                         amount: 49.00,
