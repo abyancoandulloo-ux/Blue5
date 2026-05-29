@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue5 Academy | Photos</title>
+    <title>Blue5 Academy | Media Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4fa; color: #1f2a44; }
@@ -28,9 +28,12 @@
         .section-title { color: #0a4da4; font-size: 2rem; }
         .title-underline { width: 80px; height: 3px; background: #0a4da4; margin-top: 5px; border-radius: 3px; }
 
-        /* Action Buttons */
+        /* Action Buttons Header Layout */
+        .admin-actions { display: flex; gap: 12px; flex-wrap: wrap; }
         .admin-action-btn { background: #1e6fdf; color: white; border: none; padding: 10px 24px; border-radius: 30px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
         .admin-action-btn:hover { background: #0a4da4; }
+        .admin-action-btn.video-btn { background: #22c55e; }
+        .admin-action-btn.video-btn:hover { background: #15803d; }
 
         /* Upload Panel Box */
         .upload-card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 35px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: none; }
@@ -53,10 +56,9 @@
         .gallery-item { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; display: flex; flex-direction: column; }
         .gallery-item:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(10, 77, 164, 0.15); }
 
-        /* Facebook Style Dynamic Composite Preview Grid System */
+        /* Composite Preview Grid System */
         .fb-grid-wrapper { width: 100%; height: 320px; background: #e2e8f0; display: grid; gap: 4px; overflow: hidden; position: relative; }
         
-        /* Grid Formations based on image count class names */
         .fb-grid-wrapper.count-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
         .fb-grid-wrapper.count-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
         .fb-grid-wrapper.count-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
@@ -65,24 +67,29 @@
         .fb-grid-wrapper.count-4 .fb-img-box:first-child, .fb-grid-wrapper.count-more .fb-img-box:first-child { grid-column: span 3; }
 
         .fb-img-box { position: relative; width: 100%; height: 100%; overflow: hidden; }
-        .fb-img-box img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+        .fb-img-box img, .fb-img-box video { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
         .gallery-item:hover .fb-img-box img { transform: scale(1.03); }
 
-        /* Plus Text Counter Overlay Badge matching Facebook post structures */
+        /* Video Play Overlay Indicator Icon */
+        .video-play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(30, 111, 223, 0.9); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; padding-left: 5px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); z-index: 4; }
+        .fb-img-box:hover .video-play-overlay { background: #0a4da4; transform: translate(-50%, -50%) scale(1.08); transition: all 0.2s; }
+
+        /* Media Overlay Count Indicator Badge */
         .fb-more-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.7); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.6rem; font-weight: 700; backdrop-filter: blur(2px); }
 
         .img-details { padding: 22px; border-top: 1px solid #f0f4fa; background: white; }
         .img-details h4 { font-size: 1.1rem; color: #1f2a44; margin-bottom: 6px; font-weight: 600; line-height: 1.4; }
         .img-details p { font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
 
-        /* Lightbox Carousel Modal CSS Structures */
+        /* Lightbox Carousel Modal Container */
         .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.96); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        .lightbox-content { max-width: 85%; max-height: 78vh; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); object-fit: contain; }
+        .lightbox-content { max-width: 85%; max-height: 75vh; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); object-fit: contain; display: none; }
+        .lightbox-video { max-width: 85%; max-height: 75vh; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); display: none; outline: none; background: black; }
         .lightbox-close { position: absolute; top: 25px; right: 35px; color: white; font-size: 42px; cursor: pointer; z-index: 10100; transition: color 0.2s; }
         .lightbox-close:hover { color: #1e6fdf; }
         .lightbox-caption { position: absolute; bottom: 35px; color: white; font-size: 1.1rem; background: rgba(0,0,0,0.75); padding: 12px 30px; border-radius: 40px; text-align: center; font-weight: 500; min-width: 260px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
-        /* Carousel Navigation Controls */
+        /* Carousel Arrows */
         .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 28px; background: rgba(255,255,255,0.08); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: all 0.2s ease; z-index: 10050; }
         .nav-arrow:hover { background: #1e6fdf; color: white; box-shadow: 0 0 15px rgba(30,111,223,0.4); }
         .left-arrow { left: 40px; }
@@ -119,52 +126,58 @@
     <div class="container">
         <div class="header-wrapper">
             <div>
-                <h2 class="section-title"><i class="fas fa-camera"></i> Training Moments Gallery</h2>
+                <h2 class="section-title"><i class="fas fa-camera"></i> Training Media Portal</h2>
                 <div class="title-underline"></div>
             </div>
-            <button class="admin-action-btn" id="openUploadBoxBtn"><i class="fas fa-cloud-upload-alt"></i> Upload Batch</button>
+            <div class="admin-actions">
+                <button class="admin-action-btn" id="uploadPhotosBtn"><i class="fas fa-images"></i> Upload Photos</button>
+                <button class="admin-action-btn video-btn" id="uploadVideoBtn"><i class="fas fa-video"></i> Upload Video</button>
+            </div>
         </div>
 
         <div class="upload-card" id="uploadCard">
-            <h3><i class="fas fa-plus-circle"></i> Upload Photo Batch</h3>
-            <form id="photoUploadForm">
+            <h3 id="uploadCardTitle"><i class="fas fa-plus-circle"></i> Upload Photo Batch</h3>
+            <form id="mediaUploadForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="photoFile">Choose Image Files (Select Multiple)</label>
-                        <input type="file" id="photoFile" name="photos[]" accept="image/png, image/jpeg, image/jpg, image/webp" multiple required>
+                        <label for="mediaFile" id="fileFieldLabel">Choose Image Files (Select Multiple)</label>
+                        <input type="file" id="mediaFile" name="media[]" required>
                         <small id="fileCountIndicator" style="color: #1e6fdf; font-weight: 600; margin-top: 4px; display: block; min-height: 1.2em;"></small>
                     </div>
                     <div class="form-group">
-                        <label for="photoDesc">Batch Description / Title</label>
-                        <input type="text" id="photoDesc" placeholder="e.g. Saturday Drills Bunch" required>
+                        <label for="mediaDesc">Media Group Title / Description</label>
+                        <input type="text" id="mediaDesc" placeholder="e.g. Saturday Drills Bunch" required>
                     </div>
                     <div class="form-group">
-                        <label for="photoAgeGroup">Target Age Cohort Group</label>
-                        <select id="photoAgeGroup" required>
+                        <label for="mediaAgeGroup">Target Age Cohort Group</label>
+                        <select id="mediaAgeGroup" required>
                             <option value="6-8">6-8 Years Old</option>
                             <option value="9-11">9-11 Years Old</option>
                         </select>
                     </div>
-                    <button type="submit" class="upload-submit-btn" id="uploadSubmitBtn">Publish Batch to Portal</button>
+                    <button type="submit" class="upload-submit-btn" id="uploadSubmitBtn">Publish to Portal</button>
                 </div>
             </form>
         </div>
 
         <div class="gallery-filters">
-            <button class="filter-btn active" data-filter="all">All Groups</button>
+            <button class="filter-btn active" data-filter="all">All Content</button>
             <button class="filter-btn" data-filter="6-8">6-8 Years Old</button>
             <button class="filter-btn" data-filter="9-11">9-11 Years Old</button>
         </div>
 
         <div class="gallery-grid" id="galleryGrid">
-            <div class="status-msg" id="gridStatus"><i class="fas fa-spinner fa-spin"></i> Connecting to gallery database...</div>
+            <div class="status-msg" id="gridStatus"><i class="fas fa-spinner fa-spin"></i> Connecting to asset database...</div>
         </div>
     </div>
 
     <div id="lightboxModal" class="lightbox">
         <span class="lightbox-close" id="closeBtn">&times;</span>
         <div class="nav-arrow left-arrow" id="prevBtn"><i class="fas fa-chevron-left"></i></div>
-        <img class="lightbox-content" id="lightboxImg" alt="Enlarged View">
+        
+        <img class="lightbox-content" id="lightboxImg" alt="Enlarged Photo">
+        <video class="lightbox-video" id="lightboxVid" controls></video>
+        
         <div class="nav-arrow right-arrow" id="nextBtn"><i class="fas fa-chevron-right"></i></div>
         <div class="lightbox-caption" id="lightboxCaption"></div>
     </div>
@@ -178,25 +191,30 @@
 
         const CORRECT_PASSWORD = "Saliim007";
         let currentFilter = "all";
-        let groupedAlbumsCache = [];
+        let aggregatedMediaCache = []; // Unified collection grouping items by matching titles
+        let uploadMode = "photo"; // Options tracking state: "photo" or "video"
 
-        // Carousel variables
-        let activeAlbumImages = [];
-        let activeImageIndex = 0;
+        // Lightbox carousel variables
+        let activeAlbumFiles = [];
+        let activeFileIndex = 0;
         let activeAlbumTitle = "";
 
         // UI Target Bindings
-        const openUploadBoxBtn = document.getElementById('openUploadBoxBtn');
+        const uploadPhotosBtn = document.getElementById('uploadPhotosBtn');
+        const uploadVideoBtn = document.getElementById('uploadVideoBtn');
         const uploadCard = document.getElementById('uploadCard');
-        const photoUploadForm = document.getElementById('photoUploadForm');
-        const fileInput = document.getElementById('photoFile');
+        const uploadCardTitle = document.getElementById('uploadCardTitle');
+        const mediaUploadForm = document.getElementById('mediaUploadForm');
+        const fileInput = document.getElementById('mediaFile');
+        const fileFieldLabel = document.getElementById('fileFieldLabel');
         const fileCountIndicator = document.getElementById('fileCountIndicator');
         const galleryGrid = document.getElementById('galleryGrid');
         const gridStatus = document.getElementById('gridStatus');
 
-        // Lightbox bindings
+        // Lightbox target linkages
         const lightboxModal = document.getElementById('lightboxModal');
         const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxVid = document.getElementById('lightboxVid');
         const lightboxCaption = document.getElementById('lightboxCaption');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
@@ -206,40 +224,60 @@
             console.error("Supabase client missing or misconfigured.");
             document.getElementById('gridStatus').innerHTML = `
                 <span style="color:#e53e3e; font-weight:600;">
-                    <i class="fas fa-exclamation-triangle"></i> Configuration Error: Unable to bind to the client module.
+                    <i class="fas fa-exclamation-triangle"></i> Configuration Error: Unable to bind to client.
                 </span>`;
         }
 
-        // Live selection updates
-        fileInput.addEventListener('change', () => {
-            const count = fileInput.files.length;
-            if (count > 1) {
-                fileCountIndicator.textContent = `Selected: ${count} images ready for batch upload.`;
-            } else if (count === 1) {
-                fileCountIndicator.textContent = `Selected: 1 image ready.`;
-            } else {
-                fileCountIndicator.textContent = ``;
-            }
-        });
+        // Setup File Upload Panel Mode Switching
+        uploadPhotosBtn.addEventListener('click', () => toggleUploadForm('photo'));
+        uploadVideoBtn.addEventListener('click', () => toggleUploadForm('video'));
 
-        // Verify Admin Credentials
-        openUploadBoxBtn.addEventListener('click', () => {
-            if (uploadCard.style.display === 'block') {
+        function toggleUploadForm(mode) {
+            if (uploadCard.style.display === 'block' && uploadMode === mode) {
                 uploadCard.style.display = 'none';
                 return;
             }
-            const accessKey = prompt("Coach Access Verification Required:\nEnter Security Password:");
+
+            const accessKey = prompt("Coach Verification Action Required:\nEnter Security Password:");
             if (accessKey === null) return;
             
-            if (accessKey === CORRECT_PASSWORD) {
-                uploadCard.style.display = 'block';
-                uploadCard.scrollIntoView({ behavior: 'smooth' });
+            if (accessKey !== CORRECT_PASSWORD) {
+                alert("Access Denied: Guard passkey mismatch.");
+                return;
+            }
+
+            uploadMode = mode;
+            uploadCard.style.display = 'block';
+            mediaUploadForm.reset();
+            fileCountIndicator.textContent = '';
+
+            if (mode === 'photo') {
+                uploadCardTitle.innerHTML = `<i class="fas fa-images"></i> Upload Photo Album Batch`;
+                fileFieldLabel.textContent = "Choose Image Files (Select Multiple)";
+                fileInput.setAttribute('accept', 'image/png, image/jpeg, image/jpg, image/webp');
+                fileInput.setAttribute('multiple', 'multiple');
             } else {
-                alert("Access Denied: Incorrect portal security key token match.");
+                uploadCardTitle.innerHTML = `<i class="fas fa-video"></i> Upload Training Video Clip`;
+                fileFieldLabel.textContent = "Choose Video File (MP4, WebM)";
+                fileInput.setAttribute('accept', 'video/mp4, video/webm');
+                fileInput.removeAttribute('multiple');
+            }
+            uploadCard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Live textual file pick counter tracking
+        fileInput.addEventListener('change', () => {
+            const count = fileInput.files.length;
+            if (count > 1) {
+                fileCountIndicator.textContent = `Selected: ${count} images ready for batch compression.`;
+            } else if (count === 1) {
+                fileCountIndicator.textContent = uploadMode === 'photo' ? `Selected: 1 image ready.` : `Video file staged.`;
+            } else {
+                fileCountIndicator.textContent = '';
             }
         });
 
-        // Pull Images and Group them together dynamically
+        // Pull, group, and map multi-format database items 
         async function fetchGalleryRecords() {
             if (!supabase) return;
             try {
@@ -250,33 +288,38 @@
 
                 if (error) throw error;
 
-                // Group entries matching title string + cohort assignment tag
                 const groupingMap = {};
                 (data || []).forEach(item => {
+                    // Check if file is image or video path string
+                    const isVideo = item.image_url.match(/\.(mp4|webm)$/i) || item.storage_path?.includes('videos/');
                     const key = item.description.trim().toLowerCase() + "_" + item.age_group;
+                    
                     if (!groupingMap[key]) {
                         groupingMap[key] = {
                             description: item.description,
                             age_group: item.age_group,
-                            urls: []
+                            files: []
                         };
                     }
-                    groupingMap[key].urls.push(item.image_url);
+                    groupingMap[key].files.push({
+                        url: item.image_url,
+                        isVideo: !!isVideo
+                    });
                 });
 
-                groupedAlbumsCache = Object.values(groupingMap);
+                aggregatedMediaCache = Object.values(groupingMap);
                 renderActiveView();
             } catch (err) {
-                console.error("Database records compilation error:", err);
-                gridStatus.innerHTML = `<span style="color:#e53e3e;"><i class="fas fa-wifi"></i> Sync error reading gallery entries.</span>`;
+                console.error("Database compile loop breakdown:", err);
+                gridStatus.innerHTML = `<span style="color:#e53e3e;"><i class="fas fa-wifi"></i> Sync error reading gallery indexes.</span>`;
             }
         }
 
         function renderActiveView() {
-            const filtered = groupedAlbumsCache.filter(album => currentFilter === 'all' || album.age_group === currentFilter);
+            const filtered = aggregatedMediaCache.filter(album => currentFilter === 'all' || album.age_group === currentFilter);
             
             if (filtered.length === 0) {
-                galleryGrid.innerHTML = `<div class="status-msg"><i class="far fa-images"></i> No photo groups found in this category.</div>`;
+                galleryGrid.innerHTML = `<div class="status-msg"><i class="far fa-images"></i> No media bundles found inside this target filter.</div>`;
                 return;
             }
 
@@ -286,69 +329,72 @@
                 const card = document.createElement('div');
                 card.className = 'gallery-item';
                 
-                const totalCount = album.urls.length;
+                const totalCount = album.files.length;
                 let gridClass = 'count-1';
-                let imagesHtml = '';
+                let filesHtml = '';
 
-                // Build a dynamic, nested layout block reminiscent of Facebook photo feeds
-                if (totalCount === 1) {
-                    gridClass = 'count-1';
-                    imagesHtml = `<div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>`;
-                } else if (totalCount === 2) {
-                    gridClass = 'count-2';
-                    imagesHtml = `
-                        <div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>
-                        <div class="fb-img-box"><img src="${album.urls[1]}" alt="Image 2"></div>
-                    `;
-                } else if (totalCount === 3) {
-                    gridClass = 'count-3';
-                    imagesHtml = `
-                        <div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>
-                        <div class="fb-img-box"><img src="${album.urls[1]}" alt="Image 2"></div>
-                        <div class="fb-img-box"><img src="${album.urls[2]}" alt="Image 3"></div>
-                    `;
-                } else if (totalCount === 4) {
-                    gridClass = 'count-4';
-                    imagesHtml = `
-                        <div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>
-                        <div class="fb-img-box"><img src="${album.urls[1]}" alt="Image 2"></div>
-                        <div class="fb-img-box"><img src="${album.urls[2]}" alt="Image 3"></div>
-                        <div class="fb-img-box"><img src="${album.urls[3]}" alt="Image 4"></div>
-                    `;
-                } else {
-                    gridClass = 'count-more';
-                    const remaining = totalCount - 3;
-                    imagesHtml = `
-                        <div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>
-                        <div class="fb-img-box"><img src="${album.urls[1]}" alt="Image 2"></div>
-                        <div class="fb-img-box"><img src="${album.urls[2]}" alt="Image 3"></div>
+                // Render logic checking whether the cluster is a video or structural photo grid
+                if (album.files[0].isVideo) {
+                    filesHtml = `
                         <div class="fb-img-box">
-                            <img src="${album.urls[3]}" alt="Image 4">
-                            <div class="fb-more-overlay">+${remaining}</div>
-                        </div>
-                    `;
+                            <div class="video-play-overlay"><i class="fas fa-play"></i></div>
+                            <video src="${album.files[0].url}" muted preload="metadata"></video>
+                        </div>`;
+                } else {
+                    // Classic Facebook Photo Grid Formation logic
+                    if (totalCount === 1) {
+                        gridClass = 'count-1';
+                        filesHtml = `<div class="fb-img-box"><img src="${album.files[0].url}" alt="Img"></div>`;
+                    } else if (totalCount === 2) {
+                        gridClass = 'count-2';
+                        filesHtml = `
+                            <div class="fb-img-box"><img src="${album.files[0].url}"></div>
+                            <div class="fb-img-box"><img src="${album.files[1].url}"></div>`;
+                    } else if (totalCount === 3) {
+                        gridClass = 'count-3';
+                        filesHtml = `
+                            <div class="fb-img-box"><img src="${album.files[0].url}"></div>
+                            <div class="fb-img-box"><img src="${album.files[1].url}"></div>
+                            <div class="fb-img-box"><img src="${album.files[2].url}"></div>`;
+                    } else if (totalCount === 4) {
+                        gridClass = 'count-4';
+                        filesHtml = `
+                            <div class="fb-img-box"><img src="${album.files[0].url}"></div>
+                            <div class="fb-img-box"><img src="${album.files[1].url}"></div>
+                            <div class="fb-img-box"><img src="${album.files[2].url}"></div>
+                            <div class="fb-img-box"><img src="${album.files[3].url}"></div>`;
+                    } else {
+                        gridClass = 'count-more';
+                        filesHtml = `
+                            <div class="fb-img-box"><img src="${album.files[0].url}"></div>
+                            <div class="fb-img-box"><img src="${album.files[1].url}"></div>
+                            <div class="fb-img-box"><img src="${album.files[2].url}"></div>
+                            <div class="fb-img-box">
+                                <img src="${album.files[3].url}">
+                                <div class="fb-more-overlay">+${totalCount - 3}</div>
+                            </div>`;
+                    }
                 }
 
                 card.innerHTML = `
                     <div class="fb-grid-wrapper ${gridClass}">
-                        ${imagesHtml}
+                        ${filesHtml}
                     </div>
                     <div class="img-details">
                         <h4>${escapeHtml(album.description)}</h4>
-                        <p><i class="fas ${iconClass}"></i> Age Group: ${album.age_group} Years</p>
+                        <p><i class="fas ${iconClass}"></i> Age Group: ${album.age_group} Years (${totalCount} ${album.files[0].isVideo ? 'Video' : 'Item(s)'})</p>
                     </div>
                 `;
                 
-                // Clicking opens the entire bundle inside the carousel view
-                card.addEventListener('click', () => initCarousel(album.urls, album.description));
+                card.addEventListener('click', () => initCarousel(album.files, album.description));
                 galleryGrid.appendChild(card);
             });
         }
 
-        // Initialize carousel variables and load image indices
-        function initCarousel(imageUrls, title) {
-            activeAlbumImages = imageUrls;
-            activeImageIndex = 0;
+        // Initialize display rules inside Carousel components
+        function initCarousel(files, title) {
+            activeAlbumFiles = files;
+            activeFileIndex = 0;
             activeAlbumTitle = title;
             updateCarouselState();
             
@@ -357,10 +403,26 @@
         }
 
         function updateCarouselState() {
-            lightboxImg.src = activeAlbumImages[activeImageIndex];
-            lightboxCaption.textContent = `${escapeHtml(activeAlbumTitle)} (${activeImageIndex + 1}/${activeAlbumImages.length})`;
+            const currentItem = activeAlbumFiles[activeFileIndex];
             
-            if (activeAlbumImages.length <= 1) {
+            // Turn off current running streams
+            lightboxVid.pause();
+            lightboxVid.src = "";
+
+            if (currentItem.isVideo) {
+                lightboxImg.style.display = 'none';
+                lightboxVid.style.display = 'block';
+                lightboxVid.src = currentItem.url;
+                lightboxVid.play();
+            } else {
+                lightboxVid.style.display = 'none';
+                lightboxImg.style.display = 'block';
+                lightboxImg.src = currentItem.url;
+            }
+
+            lightboxCaption.textContent = `${escapeHtml(activeAlbumTitle)} (${activeFileIndex + 1}/${activeAlbumFiles.length})`;
+            
+            if (activeAlbumFiles.length <= 1) {
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
             } else {
@@ -369,47 +431,47 @@
             }
         }
 
-        // Carousel Arrow Navigation Rules
+        // Navigation controls
         prevBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            activeImageIndex = (activeImageIndex === 0) ? activeAlbumImages.length - 1 : activeImageIndex - 1;
+            activeFileIndex = (activeFileIndex === 0) ? activeAlbumFiles.length - 1 : activeFileIndex - 1;
             updateCarouselState();
         });
 
         nextBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            activeImageIndex = (activeImageIndex === activeAlbumImages.length - 1) ? 0 : activeImageIndex + 1;
+            activeFileIndex = (activeFileIndex === activeAlbumFiles.length - 1) ? 0 : activeFileIndex + 1;
             updateCarouselState();
         });
 
-        closeBtn.addEventListener('click', () => {
+        function haltLightboxView() {
+            lightboxVid.pause();
+            lightboxVid.src = "";
             lightboxModal.style.display = 'none';
             document.body.style.overflow = '';
-        });
+        }
 
+        closeBtn.addEventListener('click', haltLightboxView);
         lightboxModal.addEventListener('click', (e) => {
-            if (e.target === lightboxModal) {
-                lightboxModal.style.display = 'none';
-                document.body.style.overflow = '';
-            }
+            if (e.target === lightboxModal) haltLightboxView();
         });
 
-        // Processing Multi-File Batch Storage Upload Pipelines
-        photoUploadForm.addEventListener('submit', async (e) => {
+        // Processing Unified Transaction Upload Pipelines
+        mediaUploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             if (!supabase) {
-                alert("Upload Blocked: Database initialization incomplete.");
+                alert("Upload Blocked: Client engine connection error.");
                 return;
             }
 
-            const descInput = document.getElementById('photoDesc');
-            const ageGroupInput = document.getElementById('photoAgeGroup');
+            const descInput = document.getElementById('mediaDesc');
+            const ageGroupInput = document.getElementById('mediaAgeGroup');
             const submitBtn = document.getElementById('uploadSubmitBtn');
-
             const selectedFiles = fileInput.files;
+
             if (!selectedFiles || selectedFiles.length === 0) {
-                alert("Please select at least one image file.");
+                alert("Please stage a file payload first.");
                 return;
             }
 
@@ -418,14 +480,16 @@
             const rowsToInsert = [];
 
             try {
-                // Upload files to storage bucket
                 for (let i = 0; i < totalFiles; i++) {
                     const activeFile = selectedFiles[i];
-                    submitBtn.textContent = `Uploading files (${i + 1}/${totalFiles})...`;
+                    submitBtn.textContent = `Uploading asset (${i + 1}/${totalFiles})...`;
 
                     const fileExt = activeFile.name.split('.').pop();
                     const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-                    const pathLocation = `uploads/${cleanFileName}`;
+                    
+                    // Route files into clean, dedicated storage folders depending on file type
+                    const folderPrefix = uploadMode === 'photo' ? 'uploads' : 'videos';
+                    const pathLocation = `${folderPrefix}/${cleanFileName}`;
 
                     const { error: storageError } = await supabase.storage
                         .from('academy-photos')
@@ -439,46 +503,38 @@
 
                     rowsToInsert.push({
                         storage_path: pathLocation,
-                        image_url: urlData.publicUrl,
+                        image_url: urlData.publicUrl, // Holds video or image public endpoint references natively
                         description: descInput.value.trim(),
                         age_group: ageGroupInput.value
                     });
                 }
 
-                submitBtn.textContent = "Saving to database...";
+                submitBtn.textContent = "Writing catalog pointers...";
 
-                // Batch insert into table using minimal return payload to bypass RLS loops
                 const { error: tableError } = await supabase
                     .from('gallery_photos')
                     .insert(rowsToInsert, { returning: 'minimal' });
 
-                if (tableError) {
-                    if (tableError.message.includes("row-level security policy")) {
-                        alert(`❌ Database error: Row Level Security rules blocked this operation.\nCheck table configuration.`);
-                    } else {
-                        throw tableError;
-                    }
-                    return;
-                }
+                if (tableError) throw tableError;
 
-                alert(`Success: Published album block featuring ${totalFiles} photos!`);
+                alert(`Success: Published media module payload to portal!`);
                 
-                photoUploadForm.reset();
+                mediaUploadForm.reset();
                 fileCountIndicator.textContent = '';
                 uploadCard.style.display = 'none';
                 
                 await fetchGalleryRecords();
 
             } catch (err) {
-                console.error("Fatal transaction error:", err);
-                alert(`Upload failed: ${err.message}`);
+                console.error("Media workflow transaction drop:", err);
+                alert(`Upload workflow interrupted: ${err.message}`);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Publish Batch to Portal";
+                submitBtn.textContent = "Publish to Portal";
             }
         });
 
-        // Filter Controls Setup
+        // Setup Filter controls
         document.querySelectorAll('.filter-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -492,7 +548,7 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Initialize App View
+        // Fire initial view data sync pipelines
         if (supabase) {
             fetchGalleryRecords();
         }
