@@ -151,7 +151,6 @@
     </footer>
 
     <script type="module">
-        // Import the configured client directly from your unaltered file
         import { supabase } from './supabase-config.js';
 
         const CORRECT_PASSWORD = "Saliim007";
@@ -165,7 +164,6 @@
         const galleryGrid = document.getElementById('galleryGrid');
         const gridStatus = document.getElementById('gridStatus');
 
-        // Check if initialization succeeded
         if (!supabase || !supabase.storage) {
             console.error("Supabase client missing or misconfigured.");
             document.getElementById('gridStatus').innerHTML = `
@@ -264,21 +262,21 @@
             submitBtn.textContent = "Uploading image...";
 
             try {
-                -- 1. Send binary file to Supabase storage bucket
+                // 1. Send binary file to Supabase storage bucket
                 const { error: storageError } = await supabase.storage
                     .from('academy-photos')
                     .upload(pathLocation, activeFile);
 
                 if (storageError) throw storageError;
 
-                -- 2. Resolve public URL endpoint
+                // 2. Resolve public URL endpoint
                 const { data: urlData } = supabase.storage
                     .from('academy-photos')
                     .getPublicUrl(pathLocation);
 
                 const publicAssetUrl = urlData.publicUrl;
 
-                -- 3. Blind write using returning minimal strategy to prevent cross-origin RLS call validation loops
+                // 3. Structured write payload stripping off auto-returning hooks to satisfy strict cross-origin RLS parsing
                 const { error: tableError } = await supabase
                     .from('gallery_photos')
                     .insert([
@@ -288,7 +286,8 @@
                             description: descInput.value.trim(),
                             age_group: ageGroupInput.value
                         }
-                    ], { returning: 'minimal' });
+                    ])
+                    .select();
 
                 if (tableError) throw tableError;
 
