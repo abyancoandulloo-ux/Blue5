@@ -70,7 +70,7 @@
 
         /* Gallery Main Grid Layout */
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 35px; }
-        .gallery-item { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; display: flex; flex-direction: column; }
+        .gallery-item { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; display: flex; flex-direction: column; position: relative; }
         .gallery-item:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(10, 77, 164, 0.15); }
 
         /* Composite Preview Grid System */
@@ -87,6 +87,10 @@
         .fb-img-box img, .fb-img-box video { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
         .gallery-item:hover .fb-img-box img { transform: scale(1.03); }
 
+        /* Dedicated Delete Button Overlay Placement */
+        .album-delete-trigger { position: absolute; top: 15px; right: 15px; background: rgba(239, 68, 68, 0.9); color: white; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: background 0.2s, transform 0.2s; z-index: 10; }
+        .album-delete-trigger:hover { background: #dc2626; transform: scale(1.1); }
+
         /* Video Play Overlay Indicator Icon */
         .video-play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(30, 111, 223, 0.9); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; padding-left: 5px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); z-index: 4; }
         .fb-img-box:hover .video-play-overlay { background: #0a4da4; transform: translate(-50%, -50%) scale(1.08); transition: all 0.2s; }
@@ -95,7 +99,7 @@
         .fb-more-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.7); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.6rem; font-weight: 700; backdrop-filter: blur(2px); }
 
         .img-details { padding: 22px; border-top: 1px solid #f0f4fa; background: white; }
-        .img-details h4 { font-size: 1.1rem; color: #1f2a44; margin-bottom: 6px; font-weight: 600; line-height: 1.4; }
+        .img-details h4 { font-size: 1.1rem; color: #1f2a44; margin-bottom: 6px; font-weight: 600; line-height: 1.4; padding-right: 20px; }
         .img-details p { font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
         .img-details .date-tag { font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 4px; font-weight: 500; margin-top: 6px; }
 
@@ -229,7 +233,7 @@
 
         const CORRECT_PASSWORD = "Saliim007";
         let currentFilter = "all";
-        let aggregatedMediaCache = []; // Unified global storage cache array
+        let aggregatedMediaCache = [];
         let uploadMode = "photo";
 
         // Lightbox carousel variables
@@ -308,7 +312,6 @@
             uploadCard.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Live textual file pick counter tracking
         fileInput.addEventListener('change', () => {
             const count = fileInput.files.length;
             if (count > 1) {
@@ -320,7 +323,6 @@
             }
         });
 
-        // Wire Event Listeners to run sorting updates in real-time
         descSearchInput.addEventListener('input', renderActiveView);
         dateSearchInput.addEventListener('change', renderActiveView);
         orderSortSelect.addEventListener('change', renderActiveView);
@@ -341,7 +343,6 @@
                     const isVideo = item.image_url.match(/\.(mp4|webm)$/i) || item.storage_path?.includes('videos/');
                     const key = item.description.trim().toLowerCase() + "_" + item.age_group;
                     
-                    // Capture the reference date string structure (YYYY-MM-DD format)
                     const parsedDate = item.created_at ? item.created_at.split('T')[0] : '';
                     const rawTimestamp = item.created_at ? new Date(item.created_at).getTime() : 0;
 
@@ -351,13 +352,19 @@
                             age_group: item.age_group,
                             dateString: parsedDate,
                             timestamp: rawTimestamp,
-                            files: []
+                            files: [],
+                            ids: [],          // track table IDs for erasure execution
+                            storagePaths: [] // track paths for storage bucket eviction
                         };
                     }
                     groupingMap[key].files.push({
                         url: item.image_url,
                         isVideo: !!isVideo
                     });
+                    groupingMap[key].ids.push(item.id);
+                    if (item.storage_path) {
+                        groupingMap[key].storagePaths.push(item.storage_path);
+                    }
                 });
 
                 aggregatedMediaCache = Object.values(groupingMap);
@@ -369,27 +376,21 @@
         }
 
         function renderActiveView() {
-            // 1. Process filters (Cohort categories, Text lookup, Date match)
             let filtered = aggregatedMediaCache.filter(album => {
                 const matchCategory = (currentFilter === 'all' || album.age_group === currentFilter);
                 
                 const searchText = descSearchInput.value.trim().toLowerCase();
                 const matchText = album.description.toLowerCase().includes(searchText);
                 
-                const targetDate = dateSearchInput.value; // Returns YYYY-MM-DD
+                const targetDate = dateSearchInput.value;
                 const matchDate = !targetDate || album.dateString === targetDate;
 
                 return matchCategory && matchText && matchDate;
             });
 
-            // 2. Process active sorting order sequence transformations
             const currentSortRule = orderSortSelect.value;
             filtered.sort((alpha, beta) => {
-                if (currentSortRule === 'newest') {
-                    return beta.timestamp - alpha.timestamp; // Higher timestamp value flows to top
-                } else {
-                    return alpha.timestamp - beta.timestamp; // Lower timestamp value moves up
-                }
+                return currentSortRule === 'newest' ? beta.timestamp - alpha.timestamp : alpha.timestamp - beta.timestamp;
             });
             
             if (filtered.length === 0) {
@@ -407,11 +408,10 @@
                 let gridClass = 'count-1';
                 let filesHtml = '';
 
-                // Format timestamp representation text
                 let visibleDate = "Unknown Date";
                 if (album.dateString) {
                     const dateParts = album.dateString.split('-');
-                    visibleDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // Convert to clean DD/MM/YYYY view
+                    visibleDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
                 }
 
                 if (album.files[0].isVideo) {
@@ -456,6 +456,7 @@
                 }
 
                 card.innerHTML = `
+                    <button class="album-delete-trigger" title="Delete entire album group"><i class="fas fa-trash-alt"></i></button>
                     <div class="fb-grid-wrapper ${gridClass}">
                         ${filesHtml}
                     </div>
@@ -466,12 +467,57 @@
                     </div>
                 `;
                 
+                // Route Delete Click vs Carousel Triggering Event Bubbling Rules
+                const deleteBtn = card.querySelector('.album-delete-trigger');
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Stops lightbox opening sequence trigger loop
+                    executeBatchDeletion(album);
+                });
+
                 card.addEventListener('click', () => initCarousel(album.files, album.description));
                 galleryGrid.appendChild(card);
             });
         }
 
-        // Load targeted files collection arrays directly into display carousel layer
+        // Processing Cascade Deletion of rows and corresponding assets
+        async function executeBatchDeletion(album) {
+            const accessKey = prompt(`Permanently drop album group: "${album.description}"?\nEnter security password to confirm erasure:`);
+            if (accessKey === null) return;
+
+            if (accessKey !== CORRECT_PASSWORD) {
+                alert("Action Refused: Invalid authorization key.");
+                return;
+            }
+
+            try {
+                gridStatus.innerHTML = `<div class="status-msg"><i class="fas fa-spinner fa-spin"></i> Erasing album bundle...</div>`;
+                
+                // 1. Purge asset files from Supabase storage buckets
+                if (album.storagePaths && album.storagePaths.length > 0) {
+                    const { error: storageError } = await supabase.storage
+                        .from('academy-photos')
+                        .remove(album.storagePaths);
+                    if (storageError) console.warn("Bucket sync variance note:", storageError.message);
+                }
+
+                // 2. Delete data entries out of database table
+                const { error: tableError } = await supabase
+                    .from('gallery_photos')
+                    .delete()
+                    .in('id', album.ids);
+
+                if (tableError) throw tableError;
+
+                alert("Success: Entire bundle has been cleanly deleted from database.");
+                await fetchGalleryRecords();
+
+            } catch (err) {
+                console.error("Purge failure transactional issue:", err);
+                alert(`Error executing drop request: ${err.message}`);
+                await fetchGalleryRecords();
+            }
+        }
+
         function initCarousel(files, title) {
             activeAlbumFiles = files;
             activeFileIndex = 0;
@@ -534,7 +580,6 @@
             if (e.target === lightboxModal) haltLightboxView();
         });
 
-        // Processing Multi-File Batch Storage Upload Pipelines
         mediaUploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -611,7 +656,6 @@
             }
         });
 
-        // Setup Cohort Selection Category Tab Filters
         document.querySelectorAll('.filter-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
