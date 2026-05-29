@@ -172,7 +172,7 @@
                 </span>`;
         }
 
-        // Verify Admin Credentials
+        // Verify Admin Credentials (password prompt)
         openUploadBoxBtn.addEventListener('click', () => {
             if (uploadCard.style.display === 'block') {
                 uploadCard.style.display = 'none';
@@ -276,20 +276,25 @@
 
                 const publicAssetUrl = urlData.publicUrl;
 
-                // 3. Structured write payload stripping off auto-returning hooks to satisfy strict cross-origin RLS parsing
+                // 3. Structured write payload
                 const { error: tableError } = await supabase
                     .from('gallery_photos')
-                    .insert([
-                        {
-                            storage_path: pathLocation,
-                            image_url: publicAssetUrl,
-                            description: descInput.value.trim(),
-                            age_group: ageGroupInput.value
-                        }
-                    ])
-                    .select();
+                    .insert([{
+                        storage_path: pathLocation,
+                        image_url: publicAssetUrl,
+                        description: descInput.value.trim(),
+                        age_group: ageGroupInput.value
+                    }]);
 
-                if (tableError) throw tableError;
+                if (tableError) {
+                    // Special handling for RLS error – show helpful message
+                    if (tableError.message.includes("row-level security policy")) {
+                        alert(`❌ Upload failed: Row Level Security (RLS) is blocking the insert.\n\nTo fix this, please run the following SQL in your Supabase SQL Editor:\n\nCREATE POLICY "Allow public inserts" ON gallery_photos FOR INSERT WITH CHECK (true);\n\n(Or use the authenticated method described in the documentation.)`);
+                    } else {
+                        throw tableError;
+                    }
+                    return;
+                }
 
                 alert("Success: Image published to portal!");
                 
