@@ -108,12 +108,11 @@
         <div class="upload-card" id="uploadCard">
             <h3><i class="fas fa-plus-circle"></i> Upload Photo Batch</h3>
             <form id="photoUploadForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="photoFile">Choose Image Files (Select Multiple)</label>
-                        <input type="file" id="photoFile" accept="image/*" multiple="multiple" required>
-                        <small id="fileCountIndicator" style="color: #1e6fdf; font-weight: 600; margin-top: 4px; display: block; min-height: 1.2em;"></small>
-                    </div>
+                <div class="form-group">
+    <label for="photoFile">Choose Image Files (Select Multiple)</label>
+    <input type="file" id="photoFile" name="photos[]" accept="image/png, image/jpeg, image/jpg, image/webp" multiple required>
+    <small id="fileCountIndicator" style="color: #1e6fdf; font-weight: 600; margin-top: 4px; display: block; min-height: 1.2em;"></small>
+</div>
                     <div class="form-group">
                         <label for="photoDesc">Batch Description / Title</label>
                         <input type="text" id="photoDesc" placeholder="e.g. Saturday Drills Bunch" required>
