@@ -151,21 +151,8 @@
     </footer>
 
     <script type="module">
-        let supabase = null;
-        try {
-            const module = await import('./supabase-config.js');
-            supabase = module.supabase;
-            
-            if (!supabase || !supabase.storage) {
-                throw new Error("Supabase client initialized, but storage configuration is unreachable.");
-            }
-        } catch (err) {
-            console.error("Configuration cloud interface connection block:", err);
-            document.getElementById('gridStatus').innerHTML = `
-                <span style="color:#e53e3e; font-weight:600;">
-                    <i class="fas fa-exclamation-triangle"></i> Database Connection Error. Ensure files are running via a web server environment.
-                </span>`;
-        }
+        // Import the configured client directly from your unaltered file
+        import { supabase } from './supabase-config.js';
 
         const CORRECT_PASSWORD = "Saliim007";
         let currentFilter = "all";
@@ -177,6 +164,15 @@
         const photoUploadForm = document.getElementById('photoUploadForm');
         const galleryGrid = document.getElementById('galleryGrid');
         const gridStatus = document.getElementById('gridStatus');
+
+        // Check if initialization succeeded
+        if (!supabase || !supabase.storage) {
+            console.error("Supabase client missing or misconfigured.");
+            document.getElementById('gridStatus').innerHTML = `
+                <span style="color:#e53e3e; font-weight:600;">
+                    <i class="fas fa-exclamation-triangle"></i> Configuration Error: Unable to bind to the client module.
+                </span>`;
+        }
 
         // Verify Admin Credentials
         openUploadBoxBtn.addEventListener('click', () => {
@@ -268,21 +264,21 @@
             submitBtn.textContent = "Uploading image...";
 
             try {
-                // 1. Send binary file to Supabase storage bucket
+                -- 1. Send binary file to Supabase storage bucket
                 const { error: storageError } = await supabase.storage
                     .from('academy-photos')
                     .upload(pathLocation, activeFile);
 
                 if (storageError) throw storageError;
 
-                // 2. Resolve public URL endpoint
+                -- 2. Resolve public URL endpoint
                 const { data: urlData } = supabase.storage
                     .from('academy-photos')
                     .getPublicUrl(pathLocation);
 
                 const publicAssetUrl = urlData.publicUrl;
 
-                // 3. Insert data into database table explicitly structuring it to ignore immediate select triggers
+                -- 3. Blind write using returning minimal strategy to prevent cross-origin RLS call validation loops
                 const { error: tableError } = await supabase
                     .from('gallery_photos')
                     .insert([
