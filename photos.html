@@ -102,20 +102,21 @@
                 <h2 class="section-title"><i class="fas fa-camera"></i> Training Moments Gallery</h2>
                 <div class="title-underline"></div>
             </div>
-            <button class="admin-action-btn" id="openUploadBoxBtn"><i class="fas fa-cloud-upload-alt"></i> Upload Photo</button>
+            <button class="admin-action-btn" id="openUploadBoxBtn"><i class="fas fa-cloud-upload-alt"></i> Upload Batch</button>
         </div>
 
         <div class="upload-card" id="uploadCard">
-            <h3><i class="fas fa-plus-circle"></i> Add New Training Image Asset</h3>
+            <h3><i class="fas fa-plus-circle"></i> Upload Photo Batch</h3>
             <form id="photoUploadForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="photoFile">Choose Image File</label>
-                        <input type="file" id="photoFile" accept="image/*" required>
+                        <label for="photoFile">Choose Image Files (Select Multiple)</label>
+                        <input type="file" id="photoFile" accept="image/*" multiple="multiple" required>
+                        <small id="fileCountIndicator" style="color: #1e6fdf; font-weight: 600; margin-top: 4px; display: block; min-height: 1.2em;"></small>
                     </div>
                     <div class="form-group">
-                        <label for="photoDesc">Image Description / Title</label>
-                        <input type="text" id="photoDesc" placeholder="e.g. Cone Dribbling Drills" required>
+                        <label for="photoDesc">Batch Description / Title</label>
+                        <input type="text" id="photoDesc" placeholder="e.g. Saturday Drills Bunch" required>
                     </div>
                     <div class="form-group">
                         <label for="photoAgeGroup">Target Age Cohort Group</label>
@@ -124,7 +125,7 @@
                             <option value="9-11">9-11 Years Old</option>
                         </select>
                     </div>
-                    <button type="submit" class="upload-submit-btn" id="uploadSubmitBtn">Publish to Portal</button>
+                    <button type="submit" class="upload-submit-btn" id="uploadSubmitBtn">Publish Batch to Portal</button>
                 </div>
             </form>
         </div>
@@ -161,6 +162,8 @@
         const openUploadBoxBtn = document.getElementById('openUploadBoxBtn');
         const uploadCard = document.getElementById('uploadCard');
         const photoUploadForm = document.getElementById('photoUploadForm');
+        const fileInput = document.getElementById('photoFile');
+        const fileCountIndicator = document.getElementById('fileCountIndicator');
         const galleryGrid = document.getElementById('galleryGrid');
         const gridStatus = document.getElementById('gridStatus');
 
@@ -172,7 +175,19 @@
                 </span>`;
         }
 
-        // Verify Admin Credentials (password prompt)
+        // Live visual selection validation
+        fileInput.addEventListener('change', () => {
+            const count = fileInput.files.length;
+            if (count > 1) {
+                fileCountIndicator.textContent = `Selected: ${count} images ready for batch upload.`;
+            } else if (count === 1) {
+                fileCountIndicator.textContent = `Selected: 1 image ready.`;
+            } else {
+                fileCountIndicator.textContent = ``;
+            }
+        });
+
+        // Verify Admin Credentials
         openUploadBoxBtn.addEventListener('click', () => {
             if (uploadCard.style.display === 'block') {
                 uploadCard.style.display = 'none';
@@ -234,7 +249,7 @@
             });
         }
 
-        // Processing Storage Upload Pipelines
+        // Processing Multi-File Batch Storage Upload Pipelines
         photoUploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -243,72 +258,81 @@
                 return;
             }
 
-            const fileInput = document.getElementById('photoFile');
             const descInput = document.getElementById('photoDesc');
             const ageGroupInput = document.getElementById('photoAgeGroup');
             const submitBtn = document.getElementById('uploadSubmitBtn');
 
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert("Please select an image file first.");
+            const selectedFiles = fileInput.files;
+            if (!selectedFiles || selectedFiles.length === 0) {
+                alert("Please select at least one image file.");
                 return;
             }
 
-            const activeFile = fileInput.files[0];
-            const fileExt = activeFile.name.split('.').pop();
-            const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-            const pathLocation = `uploads/${cleanFileName}`;
-
             submitBtn.disabled = true;
-            submitBtn.textContent = "Uploading image...";
+            const totalFiles = selectedFiles.length;
+            const rowsToInsert = [];
 
             try {
-                // 1. Send binary file to Supabase storage bucket
-                const { error: storageError } = await supabase.storage
-                    .from('academy-photos')
-                    .upload(pathLocation, activeFile);
+                // Loop through all selected assets in the bundle
+                for (let i = 0; i < totalFiles; i++) {
+                    const activeFile = selectedFiles[i];
+                    submitBtn.textContent = `Uploading processing (${i + 1}/${totalFiles})...`;
 
-                if (storageError) throw storageError;
+                    const fileExt = activeFile.name.split('.').pop();
+                    const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+                    const pathLocation = `uploads/${cleanFileName}`;
 
-                // 2. Resolve public URL endpoint
-                const { data: urlData } = supabase.storage
-                    .from('academy-photos')
-                    .getPublicUrl(pathLocation);
+                    // 1. Send individual binary file payload to Storage bucket
+                    const { error: storageError } = await supabase.storage
+                        .from('academy-photos')
+                        .upload(pathLocation, activeFile);
 
-                const publicAssetUrl = urlData.publicUrl;
+                    if (storageError) throw storageError;
 
-                // 3. Structured write payload
-                const { error: tableError } = await supabase
-                    .from('gallery_photos')
-                    .insert([{
+                    // 2. Resolve individual asset public endpoint URL
+                    const { data: urlData } = supabase.storage
+                        .from('academy-photos')
+                        .getPublicUrl(pathLocation);
+
+                    // Push formatted entry object into target rows collection array
+                    rowsToInsert.push({
                         storage_path: pathLocation,
-                        image_url: publicAssetUrl,
+                        image_url: urlData.publicUrl,
                         description: descInput.value.trim(),
                         age_group: ageGroupInput.value
-                    }]);
+                    });
+                }
+
+                submitBtn.textContent = "Saving records to database...";
+
+                // 3. Batch insert structured write collection using strict minimal strategy
+                const { error: tableError } = await supabase
+                    .from('gallery_photos')
+                    .insert(rowsToInsert, { returning: 'minimal' });
 
                 if (tableError) {
-                    // Special handling for RLS error – show helpful message
                     if (tableError.message.includes("row-level security policy")) {
-                        alert(`❌ Upload failed: Row Level Security (RLS) is blocking the insert.\n\nTo fix this, please run the following SQL in your Supabase SQL Editor:\n\nCREATE POLICY "Allow public inserts" ON gallery_photos FOR INSERT WITH CHECK (true);\n\n(Or use the authenticated method described in the documentation.)`);
+                        alert(`❌ Database rejected operation: Row Level Security rules blocked this row structure batch insert.\nVerify table policy structures permit public write commands.`);
                     } else {
                         throw tableError;
                     }
                     return;
                 }
 
-                alert("Success: Image published to portal!");
+                alert(`Success: ${totalFiles} images published to gallery matching description!`);
                 
                 photoUploadForm.reset();
+                fileCountIndicator.textContent = '';
                 uploadCard.style.display = 'none';
                 
                 await fetchGalleryRecords();
 
             } catch (err) {
                 console.error("Fatal transaction execution error:", err);
-                alert(`Upload workflow failed: ${err.message}`);
+                alert(`Batch processing breakdown: ${err.message}`);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Publish to Portal";
+                submitBtn.textContent = "Publish Batch to Portal";
             }
         });
 
