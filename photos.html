@@ -163,7 +163,7 @@
             console.error("Configuration cloud interface connection block:", err);
             document.getElementById('gridStatus').innerHTML = `
                 <span style="color:#e53e3e; font-weight:600;">
-                    <i class="fas fa-exclamation-triangle"></i> Database Connection Unresolved. Please run through a local server.
+                    <i class="fas fa-exclamation-triangle"></i> Database Connection Error. Ensure files are running via a web server environment.
                 </span>`;
         }
 
@@ -282,15 +282,17 @@
 
                 const publicAssetUrl = urlData.publicUrl;
 
-                // 3. Insert data to database table using a pure write payload structure
+                // 3. Insert data into database table explicitly structuring it to ignore immediate select triggers
                 const { error: tableError } = await supabase
                     .from('gallery_photos')
-                    .insert([{
-                        storage_path: pathLocation,
-                        image_url: publicAssetUrl,
-                        description: descInput.value.trim(),
-                        age_group: ageGroupInput.value
-                    }]);
+                    .insert([
+                        {
+                            storage_path: pathLocation,
+                            image_url: publicAssetUrl,
+                            description: descInput.value.trim(),
+                            age_group: ageGroupInput.value
+                        }
+                    ], { returning: 'minimal' });
 
                 if (tableError) throw tableError;
 
