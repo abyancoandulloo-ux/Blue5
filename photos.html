@@ -157,13 +157,13 @@
             supabase = module.supabase;
             
             if (!supabase || !supabase.storage) {
-                throw new Error("Supabase client initialized, but storage architecture is unreachable.");
+                throw new Error("Supabase client initialized, but storage configuration is unreachable.");
             }
         } catch (err) {
             console.error("Configuration cloud interface connection block:", err);
             document.getElementById('gridStatus').innerHTML = `
                 <span style="color:#e53e3e; font-weight:600;">
-                    <i class="fas fa-exclamation-triangle"></i> Database Initialization Error: Clear local system paths.
+                    <i class="fas fa-exclamation-triangle"></i> Database Connection Unresolved. Please run through a local server.
                 </span>`;
         }
 
@@ -282,7 +282,7 @@
 
                 const publicAssetUrl = urlData.publicUrl;
 
-                // 3. Inject metadata references using minimalist returns (bypasses RLS callback issues)
+                // 3. Insert data to database table using a pure write payload structure
                 const { error: tableError } = await supabase
                     .from('gallery_photos')
                     .insert([{
@@ -290,7 +290,7 @@
                         image_url: publicAssetUrl,
                         description: descInput.value.trim(),
                         age_group: ageGroupInput.value
-                    }], { returning: 'minimal' });
+                    }]);
 
                 if (tableError) throw tableError;
 
