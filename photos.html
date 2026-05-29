@@ -136,7 +136,7 @@
         </div>
 
         <div class="gallery-grid" id="galleryGrid">
-            <div class="status-msg" id="gridStatus"><i class="fas fa-spinner fa-spin"></i> Synchronization connected. Streaming dynamic image logs...</div>
+            <div class="status-msg" id="gridStatus"><i class="fas fa-spinner fa-spin"></i> Connecting to gallery database...</div>
         </div>
     </div>
 
@@ -151,186 +151,184 @@
     </footer>
 
     <script type="module">
-    let supabase = null;
-    try {
-        const module = await import('./supabase-config.js');
-        supabase = module.supabase;
-        
-        // Final sanity check to make sure the client object built perfectly
-        if (!supabase || !supabase.storage) {
-            throw new Error("Supabase client created, but storage module is unavailable.");
-        }
-    } catch (err) {
-        console.error("Configuration cloud runtime interface error:", err);
-        document.getElementById('gridStatus').innerHTML = `
-            <span style="color:#ef4444; font-weight:600;">
-                <i class="fas fa-exclamation-triangle"></i> Database Initialization Error: ${err.message}
-            </span>`;
-    }
-
-    const CORRECT_PASSWORD = "Saliim007";
-    let currentFilter = "all";
-    let localPhotosCache = [];
-
-    // UI Target Bindings
-    const openUploadBoxBtn = document.getElementById('openUploadBoxBtn');
-    const uploadCard = document.getElementById('uploadCard');
-    const photoUploadForm = document.getElementById('photoUploadForm');
-    const galleryGrid = document.getElementById('galleryGrid');
-    const gridStatus = document.getElementById('gridStatus');
-
-    // Verify Admin Credentials
-    openUploadBoxBtn.addEventListener('click', () => {
-        if (uploadCard.style.display === 'block') {
-            uploadCard.style.display = 'none';
-            return;
-        }
-        const accessKey = prompt("Coach Access Verification Required:\nEnter Security Password:");
-        if (accessKey === null) return;
-        
-        if (accessKey === CORRECT_PASSWORD) {
-            uploadCard.style.display = 'block';
-            uploadCard.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            alert("Access Denied: Incorrect portal security key token match.");
-        }
-    });
-
-    // Pull Images and Render
-    async function fetchGalleryRecords() {
-        if (!supabase) return;
+        let supabase = null;
         try {
-            const { data, error } = await supabase
-                .from('gallery_photos')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            localPhotosCache = data || [];
-            renderActiveView();
-        } catch (err) {
-            console.error("Database compilation error:", err);
-            gridStatus.innerHTML = `<span style="color:#ef4444;"><i class="fas fa-wifi"></i> Sync error reading historical database logs.</span>`;
-        }
-    }
-
-    function renderActiveView() {
-        const filtered = localPhotosCache.filter(p => currentFilter === 'all' || p.age_group === currentFilter);
-        
-        if (filtered.length === 0) {
-            galleryGrid.innerHTML = `<div class="status-msg"><i class="far fa-images"></i> No uploads recorded inside this specific filter category layout yet.</div>`;
-            return;
-        }
-
-        galleryGrid.innerHTML = '';
-        filtered.forEach(photo => {
-            const iconClass = photo.age_group === '6-8' ? 'fa-child' : 'fa-user-friends';
-            const card = document.createElement('div');
-            card.className = 'gallery-item';
-            card.innerHTML = `
-                <div class="img-container">
-                    <img src="${photo.image_url}" alt="Session Image">
-                </div>
-                <div class="img-details">
-                    <h4>${escapeHtml(photo.description)}</h4>
-                    <p><i class="fas ${iconClass}"></i> Age Group: ${photo.age_group} Years</p>
-                </div>
-            `;
-            card.addEventListener('click', () => openLightbox(photo.image_url, photo.description));
-            galleryGrid.appendChild(card);
-        });
-    }
-
-    // Processing Storage Upload Pipelines
-    photoUploadForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        // Safe Fallback Guard Clause
-        if (!supabase) {
-            alert("Upload Blocked: The database connection is not initialized. Please fix the error displayed on the page banner.");
-            return;
-        }
-
-        const fileInput = document.getElementById('photoFile');
-        const descInput = document.getElementById('photoDesc');
-        const ageGroupInput = document.getElementById('photoAgeGroup');
-        const submitBtn = document.getElementById('uploadSubmitBtn');
-
-        if (!fileInput.files || fileInput.files.length === 0) {
-            alert("Please select a file first.");
-            return;
-        }
-
-        const activeFile = fileInput.files[0];
-        const fileExt = activeFile.name.split('.').pop();
-        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-        const pathLocation = `uploads/${cleanFileName}`;
-
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Uploading asset sync...";
-
-        try {
-            // 1. Send binary source block targets out into storage buckets
-            const { error: storageError } = await supabase.storage
-                .from('academy-photos')
-                .upload(pathLocation, activeFile);
-
-            if (storageError) throw storageError;
-
-            // 2. Resolve public URL endpoints referencing file structural routes
-            const { data: urlData } = supabase.storage
-                .from('academy-photos')
-                .getPublicUrl(pathLocation);
-
-            const publicAssetUrl = urlData.publicUrl;
-
-            // 3. Inject metadata references downwards onto target log tables
-            const { error: tableError } = await supabase
-                .from('gallery_photos')
-                .insert([{
-                    storage_path: pathLocation,
-                    image_url: publicAssetUrl,
-                    description: descInput.value.trim(),
-                    age_group: ageGroupInput.value
-                }]);
-
-            if (tableError) throw tableError;
-
-            alert("Success: Image uploaded successfully!");
+            const module = await import('./supabase-config.js');
+            supabase = module.supabase;
             
-            photoUploadForm.reset();
-            uploadCard.style.display = 'none';
-            
-            await fetchGalleryRecords();
-
+            if (!supabase || !supabase.storage) {
+                throw new Error("Supabase client initialized, but storage architecture is unreachable.");
+            }
         } catch (err) {
-            console.error("Fatal transaction process error:", err);
-            alert(`Upload workflow failed: ${err.message}`);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Publish to Portal";
+            console.error("Configuration cloud interface connection block:", err);
+            document.getElementById('gridStatus').innerHTML = `
+                <span style="color:#e53e3e; font-weight:600;">
+                    <i class="fas fa-exclamation-triangle"></i> Database Initialization Error: Clear local system paths.
+                </span>`;
         }
-    });
 
-    // Filter Selection Switches Interception Controls
-    document.querySelectorAll('.filter-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-            currentFilter = e.target.getAttribute('data-filter');
-            renderActiveView();
+        const CORRECT_PASSWORD = "Saliim007";
+        let currentFilter = "all";
+        let localPhotosCache = [];
+
+        // UI Target Bindings
+        const openUploadBoxBtn = document.getElementById('openUploadBoxBtn');
+        const uploadCard = document.getElementById('uploadCard');
+        const photoUploadForm = document.getElementById('photoUploadForm');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const gridStatus = document.getElementById('gridStatus');
+
+        // Verify Admin Credentials
+        openUploadBoxBtn.addEventListener('click', () => {
+            if (uploadCard.style.display === 'block') {
+                uploadCard.style.display = 'none';
+                return;
+            }
+            const accessKey = prompt("Coach Access Verification Required:\nEnter Security Password:");
+            if (accessKey === null) return;
+            
+            if (accessKey === CORRECT_PASSWORD) {
+                uploadCard.style.display = 'block';
+                uploadCard.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert("Access Denied: Incorrect portal security key token match.");
+            }
         });
-    });
 
-    function escapeHtml(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
+        // Pull Images and Render
+        async function fetchGalleryRecords() {
+            if (!supabase) return;
+            try {
+                const { data, error } = await supabase
+                    .from('gallery_photos')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-    // Initialize App View
-    if (supabase) {
-        fetchGalleryRecords();
-    }
-</script>
+                if (error) throw error;
+                localPhotosCache = data || [];
+                renderActiveView();
+            } catch (err) {
+                console.error("Database records compilation error:", err);
+                gridStatus.innerHTML = `<span style="color:#e53e3e;"><i class="fas fa-wifi"></i> Sync error reading gallery entries.</span>`;
+            }
+        }
+
+        function renderActiveView() {
+            const filtered = localPhotosCache.filter(p => currentFilter === 'all' || p.age_group === currentFilter);
+            
+            if (filtered.length === 0) {
+                galleryGrid.innerHTML = `<div class="status-msg"><i class="far fa-images"></i> No photos found in this category.</div>`;
+                return;
+            }
+
+            galleryGrid.innerHTML = '';
+            filtered.forEach(photo => {
+                const iconClass = photo.age_group === '6-8' ? 'fa-child' : 'fa-user-friends';
+                const card = document.createElement('div');
+                card.className = 'gallery-item';
+                card.innerHTML = `
+                    <div class="img-container">
+                        <img src="${photo.image_url}" alt="Session Image">
+                    </div>
+                    <div class="img-details">
+                        <h4>${escapeHtml(photo.description)}</h4>
+                        <p><i class="fas ${iconClass}"></i> Age Group: ${photo.age_group} Years</p>
+                    </div>
+                `;
+                card.addEventListener('click', () => openLightbox(photo.image_url, photo.description));
+                galleryGrid.appendChild(card);
+            });
+        }
+
+        // Processing Storage Upload Pipelines
+        photoUploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!supabase) {
+                alert("Upload Blocked: Database initialization incomplete.");
+                return;
+            }
+
+            const fileInput = document.getElementById('photoFile');
+            const descInput = document.getElementById('photoDesc');
+            const ageGroupInput = document.getElementById('photoAgeGroup');
+            const submitBtn = document.getElementById('uploadSubmitBtn');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select an image file first.");
+                return;
+            }
+
+            const activeFile = fileInput.files[0];
+            const fileExt = activeFile.name.split('.').pop();
+            const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+            const pathLocation = `uploads/${cleanFileName}`;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Uploading image...";
+
+            try {
+                // 1. Send binary file to Supabase storage bucket
+                const { error: storageError } = await supabase.storage
+                    .from('academy-photos')
+                    .upload(pathLocation, activeFile);
+
+                if (storageError) throw storageError;
+
+                // 2. Resolve public URL endpoint
+                const { data: urlData } = supabase.storage
+                    .from('academy-photos')
+                    .getPublicUrl(pathLocation);
+
+                const publicAssetUrl = urlData.publicUrl;
+
+                // 3. Inject metadata references using minimalist returns (bypasses RLS callback issues)
+                const { error: tableError } = await supabase
+                    .from('gallery_photos')
+                    .insert([{
+                        storage_path: pathLocation,
+                        image_url: publicAssetUrl,
+                        description: descInput.value.trim(),
+                        age_group: ageGroupInput.value
+                    }], { returning: 'minimal' });
+
+                if (tableError) throw tableError;
+
+                alert("Success: Image published to portal!");
+                
+                photoUploadForm.reset();
+                uploadCard.style.display = 'none';
+                
+                await fetchGalleryRecords();
+
+            } catch (err) {
+                console.error("Fatal transaction execution error:", err);
+                alert(`Upload workflow failed: ${err.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Publish to Portal";
+            }
+        });
+
+        // Filter Controls Setup
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFilter = e.target.getAttribute('data-filter');
+                renderActiveView();
+            });
+        });
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Initialize App View
+        if (supabase) {
+            fetchGalleryRecords();
+        }
+    </script>
 
     <script>
         const lightbox = document.getElementById('lightboxModal');
