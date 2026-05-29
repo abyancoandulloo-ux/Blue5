@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blue5 Academy | Photos</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f0f4fa; color: #1f2a44; }
@@ -48,31 +48,43 @@
         .filter-btn:hover { background: #e0eafd; }
         .filter-btn.active { background: #0a4da4; color: white; box-shadow: 0 6px 15px rgba(10, 77, 164, 0.25); }
 
-        /* Gallery Grid Layout */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
-        .gallery-item { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; position: relative; }
+        /* Gallery Main Grid Layout */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 35px; }
+        .gallery-item { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; display: flex; flex-direction: column; }
         .gallery-item:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(10, 77, 164, 0.15); }
+
+        /* Facebook Style Dynamic Composite Preview Grid System */
+        .fb-grid-wrapper { width: 100%; height: 320px; background: #e2e8f0; display: grid; gap: 4px; overflow: hidden; position: relative; }
         
-        .img-container { width: 100%; height: 250px; overflow: hidden; background: #e2e8f0; position: relative; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-        .gallery-item:hover .img-container img { transform: scale(1.05); }
+        /* Grid Formations based on image count class names */
+        .fb-grid-wrapper.count-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .fb-grid-wrapper.count-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+        .fb-grid-wrapper.count-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .fb-grid-wrapper.count-3 .fb-img-box:first-child { grid-row: span 2; }
+        .fb-grid-wrapper.count-4, .fb-grid-wrapper.count-more { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
+        .fb-grid-wrapper.count-4 .fb-img-box:first-child, .fb-grid-wrapper.count-more .fb-img-box:first-child { grid-column: span 3; }
 
-        /* Batch count tag badge inside box preview */
-        .batch-badge { position: absolute; top: 15px; right: 15px; background: rgba(30, 111, 223, 0.9); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; backdrop-filter: blur(4px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 5; }
+        .fb-img-box { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        .fb-img-box img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+        .gallery-item:hover .fb-img-box img { transform: scale(1.03); }
 
-        .img-details { padding: 20px; border-top: 1px solid #f0f4fa; }
-        .img-details h4 { font-size: 1.05rem; color: #1f2a44; margin-bottom: 5px; font-weight: 600; }
+        /* Plus Text Counter Overlay Badge matching Facebook post structures */
+        .fb-more-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.7); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.6rem; font-weight: 700; backdrop-filter: blur(2px); }
+
+        .img-details { padding: 22px; border-top: 1px solid #f0f4fa; background: white; }
+        .img-details h4 { font-size: 1.1rem; color: #1f2a44; margin-bottom: 6px; font-weight: 600; line-height: 1.4; }
         .img-details p { font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
 
-        /* Lightbox Carousel Modal */
-        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.95); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        .lightbox-content { max-width: 90%; max-height: 80vh; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); object-fit: contain; }
-        .lightbox-close { position: absolute; top: 25px; right: 35px; color: white; font-size: 40px; cursor: pointer; z-index: 10100; }
-        .lightbox-caption { position: absolute; bottom: 30px; color: white; font-size: 1.1rem; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 40px; text-align: center; }
+        /* Lightbox Carousel Modal CSS Structures */
+        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.96); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+        .lightbox-content { max-width: 85%; max-height: 78vh; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); object-fit: contain; }
+        .lightbox-close { position: absolute; top: 25px; right: 35px; color: white; font-size: 42px; cursor: pointer; z-index: 10100; transition: color 0.2s; }
+        .lightbox-close:hover { color: #1e6fdf; }
+        .lightbox-caption { position: absolute; bottom: 35px; color: white; font-size: 1.1rem; background: rgba(0,0,0,0.75); padding: 12px 30px; border-radius: 40px; text-align: center; font-weight: 500; min-width: 260px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
-        /* Carousel Navigation Arrows */
-        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 35px; background: rgba(255,255,255,0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: background 0.2s; }
-        .nav-arrow:hover { background: rgba(255,255,255,0.25); }
+        /* Carousel Navigation Controls */
+        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 28px; background: rgba(255,255,255,0.08); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: all 0.2s ease; z-index: 10050; }
+        .nav-arrow:hover { background: #1e6fdf; color: white; box-shadow: 0 0 15px rgba(30,111,223,0.4); }
         .left-arrow { left: 40px; }
         .right-arrow { right: 40px; }
 
@@ -166,7 +178,7 @@
 
         const CORRECT_PASSWORD = "Saliim007";
         let currentFilter = "all";
-        let groupedAlbumsCache = []; // Cache holds combined items grouped into unique descriptions
+        let groupedAlbumsCache = [];
 
         // Carousel variables
         let activeAlbumImages = [];
@@ -182,7 +194,7 @@
         const galleryGrid = document.getElementById('galleryGrid');
         const gridStatus = document.getElementById('gridStatus');
 
-        // Lightbox target links
+        // Lightbox bindings
         const lightboxModal = document.getElementById('lightboxModal');
         const lightboxImg = document.getElementById('lightboxImg');
         const lightboxCaption = document.getElementById('lightboxCaption');
@@ -198,7 +210,7 @@
                 </span>`;
         }
 
-        // Live visual text counter updates
+        // Live selection updates
         fileInput.addEventListener('change', () => {
             const count = fileInput.files.length;
             if (count > 1) {
@@ -238,7 +250,7 @@
 
                 if (error) throw error;
 
-                // Restructure items flat row array into group boxes matching description title strings
+                // Group entries matching title string + cohort assignment tag
                 const groupingMap = {};
                 (data || []).forEach(item => {
                     const key = item.description.trim().toLowerCase() + "_" + item.age_group;
@@ -246,8 +258,7 @@
                         groupingMap[key] = {
                             description: item.description,
                             age_group: item.age_group,
-                            urls: [],
-                            cover_url: item.image_url
+                            urls: []
                         };
                     }
                     groupingMap[key].urls.push(item.image_url);
@@ -275,14 +286,52 @@
                 const card = document.createElement('div');
                 card.className = 'gallery-item';
                 
-                // Show how many images are stacked inside the box
-                const photoCount = album.urls.length;
-                const batchBadgeHtml = photoCount > 1 ? `<div class="batch-badge"><i class="fas fa-images"></i> ${photoCount} Photos</div>` : '';
+                const totalCount = album.urls.length;
+                let gridClass = 'count-1';
+                let imagesHtml = '';
+
+                // Build a dynamic, nested layout block reminiscent of Facebook photo feeds
+                if (totalCount === 1) {
+                    gridClass = 'count-1';
+                    imagesHtml = `<div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>`;
+                } else if (totalCount === 2) {
+                    gridClass = 'count-2';
+                    imagesHtml = `
+                        <div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>
+                        <div class="fb-img-box"><img src="${album.urls[1]}" alt="Image 2"></div>
+                    `;
+                } else if (totalCount === 3) {
+                    gridClass = 'count-3';
+                    imagesHtml = `
+                        <div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>
+                        <div class="fb-img-box"><img src="${album.urls[1]}" alt="Image 2"></div>
+                        <div class="fb-img-box"><img src="${album.urls[2]}" alt="Image 3"></div>
+                    `;
+                } else if (totalCount === 4) {
+                    gridClass = 'count-4';
+                    imagesHtml = `
+                        <div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>
+                        <div class="fb-img-box"><img src="${album.urls[1]}" alt="Image 2"></div>
+                        <div class="fb-img-box"><img src="${album.urls[2]}" alt="Image 3"></div>
+                        <div class="fb-img-box"><img src="${album.urls[3]}" alt="Image 4"></div>
+                    `;
+                } else {
+                    gridClass = 'count-more';
+                    const remaining = totalCount - 3;
+                    imagesHtml = `
+                        <div class="fb-img-box"><img src="${album.urls[0]}" alt="Image 1"></div>
+                        <div class="fb-img-box"><img src="${album.urls[1]}" alt="Image 2"></div>
+                        <div class="fb-img-box"><img src="${album.urls[2]}" alt="Image 3"></div>
+                        <div class="fb-img-box">
+                            <img src="${album.urls[3]}" alt="Image 4">
+                            <div class="fb-more-overlay">+${remaining}</div>
+                        </div>
+                    `;
+                }
 
                 card.innerHTML = `
-                    <div class="img-container">
-                        ${batchBadgeHtml}
-                        <img src="${album.cover_url}" alt="Album Cover Image">
+                    <div class="fb-grid-wrapper ${gridClass}">
+                        ${imagesHtml}
                     </div>
                     <div class="img-details">
                         <h4>${escapeHtml(album.description)}</h4>
@@ -311,7 +360,6 @@
             lightboxImg.src = activeAlbumImages[activeImageIndex];
             lightboxCaption.textContent = `${escapeHtml(activeAlbumTitle)} (${activeImageIndex + 1}/${activeAlbumImages.length})`;
             
-            // Hide navigation elements if there is only a single element in the group
             if (activeAlbumImages.length <= 1) {
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
@@ -321,7 +369,7 @@
             }
         }
 
-        // Carousel Arrow Actions
+        // Carousel Arrow Navigation Rules
         prevBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             activeImageIndex = (activeImageIndex === 0) ? activeAlbumImages.length - 1 : activeImageIndex - 1;
@@ -370,28 +418,25 @@
             const rowsToInsert = [];
 
             try {
-                // Loop through all selected assets in the bundle
+                // Upload files to storage bucket
                 for (let i = 0; i < totalFiles; i++) {
                     const activeFile = selectedFiles[i];
-                    submitBtn.textContent = `Uploading processing (${i + 1}/${totalFiles})...`;
+                    submitBtn.textContent = `Uploading files (${i + 1}/${totalFiles})...`;
 
                     const fileExt = activeFile.name.split('.').pop();
                     const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
                     const pathLocation = `uploads/${cleanFileName}`;
 
-                    // 1. Send individual binary file payload to Storage bucket
                     const { error: storageError } = await supabase.storage
                         .from('academy-photos')
                         .upload(pathLocation, activeFile);
 
                     if (storageError) throw storageError;
 
-                    // 2. Resolve individual asset public endpoint URL
                     const { data: urlData } = supabase.storage
                         .from('academy-photos')
                         .getPublicUrl(pathLocation);
 
-                    // Push formatted entry object into target rows collection array
                     rowsToInsert.push({
                         storage_path: pathLocation,
                         image_url: urlData.publicUrl,
@@ -400,23 +445,23 @@
                     });
                 }
 
-                submitBtn.textContent = "Saving records to database...";
+                submitBtn.textContent = "Saving to database...";
 
-                // 3. Batch insert structured write collection using strict minimal strategy
+                // Batch insert into table using minimal return payload to bypass RLS loops
                 const { error: tableError } = await supabase
                     .from('gallery_photos')
                     .insert(rowsToInsert, { returning: 'minimal' });
 
                 if (tableError) {
                     if (tableError.message.includes("row-level security policy")) {
-                        alert(`❌ Database rejected operation: Row Level Security rules blocked this row structure batch insert.\nVerify table policy structures permit public write commands.`);
+                        alert(`❌ Database error: Row Level Security rules blocked this operation.\nCheck table configuration.`);
                     } else {
                         throw tableError;
                     }
                     return;
                 }
 
-                alert(`Success: ${totalFiles} images published to gallery grouped in one box structure!`);
+                alert(`Success: Published album block featuring ${totalFiles} photos!`);
                 
                 photoUploadForm.reset();
                 fileCountIndicator.textContent = '';
@@ -425,8 +470,8 @@
                 await fetchGalleryRecords();
 
             } catch (err) {
-                console.error("Fatal transaction execution error:", err);
-                alert(`Batch processing breakdown: ${err.message}`);
+                console.error("Fatal transaction error:", err);
+                alert(`Upload failed: ${err.message}`);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Publish Batch to Portal";
