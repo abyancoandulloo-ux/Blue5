@@ -50,23 +50,31 @@
 
         /* Gallery Grid Layout */
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
-        .gallery-item { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
+        .gallery-item { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; position: relative; }
         .gallery-item:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(10, 77, 164, 0.15); }
         
-        .img-container { width: 100%; height: 250px; overflow: hidden; background: #e2e8f0; }
+        .img-container { width: 100%; height: 250px; overflow: hidden; background: #e2e8f0; position: relative; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
         .gallery-item:hover .img-container img { transform: scale(1.05); }
+
+        /* Batch count tag badge inside box preview */
+        .batch-badge { position: absolute; top: 15px; right: 15px; background: rgba(30, 111, 223, 0.9); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; backdrop-filter: blur(4px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 5; }
 
         .img-details { padding: 20px; border-top: 1px solid #f0f4fa; }
         .img-details h4 { font-size: 1.05rem; color: #1f2a44; margin-bottom: 5px; font-weight: 600; }
         .img-details p { font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
 
-        /* Lightbox Modal */
+        /* Lightbox Carousel Modal */
         .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12, 27, 51, 0.95); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        .lightbox-content { max-width: 90%; max-height: 80vh; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); object-fit: contain; transform: scale(0.95); transition: transform 0.3s ease; }
-        .lightbox.open .lightbox-content { transform: scale(1); }
-        .lightbox-close { position: absolute; top: 25px; right: 35px; color: white; font-size: 40px; cursor: pointer; }
-        .lightbox-caption { position: absolute; bottom: 30px; color: white; font-size: 1.1rem; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 40px; }
+        .lightbox-content { max-width: 90%; max-height: 80vh; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); object-fit: contain; }
+        .lightbox-close { position: absolute; top: 25px; right: 35px; color: white; font-size: 40px; cursor: pointer; z-index: 10100; }
+        .lightbox-caption { position: absolute; bottom: 30px; color: white; font-size: 1.1rem; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 40px; text-align: center; }
+
+        /* Carousel Navigation Arrows */
+        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 35px; background: rgba(255,255,255,0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: background 0.2s; }
+        .nav-arrow:hover { background: rgba(255,255,255,0.25); }
+        .left-arrow { left: 40px; }
+        .right-arrow { right: 40px; }
 
         /* Status States */
         .status-msg { text-align: center; padding: 40px; color: #5a6e8a; font-size: 1.1rem; width: 100%; grid-column: 1 / -1; }
@@ -108,11 +116,12 @@
         <div class="upload-card" id="uploadCard">
             <h3><i class="fas fa-plus-circle"></i> Upload Photo Batch</h3>
             <form id="photoUploadForm">
-                <div class="form-group">
-    <label for="photoFile">Choose Image Files (Select Multiple)</label>
-    <input type="file" id="photoFile" name="photos[]" accept="image/png, image/jpeg, image/jpg, image/webp" multiple required>
-    <small id="fileCountIndicator" style="color: #1e6fdf; font-weight: 600; margin-top: 4px; display: block; min-height: 1.2em;"></small>
-</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="photoFile">Choose Image Files (Select Multiple)</label>
+                        <input type="file" id="photoFile" name="photos[]" accept="image/png, image/jpeg, image/jpg, image/webp" multiple required>
+                        <small id="fileCountIndicator" style="color: #1e6fdf; font-weight: 600; margin-top: 4px; display: block; min-height: 1.2em;"></small>
+                    </div>
                     <div class="form-group">
                         <label for="photoDesc">Batch Description / Title</label>
                         <input type="text" id="photoDesc" placeholder="e.g. Saturday Drills Bunch" required>
@@ -140,9 +149,11 @@
         </div>
     </div>
 
-    <div id="lightboxModal" class="lightbox" onclick="closeLightbox()">
-        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <div id="lightboxModal" class="lightbox">
+        <span class="lightbox-close" id="closeBtn">&times;</span>
+        <div class="nav-arrow left-arrow" id="prevBtn"><i class="fas fa-chevron-left"></i></div>
         <img class="lightbox-content" id="lightboxImg" alt="Enlarged View">
+        <div class="nav-arrow right-arrow" id="nextBtn"><i class="fas fa-chevron-right"></i></div>
         <div class="lightbox-caption" id="lightboxCaption"></div>
     </div>
 
@@ -155,7 +166,12 @@
 
         const CORRECT_PASSWORD = "Saliim007";
         let currentFilter = "all";
-        let localPhotosCache = [];
+        let groupedAlbumsCache = []; // Cache holds combined items grouped into unique descriptions
+
+        // Carousel variables
+        let activeAlbumImages = [];
+        let activeImageIndex = 0;
+        let activeAlbumTitle = "";
 
         // UI Target Bindings
         const openUploadBoxBtn = document.getElementById('openUploadBoxBtn');
@@ -166,6 +182,14 @@
         const galleryGrid = document.getElementById('galleryGrid');
         const gridStatus = document.getElementById('gridStatus');
 
+        // Lightbox target links
+        const lightboxModal = document.getElementById('lightboxModal');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxCaption = document.getElementById('lightboxCaption');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
         if (!supabase || !supabase.storage) {
             console.error("Supabase client missing or misconfigured.");
             document.getElementById('gridStatus').innerHTML = `
@@ -174,7 +198,7 @@
                 </span>`;
         }
 
-        // Live visual selection validation
+        // Live visual text counter updates
         fileInput.addEventListener('change', () => {
             const count = fileInput.files.length;
             if (count > 1) {
@@ -203,7 +227,7 @@
             }
         });
 
-        // Pull Images and Render
+        // Pull Images and Group them together dynamically
         async function fetchGalleryRecords() {
             if (!supabase) return;
             try {
@@ -213,7 +237,23 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-                localPhotosCache = data || [];
+
+                // Restructure items flat row array into group boxes matching description title strings
+                const groupingMap = {};
+                (data || []).forEach(item => {
+                    const key = item.description.trim().toLowerCase() + "_" + item.age_group;
+                    if (!groupingMap[key]) {
+                        groupingMap[key] = {
+                            description: item.description,
+                            age_group: item.age_group,
+                            urls: [],
+                            cover_url: item.image_url
+                        };
+                    }
+                    groupingMap[key].urls.push(item.image_url);
+                });
+
+                groupedAlbumsCache = Object.values(groupingMap);
                 renderActiveView();
             } catch (err) {
                 console.error("Database records compilation error:", err);
@@ -222,31 +262,89 @@
         }
 
         function renderActiveView() {
-            const filtered = localPhotosCache.filter(p => currentFilter === 'all' || p.age_group === currentFilter);
+            const filtered = groupedAlbumsCache.filter(album => currentFilter === 'all' || album.age_group === currentFilter);
             
             if (filtered.length === 0) {
-                galleryGrid.innerHTML = `<div class="status-msg"><i class="far fa-images"></i> No photos found in this category.</div>`;
+                galleryGrid.innerHTML = `<div class="status-msg"><i class="far fa-images"></i> No photo groups found in this category.</div>`;
                 return;
             }
 
             galleryGrid.innerHTML = '';
-            filtered.forEach(photo => {
-                const iconClass = photo.age_group === '6-8' ? 'fa-child' : 'fa-user-friends';
+            filtered.forEach(album => {
+                const iconClass = album.age_group === '6-8' ? 'fa-child' : 'fa-user-friends';
                 const card = document.createElement('div');
                 card.className = 'gallery-item';
+                
+                // Show how many images are stacked inside the box
+                const photoCount = album.urls.length;
+                const batchBadgeHtml = photoCount > 1 ? `<div class="batch-badge"><i class="fas fa-images"></i> ${photoCount} Photos</div>` : '';
+
                 card.innerHTML = `
                     <div class="img-container">
-                        <img src="${photo.image_url}" alt="Session Image">
+                        ${batchBadgeHtml}
+                        <img src="${album.cover_url}" alt="Album Cover Image">
                     </div>
                     <div class="img-details">
-                        <h4>${escapeHtml(photo.description)}</h4>
-                        <p><i class="fas ${iconClass}"></i> Age Group: ${photo.age_group} Years</p>
+                        <h4>${escapeHtml(album.description)}</h4>
+                        <p><i class="fas ${iconClass}"></i> Age Group: ${album.age_group} Years</p>
                     </div>
                 `;
-                card.addEventListener('click', () => openLightbox(photo.image_url, photo.description));
+                
+                // Clicking opens the entire bundle inside the carousel view
+                card.addEventListener('click', () => initCarousel(album.urls, album.description));
                 galleryGrid.appendChild(card);
             });
         }
+
+        // Initialize carousel variables and load image indices
+        function initCarousel(imageUrls, title) {
+            activeAlbumImages = imageUrls;
+            activeImageIndex = 0;
+            activeAlbumTitle = title;
+            updateCarouselState();
+            
+            lightboxModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function updateCarouselState() {
+            lightboxImg.src = activeAlbumImages[activeImageIndex];
+            lightboxCaption.textContent = `${escapeHtml(activeAlbumTitle)} (${activeImageIndex + 1}/${activeAlbumImages.length})`;
+            
+            // Hide navigation elements if there is only a single element in the group
+            if (activeAlbumImages.length <= 1) {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'flex';
+                nextBtn.style.display = 'flex';
+            }
+        }
+
+        // Carousel Arrow Actions
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeImageIndex = (activeImageIndex === 0) ? activeAlbumImages.length - 1 : activeImageIndex - 1;
+            updateCarouselState();
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeImageIndex = (activeImageIndex === activeAlbumImages.length - 1) ? 0 : activeImageIndex + 1;
+            updateCarouselState();
+        });
+
+        closeBtn.addEventListener('click', () => {
+            lightboxModal.style.display = 'none';
+            document.body.style.overflow = '';
+        });
+
+        lightboxModal.addEventListener('click', (e) => {
+            if (e.target === lightboxModal) {
+                lightboxModal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        });
 
         // Processing Multi-File Batch Storage Upload Pipelines
         photoUploadForm.addEventListener('submit', async (e) => {
@@ -318,7 +416,7 @@
                     return;
                 }
 
-                alert(`Success: ${totalFiles} images published to gallery matching description!`);
+                alert(`Success: ${totalFiles} images published to gallery grouped in one box structure!`);
                 
                 photoUploadForm.reset();
                 fileCountIndicator.textContent = '';
@@ -352,26 +450,6 @@
         // Initialize App View
         if (supabase) {
             fetchGalleryRecords();
-        }
-    </script>
-
-    <script>
-        const lightbox = document.getElementById('lightboxModal');
-        const lightboxImg = document.getElementById('lightboxImg');
-        const lightboxCap = document.getElementById('lightboxCaption');
-
-        function openLightbox(imgSrc, captionText) {
-            lightboxImg.src = imgSrc;
-            lightboxCap.textContent = captionText;
-            lightbox.style.display = 'flex';
-            setTimeout(() => lightbox.classList.add('open'), 10);
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeLightbox() {
-            lightbox.classList.remove('open');
-            setTimeout(() => lightbox.style.display = 'none', 300);
-            document.body.style.overflow = '';
         }
     </script>
 </body>
