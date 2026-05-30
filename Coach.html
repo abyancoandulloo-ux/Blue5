@@ -22,28 +22,41 @@
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
         
         /* Main Container Content */
-        .container { max-width: 1300px; margin: 30px auto; padding: 20px; }
+        .container { max-width: 1400px; margin: 30px auto; padding: 20px; }
         .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
         .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
         
+        /* Controls Bar (Search & Reset) Layout */
+        .control-hub-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); gap: 20px; flex-wrap: wrap; }
+        .search-wrapper { position: relative; flex-grow: 1; max-width: 450px; }
+        .search-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-wrapper input { width: 100%; padding: 11px 16px 11px 45px; border-radius: 30px; border: 1px solid #cbd5e1; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; transition: border 0.2s; }
+        .search-wrapper input:focus { border-color: #1e6fdf; }
+        .global-reset-btn { background: #ef4444; color: white; border: none; padding: 11px 24px; border-radius: 30px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .global-reset-btn:hover { background: #dc2626; }
+
         /* Table Layout Configuration */
         .coach-table-wrapper { overflow-x: auto; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 5px; }
         .payment-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; }
+        .payment-table th { background: #0a4da4; color: white; padding: 14px 10px; text-align: center; font-weight: 600; position: sticky; top: 0; white-space: nowrap; }
         .payment-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
         
         /* Interactive Student Name Link Cell */
-        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 20px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px; }
+        .student-name-cell { font-weight: 600; background: #f8fafd; text-align: left; padding-left: 15px; white-space: nowrap; font-size: 0.85rem; color: #1f2a44; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px; }
         .student-name-cell:hover { background: #e0ecfb; color: #0a4da4; }
         
         /* Micro Thumbnails inside table row */
         .table-avatar-thumb { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #0a4da4; background: #cbd5e1; }
-        .table-avatar-placeholder { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.8rem; border: 2px solid #cbd5e1; }
+        .table-avatar-placeholder { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.8rem; border: 2px solid #cbd5e1; flex-shrink: 0; }
         
+        /* Action Table Elements */
+        .row-delete-btn { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem; transition: color 0.2s; padding: 4px 8px; }
+        .row-delete-btn:hover { color: #ef4444; }
+
         /* Grid Table States Tags */
-        .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        .paid-cell { background-color: #d1fae5; color: #0a6e44; font-weight: 500; cursor: pointer; transition: background 0.2s; white-space: nowrap; min-width: 85px; }
         .paid-cell:hover { background-color: #fca5a5; color: #991b1b; } 
-        .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s; }
+        .unpaid-cell { background-color: #fff9ef; color: #b45309; cursor: pointer; transition: background 0.2s; white-space: nowrap; min-width: 85px; }
         .unpaid-cell:hover { background-color: #ffeccf; color: #78350f; font-weight: 600; }
         .paid-icon { color: #10b981; margin-right: 5px; }
         .unpaid-icon { color: #f59e0b; margin-right: 5px; }
@@ -127,11 +140,10 @@
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="login.html">Log in</a></li>
-                <li><a href="Payment.html">Payment</a></li>
                 <li><a href="sessions.html">Sessions</a></li>
                 <li><a href="Coach.html" class="active-nav">Coach</a></li>
-                 <li><a href="profile.html">Profile</a></li>
-                     <li><a href="players.html">Players</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="players.html">Players</a></li>
             </ul>
         </nav>
     </div>
@@ -140,11 +152,22 @@
         <div class="container">
             <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> Master Student Profile Roster</h2>
             <div class="title-underline"></div>
+            
+            <div class="control-hub-bar">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="rosterSearchInput" placeholder="Filter student profiles by name...">
+                </div>
+                <button class="global-reset-btn" id="bulkResetPaymentsBtn">
+                    <i class="fas fa-undo-alt"></i> Reset All Payments to Pending
+                </button>
+            </div>
+
             <div class="coach-table-wrapper">
                 <table class="payment-table" id="studentPaymentTable">
                     <thead id="tableHeader"></thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="13" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading roster records matrix...</td></tr>
+                        <tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Loading roster records matrix...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -250,6 +273,7 @@
         let supabase = null;
         let currentActiveModalUserId = null; 
         let globalCachedUsersList = []; 
+        let globalCachedPaymentsList = [];
 
         try {
             const module = await import('./supabase-config.js');
@@ -267,13 +291,12 @@
         const coachContent = document.getElementById('coachContent');
         const footer = document.getElementById('footer');
         const modal = document.getElementById('passwordModal');
+        const rosterSearchInput = document.getElementById('rosterSearchInput');
+        const bulkResetPaymentsBtn = document.getElementById('bulkResetPaymentsBtn');
 
         document.body.style.overflow = 'hidden';
 
-        async function loadAndRenderLivePayments() {
-            const thead = document.getElementById('tableHeader');
-            const tbody = document.getElementById('tableBody');
-            
+        async function fetchRosterData() {
             try {
                 const { data: usersProfiles, error: userError } = await supabase
                     .from('users')
@@ -288,48 +311,118 @@
                     .select('*');
 
                 if (paymentError) throw paymentError;
+                globalCachedPaymentsList = allPayments || [];
 
-                let headerHtml = '<tr><th>Student Name</th>';
-                months.forEach(month => { headerHtml += `<th>${month.substring(0,3)}</th>`; });
-                headerHtml += '</tr>';
-                thead.innerHTML = headerHtml;
-
-                if (globalCachedUsersList.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" style="padding:30px; color:#b45309;"><i class="fas fa-exclamation-triangle"></i> No student profiles discovered. Check user trigger execution logs.</td></tr>`;
-                    return;
-                }
-
-                let bodyHtml = '';
-                globalCachedUsersList.forEach(user => {
-                    const userRecords = allPayments.filter(p => p.user_id === user.id);
-                    let studentDisplayLabel = user.name || `Student (${user.id.substring(0,6)})`;
-
-                    // Choose image asset thumbnail configuration or a clean icon fallback 
-                    let imageSnippet = user.avatar_url 
-                        ? `<img src="${user.avatar_url}" class="table-avatar-thumb" alt="">`
-                        : `<div class="table-avatar-placeholder"><i class="fas fa-user-ninja"></i></div>`;
-
-                    bodyHtml += `<tr><td class="student-name-cell" onclick="openStudentModal('${user.id}')">${imageSnippet} ${studentDisplayLabel}</td>`;
-                    
-                    months.forEach(month => {
-                        const matchRecord = userRecords.find(p => p.month && p.month.toLowerCase() === month.toLowerCase());
-                        const isPaid = matchRecord ? matchRecord.paid : false;
-                        const cellId = `cell-${user.id}-${month.toLowerCase()}`;
-                        
-                        if (isPaid) {
-                            bodyHtml += `<td id="${cellId}" class="paid-cell" onclick="togglePaymentStatus('${user.id}', '${studentDisplayLabel.replace(/'/g, "\\'")}', '${month}', true); event.stopPropagation();"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
-                        } else {
-                            bodyHtml += `<td id="${cellId}" class="unpaid-cell" onclick="togglePaymentStatus('${user.id}', '${studentDisplayLabel.replace(/'/g, "\\'")}', '${month}', false); event.stopPropagation();"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
-                        }
-                    });
-                    bodyHtml += '</tr>';
-                });
-                tbody.innerHTML = bodyHtml;
-
+                renderTableStructure();
             } catch (error) {
-                tbody.innerHTML = `<tr><td colspan="13" style="color:red; padding:20px;">Roster generation broke down: ${error.message}</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="color:red; padding:20px;">Roster generation broke down: ${error.message}</td></tr>`;
             }
         }
+
+        function renderTableStructure() {
+            const thead = document.getElementById('tableHeader');
+            const tbody = document.getElementById('tableBody');
+            const query = rosterSearchInput.value.trim().toLowerCase();
+
+            let headerHtml = '<tr><th>Student Name</th>';
+            months.forEach(month => { headerHtml += `<th>${month.substring(0,3)}</th>`; });
+            headerHtml += '<th>Actions</th></tr>';
+            thead.innerHTML = headerHtml;
+
+            const filteredUsers = globalCachedUsersList.filter(user => {
+                const name = user.name || '';
+                return name.toLowerCase().includes(query);
+            });
+
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="14" style="padding:30px; color:#b45309;"><i class="fas fa-search-minus"></i> No matching student records found.</td></tr>`;
+                return;
+            }
+
+            let bodyHtml = '';
+            filteredUsers.forEach(user => {
+                const userRecords = globalCachedPaymentsList.filter(p => p.user_id === user.id);
+                let studentDisplayLabel = user.name || `Student (${user.id.substring(0,6)})`;
+
+                let imageSnippet = user.avatar_url 
+                    ? `<img src="${user.avatar_url}" class="table-avatar-thumb" alt="">`
+                    : `<div class="table-avatar-placeholder"><i class="fas fa-user-ninja"></i></div>`;
+
+                bodyHtml += `<tr><td class="student-name-cell" onclick="openStudentModal('${user.id}')">${imageSnippet} ${studentDisplayLabel}</td>`;
+                
+                months.forEach(month => {
+                    const matchRecord = userRecords.find(p => p.month && p.month.toLowerCase() === month.toLowerCase());
+                    const isPaid = matchRecord ? matchRecord.paid : false;
+                    const cellId = `cell-${user.id}-${month.toLowerCase()}`;
+                    
+                    if (isPaid) {
+                        bodyHtml += `<td id="${cellId}" class="paid-cell" onclick="togglePaymentStatus('${user.id}', '${studentDisplayLabel.replace(/'/g, "\\'")}', '${month}', true); event.stopPropagation();"><i class="fas fa-check-circle paid-icon"></i> Paid</td>`;
+                    } else {
+                        bodyHtml += `<td id="${cellId}" class="unpaid-cell" onclick="togglePaymentStatus('${user.id}', '${studentDisplayLabel.replace(/'/g, "\\'")}', '${month}', false); event.stopPropagation();"><i class="fas fa-times-circle unpaid-icon"></i> Pending</td>`;
+                    }
+                });
+                
+                bodyHtml += `<td>
+                    <button class="row-delete-btn" onclick="executeStudentDeletion('${user.id}', '${studentDisplayLabel.replace(/'/g, "\\'")}')" title="Delete Student Record">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td></tr>`;
+            });
+            tbody.innerHTML = bodyHtml;
+        }
+
+        rosterSearchInput.addEventListener('input', renderTableStructure);
+
+        window.executeStudentDeletion = async (userId, studentName) => {
+            const passKey = prompt(`Are you absolutely sure you want to permanently delete student profile "${studentName}"?\nThis cannot be undone. Enter security password to execute:`);
+            if (passKey === null) return;
+            
+            if (passKey !== CORRECT_PASSWORD) {
+                alert("Authorization Denied: Password mismatch.");
+                return;
+            }
+
+            try {
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Erasing user entity and clearing related table indexes...</td></tr>`;
+                
+                // First wipe any linked user payment configurations
+                await supabase.from('user_payments').delete().eq('user_id', userId);
+                
+                // Drop primary user profile card row
+                const { error } = await supabase.from('users').delete().eq('id', userId);
+                if (error) throw error;
+
+                alert(`Success: Student record "${studentName}" has been erased.`);
+                await fetchRosterData();
+            } catch (err) {
+                alert(`Error executing drop pipeline: ${err.message}`);
+                await fetchRosterData();
+            }
+        };
+
+        bulkResetPaymentsBtn.addEventListener('click', async () => {
+            const passKey = prompt("Administrative Verification Action Required:\nThis will set ALL monthly table records for ALL students to pending status.\nEnter security password to verify block reset action:");
+            if (passKey === null) return;
+
+            if (passKey !== CORRECT_PASSWORD) {
+                alert("Action Cancelled: Passkey authorization mismatch.");
+                return;
+            }
+
+            try {
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Resetting database rows matrix state...</td></tr>`;
+                
+                // Clear out the records entirely to move everything down safely back to an unpaid/pending defaults map state
+                const { error } = await supabase.from('user_payments').delete().neq('month', 'ClearAllGlobalScopeTrigger');
+                if (error) throw error;
+
+                alert("Success: All monthly records across all student portfolios have been clean reset to Pending.");
+                await fetchRosterData();
+            } catch (err) {
+                alert(`Error executing transaction sequence: ${err.message}`);
+                await fetchRosterData();
+            }
+        });
 
         window.openStudentModal = (userId) => {
             currentActiveModalUserId = userId; 
@@ -341,7 +434,6 @@
             document.getElementById('modalUserEmail').textContent = targetUser.email || 'No email attached';
             document.getElementById('cardPlayerName').textContent = (targetUser.name || 'PLAYER').split(' ')[0].toUpperCase();
 
-            // Dynamic Image Handling inside the Modal
             const imgEl = document.getElementById('cardAvatarImg');
             const fallbackIcon = document.getElementById('cardFallbackIcon');
             if (targetUser.avatar_url) {
@@ -467,9 +559,9 @@
                     .upsert({ user_id: userId, student_name: studentName, month: monthName, paid: newPaidState, amount: 49.00, payment_date: new Date().toISOString() }, { onConflict: 'user_id, month' });
 
                 if (error) throw error;
-                loadAndRenderLivePayments();
+                await fetchRosterData();
             } catch (err) {
-                loadAndRenderLivePayments();
+                await fetchRosterData();
             }
         };
 
@@ -479,7 +571,7 @@
                 if (modal) modal.remove();
                 coachContent.style.display = 'block';
                 if (footer) footer.style.display = 'block';
-                loadAndRenderLivePayments();
+                fetchRosterData();
             } else { errorDiv.textContent = 'Incorrect credentials validation sequence failed.'; }
         }
 
