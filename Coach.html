@@ -103,8 +103,14 @@
         
         /* Control Panel Form Elements */
         .profile-title-header h3 { font-size: 1.4rem; color: #0a4da4; font-weight: 700; margin-bottom: 2px; }
-        .profile-title-header p { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; }
+        .profile-title-header p { font-size: 0.85rem; color: #64748b; margin-bottom: 5px; }
         
+        /* Photo URL Input Modification Group */
+        .photo-input-group { background: white; padding: 8px 15px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
+        .photo-input-group span { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #475569; width: 90px; }
+        .photo-input-group input { flex-grow: 1; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.85rem; outline: none; }
+        .photo-input-group input:focus { border-color: #1e6fdf; }
+
         .rating-stars-row { display: flex; align-items: center; gap: 12px; background: white; padding: 8px 15px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
         .rating-stars-row span { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #475569; width: 90px; }
         .stars-container { display: flex; gap: 6px; font-size: 20px; color: #cbd5e1; }
@@ -138,13 +144,12 @@
         </a>
         <nav class="main-nav">
             <ul>
-<li><a href="index.html" class="active-nav">Home</a></li>
-                    <li><a href="login.html">Log in</a></li>
-                    <li><a href="profile.html">Profile</a></li>
-                    <li><a href="photos.html">Photos</a></li>
-                    <li><a href="sessions.html">Sessions</a></li>
-                    <li><a href="Coach.html">Coach</a></li>
-                     <li><a href="players.html">Players</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">Log in</a></li>
+                <li><a href="sessions.html">Sessions</a></li>
+                <li><a href="Coach.html" class="active-nav">Coach</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="players.html">Players</a></li>
             </ul>
         </nav>
     </div>
@@ -227,6 +232,11 @@
                     <div class="profile-title-header">
                         <h3 id="modalStudentName">Student Profile</h3>
                         <p id="modalUserEmail">email@example.com</p>
+                    </div>
+
+                    <div class="photo-input-group">
+                        <span>Photo URL:</span>
+                        <input type="text" id="inputAvatarUrl" placeholder="Paste image URL here" oninput="liveUpdateCardView()">
                     </div>
 
                     <div class="rating-stars-row">
@@ -413,12 +423,8 @@
             try {
                 document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Resetting database rows matrix state...</td></tr>`;
                 
-                // SAFETY IMPLEMENTATION: Targets rows with valid non-null IDs instead of deleting them.
-                const { error } = await supabase
-                    .from('user_payments')
-                    .update({ paid: false })
-                    .not('user_id', 'is', null);
-
+                // Clear out the records entirely to move everything down safely back to an unpaid/pending defaults map state
+                const { error } = await supabase.from('user_payments').delete().neq('month', 'ClearAllGlobalScopeTrigger');
                 if (error) throw error;
 
                 alert("Success: All monthly records across all student portfolios have been clean reset to Pending.");
@@ -438,6 +444,7 @@
             document.getElementById('modalStudentName').textContent = targetUser.name || 'Unknown Athlete';
             document.getElementById('modalUserEmail').textContent = targetUser.email || 'No email attached';
             document.getElementById('cardPlayerName').textContent = (targetUser.name || 'PLAYER').split(' ')[0].toUpperCase();
+            document.getElementById('inputAvatarUrl').value = targetUser.avatar_url || '';
 
             const imgEl = document.getElementById('cardAvatarImg');
             const fallbackIcon = document.getElementById('cardFallbackIcon');
@@ -477,6 +484,7 @@
             const def = parseInt(document.getElementById('inputDefending').value);
             const sta = parseInt(document.getElementById('inputStamina').value);
             const phy = parseInt(document.getElementById('inputPhysicality').value);
+            const avatarUrl = document.getElementById('inputAvatarUrl').value.trim();
 
             document.getElementById('lblPace').textContent = pac;
             document.getElementById('lblDribbling').textContent = dri;
@@ -490,6 +498,17 @@
             document.getElementById('cardSta').textContent = sta;
             document.getElementById('cardPhy').textContent = phy;
 
+            const imgEl = document.getElementById('cardAvatarImg');
+            const fallbackIcon = document.getElementById('cardFallbackIcon');
+            if (avatarUrl) {
+                imgEl.src = avatarUrl;
+                imgEl.style.display = 'block';
+                fallbackIcon.style.display = 'none';
+            } else {
+                imgEl.style.display = 'none';
+                fallbackIcon.style.display = 'block';
+            }
+
             document.getElementById('cardOvr').textContent = Math.round((pac + dri + def + sta + phy) / 5);
         };
 
@@ -501,6 +520,7 @@
             const def = parseInt(document.getElementById('inputDefending').value);
             const sta = parseInt(document.getElementById('inputStamina').value);
             const phy = parseInt(document.getElementById('inputPhysicality').value);
+            const avatarUrl = document.getElementById('inputAvatarUrl').value.trim();
 
             document.getElementById('syncIndicator').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Committing changes to system record...`;
             document.getElementById('syncIndicator').style.color = "#0a4da4";
@@ -508,7 +528,7 @@
             try {
                 const { error } = await supabase
                     .from('users')
-                    .update({ pace: pac, dribbling: dri, defending: def, stamina: sta, physicality: phy })
+                    .update({ pace: pac, dribbling: dri, defending: def, stamina: sta, physicality: phy, avatar_url: avatarUrl || null })
                     .eq('id', currentActiveModalUserId);
 
                 if (error) throw error;
@@ -520,7 +540,11 @@
                     globalCachedUsersList[idx].defending = def;
                     globalCachedUsersList[idx].stamina = sta;
                     globalCachedUsersList[idx].physicality = phy;
+                    globalCachedUsersList[idx].avatar_url = avatarUrl || null;
                 }
+                
+                // Refresh table to update micro avatar thumbnail instantly
+                renderTableStructure();
                 closeStudentModal();
             } catch (err) {
                 alert(`DB Sync operation failed: ${err.message}`);
