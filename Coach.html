@@ -105,11 +105,10 @@
         .profile-title-header h3 { font-size: 1.4rem; color: #0a4da4; font-weight: 700; margin-bottom: 2px; }
         .profile-title-header p { font-size: 0.85rem; color: #64748b; margin-bottom: 5px; }
         
-        /* Photo URL Input Modification Group */
+        /* Photo File Input Modification Group */
         .photo-input-group { background: white; padding: 8px 15px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
         .photo-input-group span { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #475569; width: 90px; }
-        .photo-input-group input { flex-grow: 1; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.85rem; outline: none; }
-        .photo-input-group input:focus { border-color: #1e6fdf; }
+        .photo-input-group input[type="file"] { flex-grow: 1; font-family: inherit; font-size: 0.85rem; outline: none; cursor: pointer; }
 
         .rating-stars-row { display: flex; align-items: center; gap: 12px; background: white; padding: 8px 15px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
         .rating-stars-row span { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #475569; width: 90px; }
@@ -235,8 +234,8 @@
                     </div>
 
                     <div class="photo-input-group">
-                        <span>Photo URL:</span>
-                        <input type="text" id="inputAvatarUrl" placeholder="Paste image URL here" oninput="liveUpdateCardView()">
+                        <span>Upload Photo:</span>
+                        <input type="file" id="inputFileUpload" accept="image/*">
                     </div>
 
                     <div class="rating-stars-row">
@@ -285,6 +284,7 @@
         let currentActiveModalUserId = null; 
         let globalCachedUsersList = []; 
         let globalCachedPaymentsList = [];
+        let uploadedBase64ImageString = null; // Holds local file reference string
 
         try {
             const module = await import('./supabase-config.js');
@@ -304,8 +304,22 @@
         const modal = document.getElementById('passwordModal');
         const rosterSearchInput = document.getElementById('rosterSearchInput');
         const bulkResetPaymentsBtn = document.getElementById('bulkResetPaymentsBtn');
+        const fileUploadInput = document.getElementById('inputFileUpload');
 
         document.body.style.overflow = 'hidden';
+
+        // Listen for new file additions to update card preview asynchronously
+        fileUploadInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    uploadedBase64ImageString = event.target.result;
+                    window.liveUpdateCardView();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         async function fetchRosterData() {
             try {
@@ -444,7 +458,10 @@
             document.getElementById('modalStudentName').textContent = targetUser.name || 'Unknown Athlete';
             document.getElementById('modalUserEmail').textContent = targetUser.email || 'No email attached';
             document.getElementById('cardPlayerName').textContent = (targetUser.name || 'PLAYER').split(' ')[0].toUpperCase();
-            document.getElementById('inputAvatarUrl').value = targetUser.avatar_url || '';
+            
+            // Clean modal file element status
+            fileUploadInput.value = "";
+            uploadedBase64ImageString = targetUser.avatar_url || null;
 
             const imgEl = document.getElementById('cardAvatarImg');
             const fallbackIcon = document.getElementById('cardFallbackIcon');
@@ -476,6 +493,7 @@
         window.closeStudentModal = () => {
             document.getElementById('studentInfoModal').classList.remove('active');
             currentActiveModalUserId = null;
+            uploadedBase64ImageString = null;
         };
 
         window.liveUpdateCardView = () => {
@@ -484,7 +502,6 @@
             const def = parseInt(document.getElementById('inputDefending').value);
             const sta = parseInt(document.getElementById('inputStamina').value);
             const phy = parseInt(document.getElementById('inputPhysicality').value);
-            const avatarUrl = document.getElementById('inputAvatarUrl').value.trim();
 
             document.getElementById('lblPace').textContent = pac;
             document.getElementById('lblDribbling').textContent = dri;
@@ -500,8 +517,8 @@
 
             const imgEl = document.getElementById('cardAvatarImg');
             const fallbackIcon = document.getElementById('cardFallbackIcon');
-            if (avatarUrl) {
-                imgEl.src = avatarUrl;
+            if (uploadedBase64ImageString) {
+                imgEl.src = uploadedBase64ImageString;
                 imgEl.style.display = 'block';
                 fallbackIcon.style.display = 'none';
             } else {
@@ -520,7 +537,6 @@
             const def = parseInt(document.getElementById('inputDefending').value);
             const sta = parseInt(document.getElementById('inputStamina').value);
             const phy = parseInt(document.getElementById('inputPhysicality').value);
-            const avatarUrl = document.getElementById('inputAvatarUrl').value.trim();
 
             document.getElementById('syncIndicator').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Committing changes to system record...`;
             document.getElementById('syncIndicator').style.color = "#0a4da4";
@@ -528,7 +544,7 @@
             try {
                 const { error } = await supabase
                     .from('users')
-                    .update({ pace: pac, dribbling: dri, defending: def, stamina: sta, physicality: phy, avatar_url: avatarUrl || null })
+                    .update({ pace: pac, dribbling: dri, defending: def, stamina: sta, physicality: phy, avatar_url: uploadedBase64ImageString || null })
                     .eq('id', currentActiveModalUserId);
 
                 if (error) throw error;
@@ -540,7 +556,7 @@
                     globalCachedUsersList[idx].defending = def;
                     globalCachedUsersList[idx].stamina = sta;
                     globalCachedUsersList[idx].physicality = phy;
-                    globalCachedUsersList[idx].avatar_url = avatarUrl || null;
+                    globalCachedUsersList[idx].avatar_url = uploadedBase64ImageString || null;
                 }
                 
                 // Refresh table to update micro avatar thumbnail instantly
