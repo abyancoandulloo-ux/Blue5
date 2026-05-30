@@ -26,7 +26,7 @@
         .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
         .title-underline { width: 80px; height: 3px; background: #0a4da4; margin: 0 auto 30px; border-radius: 3px; }
         
-        /* Controls Bar (Search & Reset) Layout */
+        /* Controls Bar Layout */
         .control-hub-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); gap: 20px; flex-wrap: wrap; }
         .search-wrapper { position: relative; flex-grow: 1; max-width: 450px; }
         .search-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
@@ -103,12 +103,12 @@
         
         /* Control Panel Form Elements */
         .profile-title-header h3 { font-size: 1.4rem; color: #0a4da4; font-weight: 700; margin-bottom: 2px; }
-        .profile-title-header p { font-size: 0.85rem; color: #64748b; margin-bottom: 5px; }
+        .profile-title-header p { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; }
         
-        /* Photo File Input Modification Group */
-        .photo-input-group { background: white; padding: 8px 15px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
-        .photo-input-group span { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #475569; width: 90px; }
-        .photo-input-group input[type="file"] { flex-grow: 1; font-family: inherit; font-size: 0.85rem; outline: none; cursor: pointer; }
+        /* File Uploader Styles */
+        .photo-upload-group { background: white; padding: 8px 15px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
+        .photo-upload-group span { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #475569; width: 90px; }
+        .photo-upload-group input[type="file"] { font-family: inherit; font-size: 0.85rem; outline: none; cursor: pointer; flex-grow: 1; }
 
         .rating-stars-row { display: flex; align-items: center; gap: 12px; background: white; padding: 8px 15px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
         .rating-stars-row span { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #475569; width: 90px; }
@@ -233,9 +233,9 @@
                         <p id="modalUserEmail">email@example.com</p>
                     </div>
 
-                    <div class="photo-input-group">
-                        <span>Upload Photo:</span>
-                        <input type="file" id="inputFileUpload" accept="image/*">
+                    <div class="photo-upload-group">
+                        <span>Athlete Photo:</span>
+                        <input type="file" id="athletePhotoFile" accept="image/*">
                     </div>
 
                     <div class="rating-stars-row">
@@ -284,7 +284,7 @@
         let currentActiveModalUserId = null; 
         let globalCachedUsersList = []; 
         let globalCachedPaymentsList = [];
-        let uploadedBase64ImageString = null; // Holds local file reference string
+        let temporarySelectedFile = null;
 
         try {
             const module = await import('./supabase-config.js');
@@ -304,18 +304,22 @@
         const modal = document.getElementById('passwordModal');
         const rosterSearchInput = document.getElementById('rosterSearchInput');
         const bulkResetPaymentsBtn = document.getElementById('bulkResetPaymentsBtn');
-        const fileUploadInput = document.getElementById('inputFileUpload');
+        const photoFileInput = document.getElementById('athletePhotoFile');
 
         document.body.style.overflow = 'hidden';
 
-        // Listen for new file additions to update card preview asynchronously
-        fileUploadInput.addEventListener('change', function(e) {
+        // Listen for new file changes to update live card preview locally
+        photoFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                temporarySelectedFile = file;
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    uploadedBase64ImageString = event.target.result;
-                    window.liveUpdateCardView();
+                reader.onload = (event) => {
+                    const imgEl = document.getElementById('cardAvatarImg');
+                    const fallbackIcon = document.getElementById('cardFallbackIcon');
+                    imgEl.src = event.target.result;
+                    imgEl.style.display = 'block';
+                    fallbackIcon.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             }
@@ -410,10 +414,7 @@
             try {
                 document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Erasing user entity and clearing related table indexes...</td></tr>`;
                 
-                // First wipe any linked user payment configurations
                 await supabase.from('user_payments').delete().eq('user_id', userId);
-                
-                // Drop primary user profile card row
                 const { error } = await supabase.from('users').delete().eq('id', userId);
                 if (error) throw error;
 
@@ -436,8 +437,6 @@
 
             try {
                 document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Resetting database rows matrix state...</td></tr>`;
-                
-                // Clear out the records entirely to move everything down safely back to an unpaid/pending defaults map state
                 const { error } = await supabase.from('user_payments').delete().neq('month', 'ClearAllGlobalScopeTrigger');
                 if (error) throw error;
 
@@ -451,6 +450,9 @@
 
         window.openStudentModal = (userId) => {
             currentActiveModalUserId = userId; 
+            temporarySelectedFile = null;
+            photoFileInput.value = "";
+
             const infoModal = document.getElementById('studentInfoModal');
             const targetUser = globalCachedUsersList.find(u => u.id === userId);
             if (!targetUser) return;
@@ -458,10 +460,6 @@
             document.getElementById('modalStudentName').textContent = targetUser.name || 'Unknown Athlete';
             document.getElementById('modalUserEmail').textContent = targetUser.email || 'No email attached';
             document.getElementById('cardPlayerName').textContent = (targetUser.name || 'PLAYER').split(' ')[0].toUpperCase();
-            
-            // Clean modal file element status
-            fileUploadInput.value = "";
-            uploadedBase64ImageString = targetUser.avatar_url || null;
 
             const imgEl = document.getElementById('cardAvatarImg');
             const fallbackIcon = document.getElementById('cardFallbackIcon');
@@ -493,7 +491,7 @@
         window.closeStudentModal = () => {
             document.getElementById('studentInfoModal').classList.remove('active');
             currentActiveModalUserId = null;
-            uploadedBase64ImageString = null;
+            temporarySelectedFile = null;
         };
 
         window.liveUpdateCardView = () => {
@@ -515,17 +513,6 @@
             document.getElementById('cardSta').textContent = sta;
             document.getElementById('cardPhy').textContent = phy;
 
-            const imgEl = document.getElementById('cardAvatarImg');
-            const fallbackIcon = document.getElementById('cardFallbackIcon');
-            if (uploadedBase64ImageString) {
-                imgEl.src = uploadedBase64ImageString;
-                imgEl.style.display = 'block';
-                fallbackIcon.style.display = 'none';
-            } else {
-                imgEl.style.display = 'none';
-                fallbackIcon.style.display = 'block';
-            }
-
             document.getElementById('cardOvr').textContent = Math.round((pac + dri + def + sta + phy) / 5);
         };
 
@@ -542,13 +529,46 @@
             document.getElementById('syncIndicator').style.color = "#0a4da4";
 
             try {
-                const { error } = await supabase
+                let finalAvatarUrl = globalCachedUsersList.find(u => u.id === currentActiveModalUserId)?.avatar_url || null;
+
+                // Handle file uploads to Supabase Storage if a new file is chosen
+                if (temporarySelectedFile) {
+                    document.getElementById('syncIndicator').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading file to storage bucket...`;
+                    
+                    const fileExtension = temporarySelectedFile.name.split('.').pop();
+                    const fileName = `${currentActiveModalUserId}-${Date.now()}.${fileExtension}`;
+
+                    // Upload file to 'avatars' storage bucket
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('avatars')
+                        .upload(fileName, temporarySelectedFile, { cacheControl: '3600', upsert: true });
+
+                    if (uploadError) throw uploadError;
+
+                    // Fetch public URL link string from storage
+                    const { data: urlData } = supabase.storage
+                        .from('avatars')
+                        .getPublicUrl(fileName);
+
+                    finalAvatarUrl = urlData.publicUrl;
+                }
+
+                // Update users record inside table indexes
+                const { error: dbError } = await supabase
                     .from('users')
-                    .update({ pace: pac, dribbling: dri, defending: def, stamina: sta, physicality: phy, avatar_url: uploadedBase64ImageString || null })
+                    .update({ 
+                        pace: pac, 
+                        dribbling: dri, 
+                        defending: def, 
+                        stamina: sta, 
+                        physicality: phy,
+                        avatar_url: finalAvatarUrl
+                    })
                     .eq('id', currentActiveModalUserId);
 
-                if (error) throw error;
+                if (dbError) throw dbError;
 
+                // Update local web memory model cache to avoid page broken view delays
                 const idx = globalCachedUsersList.findIndex(u => u.id === currentActiveModalUserId);
                 if (idx !== -1) {
                     globalCachedUsersList[idx].pace = pac;
@@ -556,14 +576,15 @@
                     globalCachedUsersList[idx].defending = def;
                     globalCachedUsersList[idx].stamina = sta;
                     globalCachedUsersList[idx].physicality = phy;
-                    globalCachedUsersList[idx].avatar_url = uploadedBase64ImageString || null;
+                    globalCachedUsersList[idx].avatar_url = finalAvatarUrl;
                 }
-                
-                // Refresh table to update micro avatar thumbnail instantly
+
                 renderTableStructure();
                 closeStudentModal();
             } catch (err) {
                 alert(`DB Sync operation failed: ${err.message}`);
+                document.getElementById('syncIndicator').innerHTML = "Error saving changes.";
+                document.getElementById('syncIndicator').style.color = "#e53e3e";
             }
         };
 
