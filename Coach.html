@@ -385,10 +385,8 @@
             try {
                 document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Erasing user entity and clearing related table indexes...</td></tr>`;
                 
-                // First wipe any linked user payment configurations
                 await supabase.from('user_payments').delete().eq('user_id', userId);
                 
-                // Drop primary user profile card row
                 const { error } = await supabase.from('users').delete().eq('id', userId);
                 if (error) throw error;
 
@@ -412,12 +410,19 @@
             try {
                 document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Resetting database rows matrix state...</td></tr>`;
                 
-                // Clear out the records entirely to move everything down safely back to an unpaid/pending defaults map state
-                const { error } = await supabase.from('user_payments').delete().neq('month', 'ClearAllGlobalScopeTrigger');
-                if (error) throw error;
+                const { data: records, error: fetchErr } = await supabase.from('user_payments').select('id');
+                if (fetchErr) throw fetchErr;
+
+                if (records && records.length > 0) {
+                    const idList = records.map(r => r.id);
+                    const { error: deleteErr } = await supabase.from('user_payments').delete().in('id', idList);
+                    if (deleteErr) throw deleteErr;
+                }
 
                 alert("Success: All monthly records across all student portfolios have been clean reset to Pending.");
-                await fetchRosterData();
+                
+                globalCachedPaymentsList = [];
+                renderTableStructure();
             } catch (err) {
                 alert(`Error executing transaction sequence: ${err.message}`);
                 await fetchRosterData();
