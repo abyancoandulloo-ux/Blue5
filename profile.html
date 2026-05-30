@@ -106,11 +106,10 @@
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="login.html">Log in</a></li>
-               
                 <li><a href="sessions.html">Sessions</a></li>
                 <li><a href="Coach.html">Coach</a></li>
-                 <li><a href="profile.html">Profile</a></li>
-                     <li><a href="players.html">Players</a></li>
+                <li><a href="profile.html" class="active-nav">Profile</a></li>
+                <li><a href="players.html">Players</a></li>
             </ul>
         </nav>
         <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
@@ -209,6 +208,47 @@
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         let currentUser = null;
 
+        // Shared function to render the calendar display
+        function renderPaymentGrid(paymentRecords) {
+            const paymentMap = {};
+            paymentRecords.forEach(p => { if (p.month) paymentMap[p.month.toLowerCase()] = p.paid; });
+
+            const paymentsGrid = document.getElementById('paymentsBadgeGrid');
+            let gridHtml = '';
+            months.forEach(m => {
+                const isPaid = paymentMap[m.toLowerCase()] || false;
+                gridHtml += `
+                    <div class="month-badge">
+                        <div class="month-name">${m.substring(0,3)}</div>
+                        <span class="status-pill ${isPaid ? 'status-paid' : 'status-pending'}">
+                            ${isPaid ? '<i class="fas fa-check"></i> Paid' : '<i class="fas fa-clock"></i> Pending'}
+                        </span>
+                    </div>`;
+            });
+            paymentsGrid.innerHTML = gridHtml;
+        }
+
+        // Live listening function for real-time payment structural updates
+        async function setupPaymentRealtimeSubscription(userId) {
+            supabase
+                .channel('public:user_payments')
+                .on('postgres_changes', { 
+                    event: '*', 
+                    schema: 'public', 
+                    table: 'user_payments', 
+                    filter: `user_id=eq.${userId}` 
+                }, async () => {
+                    // Re-fetch current database records whenever changes/deletions happen live
+                    const { data: updatedPayments } = await supabase
+                        .from('user_payments')
+                        .select('month, paid')
+                        .eq('user_id', userId);
+                        
+                    renderPaymentGrid(updatedPayments || []);
+                })
+                .subscribe();
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -273,22 +313,11 @@
                     if (parseInt(icon.getAttribute('data-index')) <= starRank) icon.classList.add('active');
                 });
 
-                const paymentMap = {};
-                paymentRecords.forEach(p => { if (p.month) paymentMap[p.month.toLowerCase()] = p.paid; });
+                // Initial layout rendering
+                renderPaymentGrid(paymentRecords);
 
-                const paymentsGrid = document.getElementById('paymentsBadgeGrid');
-                let gridHtml = '';
-                months.forEach(m => {
-                    const isPaid = paymentMap[m.toLowerCase()] || false;
-                    gridHtml += `
-                        <div class="month-badge">
-                            <div class="month-name">${m.substring(0,3)}</div>
-                            <span class="status-pill ${isPaid ? 'status-paid' : 'status-pending'}">
-                                ${isPaid ? '<i class="fas fa-check"></i> Paid' : '<i class="fas fa-clock"></i> Pending'}
-                            </span>
-                        </div>`;
-                });
-                paymentsGrid.innerHTML = gridHtml;
+                // Mount real-time subscription pipeline
+                setupPaymentRealtimeSubscription(currentUser.id);
 
                 // Photo Upload workflow execution context handles
                 const fileInput = document.getElementById('avatarUploadInput');
