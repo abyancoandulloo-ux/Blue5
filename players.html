@@ -91,13 +91,13 @@
         </a>
         <nav class="main-nav">
             <ul>
-               <li><a href="index.html" >Home</a></li>
-                    <li><a href="login.html">Log in</a></li>
-                    <li><a href="profile.html">Profile</a></li>
-                    <li><a href="photos.html">Photos</a></li>
-                    <li><a href="sessions.html">Sessions</a></li>
-                    <li><a href="Coach.html">Coach</a></li>
-                     <li><a href="players.html" class="active-nav">Players</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">Log in</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="photos.html">Photos</a></li>
+                <li><a href="sessions.html">Sessions</a></li>
+                <li><a href="Coach.html">Coach</a></li>
+                <li><a href="players.html" class="active-nav">Players</a></li>
             </ul>
         </nav>
         <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
@@ -147,7 +147,7 @@
             const sortSelect = document.getElementById('sortSelect');
 
             try {
-                // Fetch players from database table sorted by OVR structural parameters
+                // Fetch players safely without authentication barriers
                 const { data: users, error } = await supabase
                     .from('users')
                     .select('*');
@@ -172,10 +172,10 @@
 
                 statusEl.style.display = 'none';
                 
-                // Initial execution layout process filter
+                // Render initial elements
                 processAndFilterDisplay();
 
-                // Bind performance live input response handles
+                // Listeners for user filtering
                 searchBar.addEventListener('input', processAndFilterDisplay);
                 sortSelect.addEventListener('change', processAndFilterDisplay);
 
@@ -185,21 +185,17 @@
             }
         });
 
-        // Combined Filter, Sort, and Render Pipeline
         function processAndFilterDisplay() {
             const gridEl = document.getElementById('playersGrid');
             const searchVal = document.getElementById('searchBar').value.toLowerCase().trim();
             const sortBy = document.getElementById('sortSelect').value;
 
-            // 1. Filter elements by textual parameters match queries
             let filtered = cachedPlayersList.filter(player => 
                 player.displayName.toLowerCase().includes(searchVal)
             );
 
-            // 2. Sort elements descending based on selection criteria
             filtered.sort((a, b) => b.stats[sortBy] - a.stats[sortBy]);
 
-            // 3. Render HTML template string injection block mappings
             if (filtered.length === 0) {
                 gridEl.innerHTML = '';
                 document.getElementById('gridStatus').style.display = 'block';
@@ -212,8 +208,6 @@
             let cardsHtml = '';
             filtered.forEach(player => {
                 const shortName = player.displayName.split(' ')[0].toUpperCase();
-                
-                // Choose image reference structures safely
                 const hasAvatar = !!player.avatar_url;
                 const imgStyle = hasAvatar ? 'style="display: block;"' : '';
                 const fallbackStyle = hasAvatar ? 'style="display: none;"' : '';
