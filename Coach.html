@@ -417,7 +417,10 @@
                 if (error) throw error;
 
                 alert("Success: All monthly records across all student portfolios have been clean reset to Pending.");
-                await fetchRosterData();
+                
+                // FIXED LOCAL STATE SYNC: Reset local array memory before rebuilding table structure
+                globalCachedPaymentsList = [];
+                renderTableStructure();
             } catch (err) {
                 alert(`Error executing transaction sequence: ${err.message}`);
                 await fetchRosterData();
