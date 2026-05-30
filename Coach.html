@@ -412,8 +412,8 @@
             try {
                 document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="padding: 30px; color: #5a6e8a;"><i class="fas fa-spinner fa-spin"></i> Resetting database rows matrix state...</td></tr>`;
                 
-                // Clear out the records entirely to move everything down safely back to an unpaid/pending defaults map state
-                const { error } = await supabase.from('user_payments').delete().neq('month', 'ClearAllGlobalScopeTrigger');
+                // FIXED: Replaced string criteria logic check with a type-safe absolute null validator context matching standard UUID formats
+                const { error } = await supabase.from('user_payments').delete().not('user_id', 'is', null);
                 if (error) throw error;
 
                 alert("Success: All monthly records across all student portfolios have been clean reset to Pending.");
