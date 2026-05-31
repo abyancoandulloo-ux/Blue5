@@ -47,58 +47,78 @@
         <footer class="footer login-footer"><div class="copyright">© 2025 Blue5 Football Academy</div></footer>
     </div>
     <script type="module">
-        import { supabase } from './supabase-config.js';
+    import { supabase } from './supabase-config.js';
+    
+    window.showLogin = () => {
+        document.getElementById('LoginForm').style.display = 'block';
+        document.getElementById('RegForm').style.display = 'none';
+        document.getElementById('loginTab').classList.add('active-toggle');
+        document.getElementById('registerTab').classList.remove('active-toggle');
+    };
+    window.showRegister = () => {
+        document.getElementById('LoginForm').style.display = 'none';
+        document.getElementById('RegForm').style.display = 'block';
+        document.getElementById('registerTab').classList.add('active-toggle');
+        document.getElementById('loginTab').classList.remove('active-toggle');
+    };
+    
+    window.loginUser = async () => {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) alert('Login failed: ' + error.message);
+        else window.location.href = 'index.html';
+    };
+    
+    window.registerUser = async () => {
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const confirm = document.getElementById('regConfirm').value;
+        const fullName = document.getElementById('regName').value;
+        const whatsapp = document.getElementById('regWhatsapp').value;
         
-        window.showLogin = () => {
-            document.getElementById('LoginForm').style.display = 'block';
-            document.getElementById('RegForm').style.display = 'none';
-            document.getElementById('loginTab').classList.add('active-toggle');
-            document.getElementById('registerTab').classList.remove('active-toggle');
-        };
-        window.showRegister = () => {
-            document.getElementById('LoginForm').style.display = 'none';
-            document.getElementById('RegForm').style.display = 'block';
-            document.getElementById('registerTab').classList.add('active-toggle');
-            document.getElementById('loginTab').classList.remove('active-toggle');
-        };
+        if (password !== confirm) { alert('Passwords do not match'); return; }
         
-        window.loginUser = async () => {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) alert('Login failed: ' + error.message);
-            else window.location.href = 'index.html';
-        };
+        // 1. Sign up the user in Supabase Authentication
+        const { data: authData, error: authError } = await supabase.auth.signUp({ 
+            email, 
+            password, 
+            options: { 
+                data: { full_name: fullName } 
+            } 
+        });
         
-        window.registerUser = async () => {
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirm').value;
-            const fullName = document.getElementById('regName').value;
-            // NEW: Get the WhatsApp field value
-            const whatsapp = document.getElementById('regWhatsapp').value;
-            
-            if (password !== confirm) { alert('Passwords do not match'); return; }
-            
-            // UPDATED: Pass whatsapp to the user metadata object
-            const { error } = await supabase.auth.signUp({ 
-                email, 
-                password, 
-                options: { 
-                    data: { 
-                        full_name: fullName,
-                        whatsapp_number: whatsapp 
-                    } 
-                } 
-            });
-            
-            if (error) alert('Registration failed: ' + error.message);
-            else { alert('Registration successful! Please log in.'); showLogin(); }
-        };
+        if (authError) {
+            alert('Registration failed: ' + authError.message);
+            return;
+        }
+
+        // 2. If Auth succeeds, insert the data directly into your custom 'users' table
+        if (authData?.user) {
+            const { error: dbError } = await supabase
+                .from('users') // Targets your custom unrestricted table
+                .insert([
+                    { 
+                        id: authData.user.id, // Links the custom record to the Auth ID
+                        email: email,
+                        name: fullName,       // Adjust column name if it is 'full_name' in your table
+                        phone: whatsapp       // Saves the WhatsApp number into your phone column
+                    }
+                ]);
+
+            if (dbError) {
+                alert('Account created, but failed to save profile to custom table: ' + dbError.message);
+                return;
+            }
+        }
         
-        window.toggleMobileMenu = () => {
-            document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
-        };
-    </script>
+        alert('Registration successful! Please log in.'); 
+        showLogin();
+    };
+    
+    window.toggleMobileMenu = () => {
+        document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
+    };
+</script>
 </body>
 </html>
