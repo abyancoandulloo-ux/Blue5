@@ -50,79 +50,80 @@
         <footer class="footer login-footer"><div class="copyright">© 2025 Blue5 Football Academy</div></footer>
     </div>
 
-    <script type="module">
-        import { supabase } from './supabase-config.js';
+   <script type="module">
+    import { supabase } from './supabase-config.js';
+    
+    window.showLogin = () => {
+        document.getElementById('LoginForm').style.display = 'block';
+        document.getElementById('RegForm').style.display = 'none';
+        document.getElementById('loginTab').classList.add('active-toggle');
+        document.getElementById('registerTab').classList.remove('active-toggle');
+    };
+    window.showRegister = () => {
+        document.getElementById('LoginForm').style.display = 'none';
+        document.getElementById('RegForm').style.display = 'block';
+        document.getElementById('registerTab').classList.add('active-toggle');
+        document.getElementById('loginTab').classList.remove('active-toggle');
+    };
+    
+    window.loginUser = async () => {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) alert('Login failed: ' + error.message);
+        else window.location.href = 'index.html';
+    };
+    
+    window.registerUser = async () => {
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const confirm = document.getElementById('regConfirm').value;
+        const fullName = document.getElementById('regName').value;
+        const whatsapp = document.getElementById('regWhatsapp').value;
         
-        window.showLogin = () => {
-            document.getElementById('LoginForm').style.display = 'block';
-            document.getElementById('RegForm').style.display = 'none';
-            document.getElementById('loginTab').classList.add('active-toggle');
-            document.getElementById('registerTab').classList.remove('active-toggle');
-        };
-        window.showRegister = () => {
-            document.getElementById('LoginForm').style.display = 'none';
-            document.getElementById('RegForm').style.display = 'block';
-            document.getElementById('registerTab').classList.add('active-toggle');
-            document.getElementById('loginTab').classList.remove('active-toggle');
-        };
+        if (password !== confirm) { alert('Passwords do not match'); return; }
         
-        window.loginUser = async () => {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) alert('Login failed: ' + error.message);
-            else window.location.href = 'index.html';
-        };
+        // 1. Create or retrieve the user inside Supabase Authentication
+        const { data: authData, error: authError } = await supabase.auth.signUp({ 
+            email, 
+            password, 
+            options: { 
+                data: { full_name: fullName } 
+            } 
+        });
         
-        window.registerUser = async () => {
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirm').value;
-            const fullName = document.getElementById('regName').value;
-            const whatsapp = document.getElementById('regWhatsapp').value;
-            
-            if (password !== confirm) { alert('Passwords do not match'); return; }
-            
-            // 1. Create the user inside Supabase Authentication
-            const { data: authData, error: authError } = await supabase.auth.signUp({ 
-                email, 
-                password, 
-                options: { 
-                    data: { full_name: fullName } 
-                } 
-            });
-            
-            if (authError) {
-                alert('Registration failed: ' + authError.message);
+        // Handle auth errors, but allow it to proceed if the user already exists in auth
+        if (authError) {
+            alert('Registration failed: ' + authError.message);
+            return;
+        }
+
+        // 2. Safely sync details to your custom 'users' table using upsert
+        if (authData?.user) {
+            const { error: dbError } = await supabase
+                .from('users') 
+                .upsert([
+                    { 
+                        id: authData.user.id, // Primary Key match
+                        email: email,
+                        name: fullName,       
+                        phone: whatsapp       // Successfully saves/updates the WhatsApp number
+                    }
+                ], { onConflict: 'id' }); // If the ID conflicts, it updates the record instead of crashing
+
+            if (dbError) {
+                alert('Authentication succeeded, but failed to sync profile data: ' + dbError.message);
                 return;
             }
-
-            // 2. If Auth is successful, insert details directly into your custom 'users' table
-            if (authData?.user) {
-                const { error: dbError } = await supabase
-                    .from('users') 
-                    .insert([
-                        { 
-                            id: authData.user.id, // Keeps your auth account linked to your table record
-                            email: email,
-                            name: fullName,       // Change to 'full_name' if your column uses that naming scheme
-                            phone: whatsapp       // Saves the WhatsApp number into your new phone column
-                        }
-                    ]);
-
-                if (dbError) {
-                    alert('Account authentication succeeded, but profiles failed to sync to the database table: ' + dbError.message);
-                    return;
-                }
-            }
-            
-            alert('Registration successful! Please log in.'); 
-            showLogin();
-        };
+        }
         
-        window.toggleMobileMenu = () => {
-            document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
-        };
-    </script>
+        alert('Registration successful! Please log in.'); 
+        showLogin();
+    };
+    
+    window.toggleMobileMenu = () => {
+        document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
+    };
+</script>
 </body>
 </html>
