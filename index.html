@@ -27,6 +27,24 @@
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
         .mobile-menu-icon { display: none; cursor: pointer; font-size: 24px; color: #0a4da4; }
 
+        /* Map Section Responsive Container Styles */
+        .map-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            margin: 40px auto 0 auto;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(10, 77, 164, 0.08);
+            border: 4px solid white;
+            background: white;
+        }
+        .map-frame {
+            width: 100%;
+            height: 450px;
+            border: none;
+            display: block;
+        }
+
         /* Testimonial styles integrated smoothly for layout consistency */
         .testimonial-section {
             background-color: #ffffff;
@@ -104,6 +122,8 @@
             }
             .main-nav ul.show-mobile { display: flex; }
             
+            .map-frame { height: 300px; }
+
             .testimonial-container {
                 flex-direction: column;
                 text-align: center;
@@ -130,7 +150,7 @@
                     <li><a href="photos.html">Photos</a></li>
                     <li><a href="sessions.html">Sessions</a></li>
                     <li><a href="Coach.html">Coach</a></li>
-                     <li><a href="players.html">Players</a></li>
+                    <li><a href="players.html">Players</a></li>
                 </ul>
             </nav>
             <div class="mobile-menu-icon" onclick="toggleMobileMenu()">
@@ -150,23 +170,15 @@
             <div class="center-text animate-up">
                 <h2 class="section-title">Where Passion Meets Precision</h2>
                 <div class="title-underline"></div>
-                <p class="academy-description">Blue5 Football Academy is built on a philosophy of holistic development — technical excellence, tactical intelligence, and mental toughness. Located in the heart of the city, we train aspiring athletes aged 6 to 17 with world-class methodologies. Our advanced training curriculum is designed to develop future stars while instilling discipline, teamwork, and respect.</p>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <i class="fas fa-trophy"></i>
-                        <h3>12+</h3>
-                        <p>Tournament Wins</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <h3>350+</h3>
-                        <p>Active Academy Members</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-chalkboard-user"></i>
-                        <h3>15+</h3>
-                        <p>Elite Coaches</p>
-                    </div>
+                <p class="academy-description">Blue5 Football Academy is built on a philosophy of holistic development — technical excellence, tactical intelligence, and mental toughness. Train with world-class methodologies under an advanced curriculum designed to develop future stars while instilling discipline, teamwork, and respect.</p>
+                
+                <div class="map-wrapper">
+                    <iframe 
+                        class="map-frame" 
+                        src="https://maps.google.com/maps?q=Sodnac%20Link%20road,%20Vacoas-Phoenix&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                        allowfullscreen="" 
+                        loading="lazy">
+                    </iframe>
                 </div>
             </div>
         </div>
@@ -203,9 +215,9 @@
                 </div>
                 <div class="footer-col">
                     <h4>Contact</h4>
-                    <p><i class="fas fa-map-marker-alt"></i> 45 Stadium Road, Sports City</p>
-                    <p><i class="fas fa-phone-alt"></i> +1 (555) 203-9456</p>
-                    <p><i class="fas fa-envelope"></i> hello@blue5academy.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Sodnac Link road, Vacoas-Phoenix</p>
+                    <p><i class="fas fa-phone-alt"></i> +230 5736 1218</p>
+                    <p><i class="fas fa-envelope"></i> zarinecoandulloo@gmail.com</p>
                 </div>
             </div>
             <div class="copyright">© 2025 Blue5 Football Academy. All rights reserved.</div>
