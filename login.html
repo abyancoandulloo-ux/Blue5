@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue5 Academy | Account Gateway</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22 fill=%22%230a4da4%22>⚽</text></svg>">
+    <title>Blue5 Academy | Sign In</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -12,125 +11,43 @@
 <body>
     <div class="site-wrapper">
         <div class="top-nav">
-            <a href="index.html" class="logo-link">
-                <div class="logo-area">
-                    <i class="fas fa-futbol logo-icon"></i>
-                    <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
-                </div>
-            </a>
-            <nav class="main-nav">
-                <ul>
-                   <li><a href="index.html">Home</a></li>
-                    <li><a href="login.html" class="active-nav">Log in</a></li>
-                    <li><a href="profile.html">Profile</a></li>
-                    <li><a href="photos.html">Photos</a></li>
-                    <li><a href="sessions.html">Sessions</a></li>
-                    <li><a href="Coach.html">Coach</a></li>
-                     <li><a href="players.html">Players</a></li>
-                </ul>
-            </nav>
+            <a href="index.html" class="logo-link"><div class="logo-area"><i class="fas fa-futbol logo-icon"></i><span class="logo-text">Blue5<span class="accent">Football</span> Academy</span></div></a>
+            <nav class="main-nav"><ul><li><a href="index.html">Home</a></li><li><a href="login.html" class="active-nav">Log in</a></li><li><a href="Payment.html">Payment</a></li><li><a href="sessions.html">Sessions</a></li><li><a href="Coach.html">Coach</a></li></ul></nav>
             <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
         </div>
 
-        <div class="form-card login-register-card" id="portalCard">
-            <div id="loadingState" style="padding: 40px 10px; text-align: center; color: #0a4da4;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; margin-bottom: 15px;"></i>
-                <p style="font-weight: 500;">Verifying user session status...</p>
+        <div class="form-card login-register-card">
+            <h2><i class="fas fa-user-astronaut"></i> Welcome to Blue5</h2>
+            <div class="form-toggle">
+                <span id="loginTab" class="active-toggle" onclick="showLogin()">Login</span>
+                <span id="registerTab" onclick="showRegister()">Register</span>
             </div>
-
-            <div id="loggedOutInterface" style="display: none;">
-                <h2><i class="fas fa-user-astronaut"></i> Welcome to Blue5</h2>
-                <div class="form-toggle">
-                    <span id="loginTab" class="active-toggle" onclick="showLogin()">Login</span>
-                    <span id="registerTab" onclick="showRegister()">Register</span>
-                </div>
+            <form id="LoginForm" onsubmit="event.preventDefault(); loginUser()">
+                <div class="input-group"><i class="fas fa-envelope input-icon"></i><input type="email" id="loginEmail" placeholder="Email Address" required></div>
+                <div class="input-group"><i class="fas fa-lock input-icon"></i><input type="password" id="loginPassword" placeholder="Password" required></div>
+                <button type="submit" class="btn-block">Login</button>
+            </form>
+            <form id="RegForm" style="display:none;" onsubmit="event.preventDefault(); registerUser()">
+                <div class="input-group"><i class="fas fa-user input-icon"></i><input type="text" id="regName" placeholder="Full Name" required></div>
+                <div class="input-group"><i class="fas fa-envelope input-icon"></i><input type="email" id="regEmail" placeholder="Email Address" required></div>
                 
-                <form id="LoginForm" onsubmit="event.preventDefault(); loginUser()">
-                    <div class="input-group">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="loginEmail" placeholder="Email Address" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required>
-                    </div>
-                    <button type="submit" class="btn-block">Login</button>
-                </form>
+                <div class="input-group"><i class="fab fa-whatsapp input-icon"></i><input type="tel" id="regWhatsapp" placeholder="WhatsApp Number (e.g. +123456789)" required></div>
                 
-                <form id="RegForm" style="display:none;" onsubmit="event.preventDefault(); registerUser()">
-                    <div class="input-group">
-                        <i class="fas fa-user input-icon"></i>
-                        <input type="text" id="regName" placeholder="Full Name" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="regEmail" placeholder="Email Address" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="regPassword" placeholder="Password" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-check-circle input-icon"></i>
-                        <input type="password" id="regConfirm" placeholder="Confirm Password" required>
-                    </div>
-                    <button type="submit" class="btn-block">Create Account</button>
-                </form>
-                
-                <div class="social-divider"><span>or continue with</span></div>
-                <div class="social-login-group">
-                    <button class="social-btn google-btn" onclick="alert('Google OAuth not set up yet. Use email/password.')"><i class="fab fa-google"></i> Google</button>
-                    <button class="social-btn yahoo-btn" onclick="alert('Yahoo OAuth not set up')"><i class="fab fa-yahoo"></i> Yahoo</button>
-                    <button class="social-btn hotmail-btn" onclick="alert('Hotmail OAuth not set up')"><i class="fas fa-envelope"></i> Hotmail</button>
-                </div>
-            </div>
-
-            <div id="loggedInInterface" style="display: none; padding: 15px 10px; text-align: center;">
-                <div style="width: 80px; height: 80px; background: #e0ecfb; color: #0a4da4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2rem; border: 3px solid #1e6fdf;">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <h2 style="margin-bottom: 5px;">Active Session Found</h2>
-                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">Logged in as: <strong id="activeUserLabel" style="color: #1f2a44;">---</strong></p>
-                
-                <button onclick="window.location.href='Payment.html'" class="btn-block" style="background: #1e6fdf; margin-bottom: 12px; border: none; padding: 12px; color: white; border-radius: 8px; font-weight: 600; cursor: pointer; display: block; text-decoration: none; text-align: center;">Go to Payment Dashboard</button>
-                <button onclick="handleLogout()" class="btn-block" style="background: #e53e3e; border: none; padding: 12px; color: white; border-radius: 8px; font-weight: 600; cursor: pointer;">Log Out from Account</button>
+                <div class="input-group"><i class="fas fa-lock input-icon"></i><input type="password" id="regPassword" placeholder="Password" required></div>
+                <div class="input-group"><i class="fas fa-check-circle input-icon"></i><input type="password" id="regConfirm" placeholder="Confirm Password" required></div>
+                <button type="submit" class="btn-block">Create Account</button>
+            </form>
+            <div class="social-divider"><span>or continue with</span></div>
+            <div class="social-login-group">
+                <button class="social-btn google-btn" onclick="alert('Google OAuth not set up yet. Use email/password.')"><i class="fab fa-google"></i> Google</button>
+                <button class="social-btn yahoo-btn" onclick="alert('Yahoo OAuth not set up')"><i class="fab fa-yahoo"></i> Yahoo</button>
+                <button class="social-btn hotmail-btn" onclick="alert('Hotmail OAuth not set up')"><i class="fas fa-envelope"></i> Hotmail</button>
             </div>
         </div>
-        <footer class="footer login-footer"><div class="copyright">© 2026 Blue5 Football Academy</div></footer>
+        <footer class="footer login-footer"><div class="copyright">© 2025 Blue5 Football Academy</div></footer>
     </div>
-
     <script type="module">
         import { supabase } from './supabase-config.js';
-
-        // Verify active authentication state on load
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const { data: { user }, error } = await supabase.auth.getUser();
-                document.getElementById('loadingState').style.display = 'none';
-
-                if (user) {
-                    const name = user.user_metadata?.full_name || user.email;
-                    document.getElementById('activeUserLabel').textContent = name;
-                    document.getElementById('loggedInInterface').style.display = 'block';
-                } else {
-                    document.getElementById('loggedOutInterface').style.display = 'block';
-                }
-            } catch (err) {
-                console.error("Session verification breakdown:", err);
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('loggedOutInterface').style.display = 'block';
-            }
-        });
-
-        window.handleLogout = async () => {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                alert('Logout failed: ' + error.message);
-            } else {
-                alert('You have logged out successfully.');
-                window.location.reload();
-            }
-        };
         
         window.showLogin = () => {
             document.getElementById('LoginForm').style.display = 'block';
@@ -138,7 +55,6 @@
             document.getElementById('loginTab').classList.add('active-toggle');
             document.getElementById('registerTab').classList.remove('active-toggle');
         };
-        
         window.showRegister = () => {
             document.getElementById('LoginForm').style.display = 'none';
             document.getElementById('RegForm').style.display = 'block';
@@ -150,12 +66,8 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) {
-                alert('Login failed: ' + error.message);
-            } else {
-                // Fixed routing directly to index.html to avoid 404 breakdown
-                window.location.href = 'index.html';
-            }
+            if (error) alert('Login failed: ' + error.message);
+            else window.location.href = 'index.html';
         };
         
         window.registerUser = async () => {
@@ -163,40 +75,25 @@
             const password = document.getElementById('regPassword').value;
             const confirm = document.getElementById('regConfirm').value;
             const fullName = document.getElementById('regName').value;
+            // NEW: Get the WhatsApp field value
+            const whatsapp = document.getElementById('regWhatsapp').value;
             
-            if (password !== confirm) { 
-                alert('Passwords do not match'); 
-                return; 
-            }
+            if (password !== confirm) { alert('Passwords do not match'); return; }
             
-            const { data, error } = await supabase.auth.signUp({ 
+            // UPDATED: Pass whatsapp to the user metadata object
+            const { error } = await supabase.auth.signUp({ 
                 email, 
                 password, 
-                options: { data: { full_name: fullName } } 
+                options: { 
+                    data: { 
+                        full_name: fullName,
+                        whatsapp_number: whatsapp 
+                    } 
+                } 
             });
             
-            if (error) {
-                alert('Registration failed: ' + error.message);
-            } else if (data && data.user) {
-                try {
-                    // Seed primary foundation row so user shows on Coach table instantly
-                    await supabase
-                        .from('user_payments')
-                        .insert({
-                            user_id: data.user.id,
-                            student_name: fullName,
-                            month: 'January',
-                            paid: false,
-                            amount: 49.00,
-                            payment_date: new Date().toISOString()
-                        });
-                } catch (dbErr) {
-                    console.error("Database seed row update exception:", dbErr);
-                }
-                
-                alert('Registration successful! Please log in.'); 
-                showLogin(); 
-            }
+            if (error) alert('Registration failed: ' + error.message);
+            else { alert('Registration successful! Please log in.'); showLogin(); }
         };
         
         window.toggleMobileMenu = () => {
