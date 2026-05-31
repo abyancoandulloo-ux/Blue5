@@ -22,11 +22,13 @@
                 <span id="loginTab" class="active-toggle" onclick="showLogin()">Login</span>
                 <span id="registerTab" onclick="showRegister()">Register</span>
             </div>
+            
             <form id="LoginForm" onsubmit="event.preventDefault(); loginUser()">
                 <div class="input-group"><i class="fas fa-envelope input-icon"></i><input type="email" id="loginEmail" placeholder="Email Address" required></div>
                 <div class="input-group"><i class="fas fa-lock input-icon"></i><input type="password" id="loginPassword" placeholder="Password" required></div>
                 <button type="submit" class="btn-block">Login</button>
             </form>
+            
             <form id="RegForm" style="display:none;" onsubmit="event.preventDefault(); registerUser()">
                 <div class="input-group"><i class="fas fa-user input-icon"></i><input type="text" id="regName" placeholder="Full Name" required></div>
                 <div class="input-group"><i class="fas fa-envelope input-icon"></i><input type="email" id="regEmail" placeholder="Email Address" required></div>
@@ -37,6 +39,7 @@
                 <div class="input-group"><i class="fas fa-check-circle input-icon"></i><input type="password" id="regConfirm" placeholder="Confirm Password" required></div>
                 <button type="submit" class="btn-block">Create Account</button>
             </form>
+            
             <div class="social-divider"><span>or continue with</span></div>
             <div class="social-login-group">
                 <button class="social-btn google-btn" onclick="alert('Google OAuth not set up yet. Use email/password.')"><i class="fab fa-google"></i> Google</button>
@@ -46,79 +49,80 @@
         </div>
         <footer class="footer login-footer"><div class="copyright">© 2025 Blue5 Football Academy</div></footer>
     </div>
+
     <script type="module">
-    import { supabase } from './supabase-config.js';
-    
-    window.showLogin = () => {
-        document.getElementById('LoginForm').style.display = 'block';
-        document.getElementById('RegForm').style.display = 'none';
-        document.getElementById('loginTab').classList.add('active-toggle');
-        document.getElementById('registerTab').classList.remove('active-toggle');
-    };
-    window.showRegister = () => {
-        document.getElementById('LoginForm').style.display = 'none';
-        document.getElementById('RegForm').style.display = 'block';
-        document.getElementById('registerTab').classList.add('active-toggle');
-        document.getElementById('loginTab').classList.remove('active-toggle');
-    };
-    
-    window.loginUser = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) alert('Login failed: ' + error.message);
-        else window.location.href = 'index.html';
-    };
-    
-    window.registerUser = async () => {
-        const email = document.getElementById('regEmail').value;
-        const password = document.getElementById('regPassword').value;
-        const confirm = document.getElementById('regConfirm').value;
-        const fullName = document.getElementById('regName').value;
-        const whatsapp = document.getElementById('regWhatsapp').value;
+        import { supabase } from './supabase-config.js';
         
-        if (password !== confirm) { alert('Passwords do not match'); return; }
+        window.showLogin = () => {
+            document.getElementById('LoginForm').style.display = 'block';
+            document.getElementById('RegForm').style.display = 'none';
+            document.getElementById('loginTab').classList.add('active-toggle');
+            document.getElementById('registerTab').classList.remove('active-toggle');
+        };
+        window.showRegister = () => {
+            document.getElementById('LoginForm').style.display = 'none';
+            document.getElementById('RegForm').style.display = 'block';
+            document.getElementById('registerTab').classList.add('active-toggle');
+            document.getElementById('loginTab').classList.remove('active-toggle');
+        };
         
-        // 1. Sign up the user in Supabase Authentication
-        const { data: authData, error: authError } = await supabase.auth.signUp({ 
-            email, 
-            password, 
-            options: { 
-                data: { full_name: fullName } 
-            } 
-        });
+        window.loginUser = async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) alert('Login failed: ' + error.message);
+            else window.location.href = 'index.html';
+        };
         
-        if (authError) {
-            alert('Registration failed: ' + authError.message);
-            return;
-        }
-
-        // 2. If Auth succeeds, insert the data directly into your custom 'users' table
-        if (authData?.user) {
-            const { error: dbError } = await supabase
-                .from('users') // Targets your custom unrestricted table
-                .insert([
-                    { 
-                        id: authData.user.id, // Links the custom record to the Auth ID
-                        email: email,
-                        name: fullName,       // Adjust column name if it is 'full_name' in your table
-                        phone: whatsapp       // Saves the WhatsApp number into your phone column
-                    }
-                ]);
-
-            if (dbError) {
-                alert('Account created, but failed to save profile to custom table: ' + dbError.message);
+        window.registerUser = async () => {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirm').value;
+            const fullName = document.getElementById('regName').value;
+            const whatsapp = document.getElementById('regWhatsapp').value;
+            
+            if (password !== confirm) { alert('Passwords do not match'); return; }
+            
+            // 1. Create the user inside Supabase Authentication
+            const { data: authData, error: authError } = await supabase.auth.signUp({ 
+                email, 
+                password, 
+                options: { 
+                    data: { full_name: fullName } 
+                } 
+            });
+            
+            if (authError) {
+                alert('Registration failed: ' + authError.message);
                 return;
             }
-        }
+
+            // 2. If Auth is successful, insert details directly into your custom 'users' table
+            if (authData?.user) {
+                const { error: dbError } = await supabase
+                    .from('users') 
+                    .insert([
+                        { 
+                            id: authData.user.id, // Keeps your auth account linked to your table record
+                            email: email,
+                            name: fullName,       // Change to 'full_name' if your column uses that naming scheme
+                            phone: whatsapp       // Saves the WhatsApp number into your new phone column
+                        }
+                    ]);
+
+                if (dbError) {
+                    alert('Account authentication succeeded, but profiles failed to sync to the database table: ' + dbError.message);
+                    return;
+                }
+            }
+            
+            alert('Registration successful! Please log in.'); 
+            showLogin();
+        };
         
-        alert('Registration successful! Please log in.'); 
-        showLogin();
-    };
-    
-    window.toggleMobileMenu = () => {
-        document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
-    };
-</script>
+        window.toggleMobileMenu = () => {
+            document.querySelector('.main-nav ul')?.classList.toggle('show-mobile');
+        };
+    </script>
 </body>
 </html>
