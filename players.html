@@ -157,11 +157,11 @@
 
                 // Process player overall metric scores locally
                 cachedPlayersList = (users || []).map(player => {
-                    const pac = player.pace ?? 50;
-                    const dri = player.dribbling ?? 50;
-                    const def = player.defending ?? 50;
-                    const sta = player.stamina ?? 50;
-                    const phy = player.physicality ?? 50;
+                    const pac = player.pace ?? 0;
+                    const dri = player.dribbling ?? 0;
+                    const def = player.defending ?? 0;
+                    const sta = player.stamina ?? 0;
+                    const phy = player.physicality ?? 0;
                     const ovr = Math.round((pac + dri + def + sta + phy) / 5);
 
                     return {
