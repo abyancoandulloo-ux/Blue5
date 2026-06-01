@@ -212,7 +212,18 @@ body {
     margin: 0 auto 25px;
     border-radius: 4px;
 }
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
+.logo-img {
+    height: 35px;         /* Keeps it perfectly proportioned to the text height */
+    width: auto;          /* Prevents any horizontal image stretching */
+    object-fit: contain;  /* Safeguards image dimensions */
+    border-radius: 4px;   /* Optional: adds a subtle roundness to sharp corners */
+}
 .academy-description {
     font-size: 1.05rem;
     line-height: 1.6;
