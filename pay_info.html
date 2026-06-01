@@ -20,7 +20,18 @@
         .main-nav ul { display: flex; gap: 28px; list-style: none; }
         .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
-        
+        .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-img {
+    height: 35px;         /* Keeps it perfectly proportioned to the text height */
+    width: auto;          /* Prevents any horizontal image stretching */
+    object-fit: contain;  /* Safeguards image dimensions */
+    border-radius: 4px;   /* Optional: adds a subtle roundness to sharp corners */
+}
         /* Main Container Content */
         .container { max-width: 1400px; margin: 30px auto; padding: 20px; }
         .section-title { text-align: center; color: #0a4da4; margin-bottom: 20px; }
