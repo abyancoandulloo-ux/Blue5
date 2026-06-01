@@ -28,7 +28,18 @@
         .header-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         .section-title { color: #0a4da4; font-size: 2rem; }
         .title-underline { width: 80px; height: 3px; background: #0a4da4; margin-top: 5px; border-radius: 3px; }
+        .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
+.logo-img {
+    height: 35px;         /* Keeps it perfectly proportioned to the text height */
+    width: auto;          /* Prevents any horizontal image stretching */
+    object-fit: contain;  /* Safeguards image dimensions */
+    border-radius: 4px;   /* Optional: adds a subtle roundness to sharp corners */
+}
         /* Action Buttons Header Layout */
         .admin-actions { display: flex; gap: 12px; flex-wrap: wrap; }
         .admin-action-btn { background: #1e6fdf; color: white; border: none; padding: 10px 24px; border-radius: 30px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
