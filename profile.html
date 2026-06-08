@@ -22,18 +22,7 @@
         .main-nav a { text-decoration: none; color: #1f2a44; font-weight: 500; }
         .main-nav a.active-nav { color: #0a4da4; font-weight: 600; }
         .mobile-menu-icon { display: none; cursor: pointer; font-size: 24px; color: #0a4da4; }
-        .logo-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
 
-.logo-img {
-    height: 35px;         /* Keeps it perfectly proportioned to the text height */
-    width: auto;          /* Prevents any horizontal image stretching */
-    object-fit: contain;  /* Safeguards image dimensions */
-    border-radius: 4px;   /* Optional: adds a subtle roundness to sharp corners */
-}
         .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
         .loading-overlay { text-align: center; padding: 100px 0; color: #0a4da4; }
         .loading-overlay i { font-size: 3rem; margin-bottom: 15px; }
@@ -110,19 +99,19 @@
     <div class="top-nav">
         <a href="index.html" class="logo-link">
             <div class="logo-area">
-<img src="logo.jpg" alt="Blue5 Academy Logo" class="logo-img">                <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
+                <i class="fas fa-futbol logo-icon"></i>
+                <span class="logo-text">Blue5<span class="accent">Football</span> Academy</span>
             </div>
         </a>
         <nav class="main-nav">
             <ul>
-                <li><a href="index.html" >Home</a></li>
-                    <li><a href="login.html" >Log in</a></li>
-                    <li><a href="profile.html" class="active-nav">Profile</a></li>
+                <li><a href="index.html" class="active-nav">Home</a></li>
+                    <li><a href="login.html">Log in</a></li>
+                    <li><a href="profile.html">Profile</a></li>
                     <li><a href="photos.html">Photos</a></li>
                     <li><a href="sessions.html">Sessions</a></li>
-                    <li><a href="Coach.html">Staff Only</a></li>
-                    <li><a href="players.html">Players</a></li>
-                     <li><a href="pay_info.html">Payment</a></li>
+                    <li><a href="Coach.html">Coach</a></li>
+                     <li><a href="players.html">Players</a></li>
             </ul>
         </nav>
         <div class="mobile-menu-icon" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></div>
@@ -205,7 +194,10 @@
                     </div>
                 </div>
 
-                
+                <div class="data-card">
+                    <div class="card-title"><div class="card-title-text"><i class="fas fa-money-check-dollar"></i> Training Attendance History Logs</div></div>
+                    <div class="payments-grid" id="paymentsBadgeGrid"></div>
+                </div>
             </div>
         </div>
     </div>
